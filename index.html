@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3D Parallax Particles</title>
+<link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
 <style>
   body, html {
     margin: 0;
@@ -94,7 +95,7 @@
     -webkit-backdrop-filter: blur(6px) saturate(1.05);
     box-shadow: 0 6px 20px rgba(0,0,0,0.35);
     pointer-events: auto;
-    font-family: "Jersey 10", sans-serif; /* use provided font class */
+    font-family: sans-serif;
   }
   #quick-links a {
     color: #fff;
@@ -133,7 +134,7 @@
   .sound-btn:focus { outline: 2px solid rgba(255,255,255,0.14); outline-offset: 2px; }
   .sound-btn[aria-pressed="true"] { background: rgba(255,255,255,0.12); }
 
-  /* Nepal clock button & popover */
+  /* Nepal clock button & popover (updated for digital + analog) */
   .clock-btn {
     appearance: none;
     -webkit-appearance: none;
@@ -154,10 +155,42 @@
   .clock-btn:focus { outline: 2px solid rgba(255,255,255,0.14); outline-offset: 2px; }
   .clock-btn .clock-time { font-variant-numeric: tabular-nums; font-weight:600; font-size:13px; }
 
-  .clock-pop { position: absolute; right: 72px; top: 48px; background: rgba(10,10,10,0.96); padding: 10px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-width: 180px; text-align: center; z-index: 12; }
-  .clock-pop .big-time { font-size: 18px; font-weight:700; letter-spacing:0.6px; color:#fff; display:block; }
-  .clock-pop .tz { font-size:12px; color:rgba(255,255,255,0.75); margin-top:6px; }
-  .clock-pop .clock-date { font-size:12px; color:rgba(255,255,255,0.6); margin-top:6px; }
+  /* Blurred, side-oriented popover that holds both the digital and analog clocks */
+  .clock-pop {
+    position: absolute;
+    right: 18px;
+    top: 56px;
+    background: rgba(8,8,8,0.48);
+    backdrop-filter: blur(10px) saturate(1.05);
+    -webkit-backdrop-filter: blur(10px) saturate(1.05);
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+    min-width: 260px;
+    z-index: 80;
+    display: inline-block;
+
+    /* entrance animation */
+    opacity: 0; transform: translateY(-6px) scale(0.99); transition: opacity 220ms ease, transform 220ms ease; pointer-events: none;
+  }
+  .clock-pop:not([hidden]) { opacity:1; transform: translateY(0) scale(1); pointer-events: auto; }
+
+  @media (max-width:520px) {
+    .clock-pop { right: 50%; left: 50%; transform: translate(-50%,-6px) scale(0.99); width: calc(100% - 40px); min-width: unset; top: 64px; }
+    .clock-pop:not([hidden]) { transform: translate(-50%,0) scale(1); }
+  }
+
+  .clock-pop-grid { display:flex; gap:12px; align-items:center; justify-content:space-between; }
+  .clock-digital { flex:1 1 auto; text-align:left; padding-left:8px; }
+  .clock-digital .big-time { font-size:18px; font-weight:700; letter-spacing:0.6px; color:#fff; }
+  .clock-digital .tz { font-size:12px; color:rgba(255,255,255,0.75); margin-top:6px; }
+  .clock-digital .clock-date { font-size:12px; color:rgba(255,255,255,0.6); margin-top:6px; }
+
+  .clock-analog { width:120px; height:120px; display:flex; align-items:center; justify-content:center; }
+  #nepal-analog { width:120px; height:120px; border-radius:12px; box-shadow: 0 8px 20px rgba(0,0,0,0.45); background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); }
+
+  .clock-pop .small-note { font-size:11px; color:rgba(255,255,255,0.55); margin-top:8px; }
 
   .clock-dot { width:8px;height:8px;background:linear-gradient(135deg,#ffb86b,#ff7aa2); border-radius:50%; box-shadow:0 6px 16px rgba(255,122,162,0.18); animation:pulse 1.6s infinite; }
   @keyframes pulse { 0%{ transform:scale(1); opacity:1 } 50%{ transform:scale(1.15); opacity:0.85 } 100%{ transform:scale(1); opacity:1 } }
@@ -318,16 +351,25 @@
       🕒 <span class="clock-time">--:--</span>
     </button>
     <div id="nepal-clock-pop" class="clock-pop" hidden>
-      <div class="clock-pop-inner">
-        <div class="big-time" id="nepal-clock-time">--:--:--</div>
-        <div class="tz">Kathmandu · NPT (UTC+5:45)</div>
-        <div class="clock-date" id="nepal-clock-date"></div>
+      <div class="clock-pop-grid">
+        <div class="clock-digital">
+          <div class="big-time" id="nepal-clock-time">--:--:--</div>
+          <div class="tz">Kathmandu · NPT (UTC+5:45)</div>
+          <div class="clock-date" id="nepal-clock-date"></div>
+        </div>
+
+        <div class="clock-analog" aria-hidden="false">
+          <canvas id="nepal-analog" width="120" height="120" aria-label="Analog clock"></canvas>
+        </div>
       </div>
     </div>
 
     <!-- Small sound toggle button -->
     <button id="sound-toggle" class="sound-btn" aria-pressed="false" aria-label="Toggle sound" title="Toggle sound">🔈</button>
   </nav>
+
+  <!-- Nishant text on the right side -->
+  <div class="jersey-10-regular" style="position: fixed; right: 20px; top: 50%; transform: translateY(-50%); color: #fff; font-size: 24px; z-index: 10;">Nishant</div>
 
   <!-- Main scrollable content below the homepage -->
   <main class="content">
@@ -377,7 +419,7 @@
 
 <!-- Background sound (toggleable) -->
 <audio id="bg-sound" loop preload="auto" aria-hidden="true">
-  <source src="metal%20pipe%20falling%20sound%20effect.mp3" type="audio/mpeg">
+  <source src="ytmp3free.cc_dar-da-da-dasse-status-lyrics-edit-youtubemp3free.org.mp3" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
 
@@ -725,27 +767,103 @@ window.addEventListener('resize', () => {
 
 })();
 
-// Nepal clock controller
+// Nepal clock controller (digital + analog)
 (function(){
   const btn = document.getElementById('nepal-btn');
   const pop = document.getElementById('nepal-clock-pop');
   const timeEl = document.getElementById('nepal-clock-time');
   const dateEl = document.getElementById('nepal-clock-date');
+  const canvas = document.getElementById('nepal-analog');
+  const ctx = canvas ? canvas.getContext('2d') : null;
+  const NEPAL_OFFSET_MIN = 5*60 + 45; // +5:45
+
+  function toNepalDate(date){
+    const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+    return new Date(utc + NEPAL_OFFSET_MIN * 60000);
+  }
+
+  function sizeCanvas(){
+    if (!canvas || !ctx) return;
+    const size = 120;
+    const ratio = window.devicePixelRatio || 1;
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+    canvas.width = size * ratio;
+    canvas.height = size * ratio;
+    ctx.setTransform(ratio,0,0,ratio,0,0);
+  }
+
+  function drawAnalog(d){
+    if (!ctx) return;
+    const w = canvas.width / (window.devicePixelRatio || 1);
+    const h = canvas.height / (window.devicePixelRatio || 1);
+    ctx.clearRect(0,0,w,h);
+    const cx = w/2, cy = h/2, radius = Math.min(w,h) * 0.45;
+
+    // subtle dial background
+    const g = ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0, 'rgba(255,255,255,0.02)');
+    g.addColorStop(1, 'rgba(255,255,255,0.01)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx,cy,radius+6,0,Math.PI*2); ctx.fill();
+
+    // outer ring
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx,cy,radius,0,Math.PI*2); ctx.stroke();
+
+    // ticks
+    for (let i=0;i<60;i++){
+      const ang = (Math.PI*2) * (i/60) - Math.PI/2;
+      const inner = radius - (i%5?6:12);
+      const outer = radius - 2;
+      ctx.strokeStyle = i%5 ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.14)';
+      ctx.lineWidth = i%5 ? 1 : 2;
+      ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*inner, cy+Math.sin(ang)*inner); ctx.lineTo(cx+Math.cos(ang)*outer, cy+Math.sin(ang)*outer); ctx.stroke();
+    }
+
+    const hh = d.getHours() % 12;
+    const mm = d.getMinutes();
+    const ss = d.getSeconds();
+    const hourAngle = (Math.PI*2) * ((hh*60 + mm) / (12*60)) - Math.PI/2;
+    const minAngle = (Math.PI*2) * ((mm*60 + ss) / 3600) - Math.PI/2;
+    const secAngle = (Math.PI*2) * (ss/60) - Math.PI/2;
+
+    // hour hand
+    ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx + Math.cos(hourAngle) * (radius * 0.52), cy + Math.sin(hourAngle) * (radius * 0.52)); ctx.stroke();
+    // minute
+    ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx + Math.cos(minAngle) * (radius * 0.72), cy + Math.sin(minAngle) * (radius * 0.72)); ctx.stroke();
+    // second
+    ctx.strokeStyle = 'rgba(255,120,162,0.95)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx + Math.cos(secAngle) * (radius * 0.82), cy + Math.sin(secAngle) * (radius * 0.82)); ctx.stroke();
+
+    // center hub
+    ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.beginPath(); ctx.arc(cx,cy,3,0,Math.PI*2); ctx.fill();
+  }
+
   function update(){
     try {
       const now = new Date();
+      const nepal = toNepalDate(now);
       const timeFmt = new Intl.DateTimeFormat(undefined, { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false, timeZone:'Asia/Kathmandu' });
       const dateFmt = new Intl.DateTimeFormat(undefined, { weekday:'short', month:'short', day:'numeric', timeZone:'Asia/Kathmandu' });
-      const timeStr = timeFmt.format(now);
-      const dateStr = dateFmt.format(now);
+      const timeStr = timeFmt.format(nepal);
+      const dateStr = dateFmt.format(nepal);
       if (timeEl) timeEl.textContent = timeStr;
       if (dateEl) dateEl.textContent = dateStr;
       const small = document.querySelector('#nepal-btn .clock-time');
-      if (small) small.textContent = timeStr.replace(/:\d{2}$/, '');
+      if (small) small.textContent = timeStr.replace(/:\\d{2}$/, '');
+
+      if (canvas) drawAnalog(nepal);
     } catch(e){ console.warn('Nepal clock error', e); }
   }
+
+  // initialize
+  sizeCanvas();
   update();
   setInterval(update, 1000);
+  window.addEventListener('resize', sizeCanvas);
 
   if (!btn || !pop) return;
   btn.addEventListener('click', (e) => {
