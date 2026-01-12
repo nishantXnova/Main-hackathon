@@ -32,7 +32,7 @@
 
   /* The video will use its intrinsic size (real pixels) and be centered; wrapper will crop slightly.
      A small scale is applied in JS when needed to ensure a slight crop and avoid tiny slivers. */
-  #bg-video, #bg-video2, #bg-video3 {
+  #bg-video, #bg-video2, #bg-video3, #bg-video4 {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -316,7 +316,7 @@
     100% { filter: blur(0px) saturate(1) brightness(1); }
   }
 
-  #bg-video, #bg-video2, #bg-video3 {
+  #bg-video, #bg-video2, #bg-video3, #bg-video4 {
     /* existing properties kept above; add animation */
     animation: subtleBlur 8s ease-in-out infinite;
     will-change: transform, filter;
@@ -352,7 +352,13 @@
 
   <!-- Third video (Madhesh) -->
   <video id="bg-video3" autoplay muted playsinline preload="auto" style="opacity:0">
-    <source src="Untitled video - Made with Clipchamp (2).mp4" type="video/mp4">
+    <source src="madhesh.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- Fourth video (Koshi) -->
+  <video id="bg-video4" autoplay muted playsinline preload="auto" style="opacity:0">
+    <source src="Koshi.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 
@@ -524,6 +530,7 @@ function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
 let baseScale2 = 1;
 let baseScale3 = 1;
+let baseScale4 = 1;
 
 function updateBaseScale1(){
   if (!videoW || !videoH) return;
@@ -551,6 +558,15 @@ function updateBaseScale3(){
   const scaleY = window.innerHeight / v3.videoHeight;
   const needed = Math.max(1, Math.max(scaleX, scaleY));
   baseScale3 = needed === 1 ? slightCrop : needed;
+}
+
+function updateBaseScale4(){
+  const v4 = document.getElementById('bg-video4');
+  if (!v4 || !v4.videoWidth || !v4.videoHeight) { baseScale4 = 1; return; }
+  const scaleX = window.innerWidth / v4.videoWidth;
+  const scaleY = window.innerHeight / v4.videoHeight;
+  const needed = Math.max(1, Math.max(scaleX, scaleY));
+  baseScale4 = needed === 1 ? slightCrop : needed;
 } 
 
 
@@ -600,6 +616,7 @@ function animate(now){
   if (currentVideo === video) scale = baseScale1;
   else if (currentVideo && currentVideo.id === 'bg-video2') scale = baseScale2;
   else if (currentVideo && currentVideo.id === 'bg-video3') scale = baseScale3;
+  else if (currentVideo && currentVideo.id === 'bg-video4') scale = baseScale4;
   currentVideo.style.transform = `translate3d(calc(-50% + ${currentTX}px), calc(-50% + ${currentTY}px), 0) rotateX(${currentRX}deg) rotateY(${currentRY}deg) scale(${scale})`; 
 
   requestAnimationFrame(animate);
@@ -610,6 +627,7 @@ window.addEventListener('resize', () => {
   updateBaseScale1();
   updateBaseScale2();
   updateBaseScale3();
+  updateBaseScale4();
 });
 
 // Reveal the info section only when the user scrolls it into view (homepage remains the video)
@@ -834,11 +852,27 @@ window.addEventListener('resize', () => {
   const video1 = document.getElementById('bg-video');
   const video2 = document.getElementById('bg-video2'); // may be null
   const video3 = document.getElementById('bg-video3'); // may be null
+  const video4 = document.getElementById('bg-video4'); // may be null
+  const overlay = document.getElementById('video-overlay');
 
   if (!video1) return;
 
   // ensure the global currentVideo (used by animate) points to the active element
   currentVideo = video1;
+
+  function updateCredits(v) {
+    if (!overlay) return;
+    if (!v) { overlay.style.display = 'none'; return; }
+    if (v.id === 'bg-video') {
+      overlay.textContent = 'Credits to Nepal Tourism Board';
+      overlay.style.display = 'block';
+    } else if (v.id === 'bg-video4') {
+      overlay.textContent = 'Credits to PostPati/KB Gurung';
+      overlay.style.display = 'block';
+    } else {
+      overlay.style.display = 'none';
+    }
+  }
 
   function switchToVideo(nextVideo) {
     if (!nextVideo || currentVideo === nextVideo) return;
@@ -848,19 +882,33 @@ window.addEventListener('resize', () => {
       if (currentVideo) { try { currentVideo.pause(); currentVideo.currentTime = 0; } catch(e){} }
       nextVideo.play().catch(err => console.warn('Video play error:', err));
       currentVideo = nextVideo;
+      updateCredits(nextVideo);
     }, 1000);
   }
 
   if (video2) {
     if (video3) {
-      // 3-video sequence: 1 -> 2 -> 3 -> 1
-      video1.addEventListener('ended', () => switchToVideo(video2));
-      video2.addEventListener('ended', () => switchToVideo(video3));
-      video3.addEventListener('ended', () => switchToVideo(video1));
+      if (video4) {
+        // 4-video sequence: 1 -> 2 -> 3 -> 4 -> 1
+        video1.addEventListener('ended', () => switchToVideo(video2));
+        video2.addEventListener('ended', () => switchToVideo(video3));
+        video3.addEventListener('ended', () => switchToVideo(video4));
+        video4.addEventListener('ended', () => switchToVideo(video1));
 
-      video2.addEventListener('loadedmetadata', updateBaseScale2);
-      video3.addEventListener('loadedmetadata', updateBaseScale3);
-      updateBaseScale2(); updateBaseScale3();
+        video2.addEventListener('loadedmetadata', updateBaseScale2);
+        video3.addEventListener('loadedmetadata', updateBaseScale3);
+        video4.addEventListener('loadedmetadata', updateBaseScale4);
+        updateBaseScale2(); updateBaseScale3(); updateBaseScale4();
+      } else {
+        // 3-video sequence: 1 -> 2 -> 3 -> 1
+        video1.addEventListener('ended', () => switchToVideo(video2));
+        video2.addEventListener('ended', () => switchToVideo(video3));
+        video3.addEventListener('ended', () => switchToVideo(video1));
+
+        video2.addEventListener('loadedmetadata', updateBaseScale2);
+        video3.addEventListener('loadedmetadata', updateBaseScale3);
+        updateBaseScale2(); updateBaseScale3();
+      }
     } else {
       // 2-video sequence remains: 1 <-> 2
       video1.addEventListener('ended', () => switchToVideo(video2));
@@ -872,6 +920,9 @@ window.addEventListener('resize', () => {
     // single-video fallback: loop so it doesn't go blank after ending
     video1.loop = true;
   }
+
+  // Set initial credits for the starting video
+  updateCredits(video1);
 
   // Start with video1 playing
   video1.play().catch(err => console.warn('Video1 play error:', err));
