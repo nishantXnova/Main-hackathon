@@ -32,7 +32,7 @@
 
   /* The video will use its intrinsic size (real pixels) and be centered; wrapper will crop slightly.
      A small scale is applied in JS when needed to ensure a slight crop and avoid tiny slivers. */
-  #bg-video, #bg-video2 {
+  #bg-video, #bg-video2, #bg-video3 {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -316,7 +316,7 @@
     100% { filter: blur(0px) saturate(1) brightness(1); }
   }
 
-  #bg-video {
+  #bg-video, #bg-video2, #bg-video3 {
     /* existing properties kept above; add animation */
     animation: subtleBlur 8s ease-in-out infinite;
     will-change: transform, filter;
@@ -350,7 +350,13 @@
     Your browser does not support the video tag.
   </video>
 
-  <div id="video-status" aria-live="polite">Loading video…</div>
+  <!-- Third video (Madhesh) -->
+  <video id="bg-video3" autoplay muted playsinline preload="auto" style="opacity:0">
+    <source src="Untitled video - Made with Clipchamp (2).mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <div id="video-status" aria-live="polite">Loading video…</div> 
   <div id="video-overlay">Credits to Nepal Tourism Board</div>
 </div>
 
@@ -517,6 +523,7 @@ video.play().catch((err) => {
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
 let baseScale2 = 1;
+let baseScale3 = 1;
 
 function updateBaseScale1(){
   if (!videoW || !videoH) return;
@@ -536,6 +543,15 @@ function updateBaseScale2(){
   const needed = Math.max(1, Math.max(scaleX, scaleY));
   baseScale2 = needed === 1 ? slightCrop : needed;
 }
+
+function updateBaseScale3(){
+  const v3 = document.getElementById('bg-video3');
+  if (!v3 || !v3.videoWidth || !v3.videoHeight) { baseScale3 = 1; return; }
+  const scaleX = window.innerWidth / v3.videoWidth;
+  const scaleY = window.innerHeight / v3.videoHeight;
+  const needed = Math.max(1, Math.max(scaleX, scaleY));
+  baseScale3 = needed === 1 ? slightCrop : needed;
+} 
 
 
 
@@ -580,8 +596,11 @@ function animate(now){
   if (Math.abs(currentTY) < 0.02) currentTY = 0;
 
   // GPU-accelerated composite transform
-  const scale = currentVideo === video ? baseScale1 : baseScale2;
-  currentVideo.style.transform = `translate3d(calc(-50% + ${currentTX}px), calc(-50% + ${currentTY}px), 0) rotateX(${currentRX}deg) rotateY(${currentRY}deg) scale(${scale})`;
+  let scale = 1;
+  if (currentVideo === video) scale = baseScale1;
+  else if (currentVideo && currentVideo.id === 'bg-video2') scale = baseScale2;
+  else if (currentVideo && currentVideo.id === 'bg-video3') scale = baseScale3;
+  currentVideo.style.transform = `translate3d(calc(-50% + ${currentTX}px), calc(-50% + ${currentTY}px), 0) rotateX(${currentRX}deg) rotateY(${currentRY}deg) scale(${scale})`; 
 
   requestAnimationFrame(animate);
 }
@@ -590,6 +609,7 @@ requestAnimationFrame(animate);
 window.addEventListener('resize', () => {
   updateBaseScale1();
   updateBaseScale2();
+  updateBaseScale3();
 });
 
 // Reveal the info section only when the user scrolls it into view (homepage remains the video)
@@ -813,6 +833,7 @@ window.addEventListener('resize', () => {
 (function(){
   const video1 = document.getElementById('bg-video');
   const video2 = document.getElementById('bg-video2'); // may be null
+  const video3 = document.getElementById('bg-video3'); // may be null
 
   if (!video1) return;
 
@@ -824,17 +845,29 @@ window.addEventListener('resize', () => {
     if (currentVideo) currentVideo.style.opacity = '0';
     nextVideo.style.opacity = '1';
     setTimeout(() => {
-      if (currentVideo) { currentVideo.pause(); currentVideo.currentTime = 0; }
+      if (currentVideo) { try { currentVideo.pause(); currentVideo.currentTime = 0; } catch(e){} }
       nextVideo.play().catch(err => console.warn('Video play error:', err));
       currentVideo = nextVideo;
     }, 1000);
   }
 
   if (video2) {
-    video1.addEventListener('ended', () => switchToVideo(video2));
-    video2.addEventListener('ended', () => switchToVideo(video1));
-    video2.addEventListener('loadedmetadata', updateBaseScale2);
-    updateBaseScale2();
+    if (video3) {
+      // 3-video sequence: 1 -> 2 -> 3 -> 1
+      video1.addEventListener('ended', () => switchToVideo(video2));
+      video2.addEventListener('ended', () => switchToVideo(video3));
+      video3.addEventListener('ended', () => switchToVideo(video1));
+
+      video2.addEventListener('loadedmetadata', updateBaseScale2);
+      video3.addEventListener('loadedmetadata', updateBaseScale3);
+      updateBaseScale2(); updateBaseScale3();
+    } else {
+      // 2-video sequence remains: 1 <-> 2
+      video1.addEventListener('ended', () => switchToVideo(video2));
+      video2.addEventListener('ended', () => switchToVideo(video1));
+      video2.addEventListener('loadedmetadata', updateBaseScale2);
+      updateBaseScale2();
+    }
   } else {
     // single-video fallback: loop so it doesn't go blank after ending
     video1.loop = true;
