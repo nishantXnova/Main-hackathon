@@ -27,6 +27,7 @@
     overflow: hidden;
     pointer-events: none; /* allow interactions to pass through */
     z-index: 0;
+    transition: opacity 1s ease;
   }
 
   /* The video will use its intrinsic size (real pixels) and be centered; wrapper will crop slightly.
@@ -228,6 +229,21 @@
     display: none;
   }
 
+  /* Credits overlay */
+  #video-overlay {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: sans-serif;
+    z-index: 4;
+    display: block;
+  }
+
   /* Info section (main content below the video) */
   .info-section {
     position: relative;
@@ -322,12 +338,18 @@
 <body>
 
 <div class="video-wrapper">
-  <!-- Replace "14959307_3840_2160_30fps.mp4" with your video file or URL. Keep autoplay, muted & loop for background effect -->
-  <video id="bg-video" autoplay muted loop playsinline preload="auto">
-    <source src="13337099_1920_1080_25fps.mp4" type="video/mp4">
+  <!-- First video -->
+  <video id="bg-video" autoplay muted playsinline preload="auto">
+    <source src="bagmati-overflow-4k-drone-shot-1440-publer.io.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <!-- Second video, initially hidden -->
+  <video id="bg-video2" autoplay muted playsinline preload="auto" style="position: absolute; top: 50%; left: 50%; width: auto; height: auto; transform: translate(-50%, -50%) rotateX(0deg) rotateY(0deg) scale(1); transform-origin: center center; will-change: transform; opacity: 0; transition: opacity 1s ease; animation: subtleBlur 8s ease-in-out infinite; will-change: transform, filter;">
+    <source src="gandaki.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
   <div id="video-status" aria-live="polite">Loading video…</div>
+  <div id="video-overlay">Credits to Nepal Tourism Board</div>
 </div>
 
 <!-- Quick navigation links (jump to info sections) -->
@@ -428,14 +450,15 @@
 const video = document.getElementById('bg-video');
 const status = document.getElementById('video-status');
 
-let videoW = 0, videoH = 0;
-let baseScale = 1; // 1 = real size; will be slightly increased when necessary to crop edges
+let videoW = 0, videoH = 0, video2W = 0, video2H = 0;
+let baseScale1 = 1, baseScale2 = 1; // per video
 const slightCrop = 1.02; // minimal crop factor when video is already larger than viewport
 const maxRotate = 10; // degrees of rotation for tilt (increased for stronger tilt)
-const maxTranslate = 60; // px translation for more noticeable parallax shift (increased) 
+const maxTranslate = 60; // px translation for more noticeable parallax shift (increased)
 
 let targetRX = 0, targetRY = 0, currentRX = 0, currentRY = 0;
 let targetTX = 0, targetTY = 0, currentTX = 0, currentTY = 0;
+let currentVideo = video;
 
 function showStatus(msg, show = true) {
   if (!status) return;
@@ -443,7 +466,7 @@ function showStatus(msg, show = true) {
   status.style.display = show ? 'block' : 'none';
 }
 
-const videoSrc = '13337099_1920_1080_25fps.mp4';
+const videoSrc = 'bagmati-overflow-4k-drone-shot-1440-publer.io.mp4';
 const srcEl = video.querySelector('source');
 if (srcEl) {
   srcEl.src = videoSrc;
@@ -462,8 +485,18 @@ video.addEventListener('loadedmetadata', () => {
   // Use intrinsic width so the video is shown at its real size
   video.style.width = videoW + 'px';
   video.style.height = 'auto';
-  updateBaseScale();
+  updateBaseScale1();
   showStatus('', false);
+});
+
+const video2 = document.getElementById('bg-video2');
+video2.addEventListener('loadedmetadata', () => {
+  video2W = video2.videoWidth;
+  video2H = video2.videoHeight;
+  // Use intrinsic width so the video is shown at its real size
+  video2.style.width = video2W + 'px';
+  video2.style.height = 'auto';
+  updateBaseScale2();
 });
 
 video.addEventListener('canplay', () => {
@@ -489,14 +522,24 @@ video.play().catch((err) => {
 
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-function updateBaseScale(){
+function updateBaseScale1(){
   if (!videoW || !videoH) return;
   const scaleX = window.innerWidth / videoW;
   const scaleY = window.innerHeight / videoH;
   const needed = Math.max(1, Math.max(scaleX, scaleY)); // ensure video covers viewport
-  baseScale = needed;
+  baseScale1 = needed;
   // If the video is intrinsically larger than the viewport, keep its real size but apply a tiny crop to avoid visible slivers
-  if (needed === 1) baseScale = slightCrop;
+  if (needed === 1) baseScale1 = slightCrop;
+}
+
+function updateBaseScale2(){
+  if (!video2W || !video2H) return;
+  const scaleX = window.innerWidth / video2W;
+  const scaleY = window.innerHeight / video2H;
+  const needed = Math.max(1, Math.max(scaleX, scaleY)); // ensure video covers viewport
+  baseScale2 = needed;
+  // If the video is intrinsically larger than the viewport, keep its real size but apply a tiny crop to avoid visible slivers
+  if (needed === 1) baseScale2 = slightCrop;
 }
 
 function onMouseMove(e){
@@ -540,14 +583,16 @@ function animate(now){
   if (Math.abs(currentTY) < 0.02) currentTY = 0;
 
   // GPU-accelerated composite transform
-  video.style.transform = `translate3d(calc(-50% + ${currentTX}px), calc(-50% + ${currentTY}px), 0) rotateX(${currentRX}deg) rotateY(${currentRY}deg) scale(${baseScale})`;
+  const scale = currentVideo === video ? baseScale1 : baseScale2;
+  currentVideo.style.transform = `translate3d(calc(-50% + ${currentTX}px), calc(-50% + ${currentTY}px), 0) rotateX(${currentRX}deg) rotateY(${currentRY}deg) scale(${scale})`;
 
   requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
 
 window.addEventListener('resize', () => {
-  updateBaseScale();
+  updateBaseScale1();
+  updateBaseScale2();
 });
 
 // Reveal the info section only when the user scrolls it into view (homepage remains the video)
@@ -765,6 +810,40 @@ window.addEventListener('resize', () => {
   // click outside to close
   document.addEventListener('click', (e) => { if (!pop.hidden && !pop.contains(e.target) && e.target !== toggle) closePop(); });
 
+})();
+
+// Video switching controller
+(function(){
+  const video1 = document.getElementById('bg-video');
+  const video2 = document.getElementById('bg-video2');
+
+  let currentVideo = video1;
+
+  function switchToVideo(nextVideo) {
+    if (currentVideo === nextVideo) return;
+    // Fade out current
+    currentVideo.style.opacity = '0';
+    // Fade in next
+    nextVideo.style.opacity = '1';
+    // After transition, pause the old one and play the new one
+    setTimeout(() => {
+      currentVideo.pause();
+      currentVideo.currentTime = 0;
+      nextVideo.play().catch(err => console.warn('Video play error:', err));
+    }, 1000); // match transition duration
+    currentVideo = nextVideo;
+  }
+
+  video1.addEventListener('ended', () => {
+    switchToVideo(video2);
+  });
+
+  video2.addEventListener('ended', () => {
+    switchToVideo(video1);
+  });
+
+  // Start with video1 playing
+  video1.play().catch(err => console.warn('Video1 play error:', err));
 })();
 
 // Nepal clock controller (digital + analog)
