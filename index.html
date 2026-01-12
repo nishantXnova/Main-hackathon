@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D Parallax Particles</title>
+<title>3D Parallax Video</title>
 <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
 <style>
   body, html {
@@ -32,7 +32,7 @@
 
   /* The video will use its intrinsic size (real pixels) and be centered; wrapper will crop slightly.
      A small scale is applied in JS when needed to ensure a slight crop and avoid tiny slivers. */
-  #bg-video {
+  #bg-video, #bg-video2 {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -40,8 +40,8 @@
     height: auto; /* keep aspect ratio */
     transform: translate(-50%, -50%) rotateX(0deg) rotateY(0deg) scale(1);
     transform-origin: center center;
-    will-change: transform;
-    transition: none; /* rely on JS interpolation for smoothness */
+    will-change: transform, opacity;
+    transition: opacity 1s ease; /* smooth fade when switching videos */
     z-index: 0;
     pointer-events: none;
   }
@@ -339,15 +339,17 @@
 
 <div class="video-wrapper">
   <!-- First video -->
-  <video id="bg-video" autoplay muted playsinline preload="auto">
+  <video id="bg-video" autoplay muted playsinline preload="auto" style="opacity:1">
     <source src="bagmati-overflow-4k-drone-shot-1440-publer.io.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-  <!-- Second video, initially hidden -->
-  <video id="bg-video2" autoplay muted playsinline preload="auto" style="position: absolute; top: 50%; left: 50%; width: auto; height: auto; transform: translate(-50%, -50%) rotateX(0deg) rotateY(0deg) scale(1); transform-origin: center center; will-change: transform; opacity: 0; transition: opacity 1s ease; animation: subtleBlur 8s ease-in-out infinite; will-change: transform, filter;">
-    <source src="gandaki.mp4" type="video/mp4">
+
+  <!-- Second video (Bagmati) — will be used as the alternate/background clip -->
+  <video id="bg-video2" autoplay muted playsinline preload="auto" style="opacity:0">
+    <source src="bagmati-overflow-4k-drone-shot-1440-publer.io.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
+
   <div id="video-status" aria-live="polite">Loading video…</div>
   <div id="video-overlay">Credits to Nepal Tourism Board</div>
 </div>
@@ -450,8 +452,8 @@
 const video = document.getElementById('bg-video');
 const status = document.getElementById('video-status');
 
-let videoW = 0, videoH = 0, video2W = 0, video2H = 0;
-let baseScale1 = 1, baseScale2 = 1; // per video
+let videoW = 0, videoH = 0;
+let baseScale1 = 1; // per video
 const slightCrop = 1.02; // minimal crop factor when video is already larger than viewport
 const maxRotate = 10; // degrees of rotation for tilt (increased for stronger tilt)
 const maxTranslate = 60; // px translation for more noticeable parallax shift (increased)
@@ -466,7 +468,7 @@ function showStatus(msg, show = true) {
   status.style.display = show ? 'block' : 'none';
 }
 
-const videoSrc = 'bagmati-overflow-4k-drone-shot-1440-publer.io.mp4';
+const videoSrc = 'gandaki.mp4';
 const srcEl = video.querySelector('source');
 if (srcEl) {
   srcEl.src = videoSrc;
@@ -489,15 +491,7 @@ video.addEventListener('loadedmetadata', () => {
   showStatus('', false);
 });
 
-const video2 = document.getElementById('bg-video2');
-video2.addEventListener('loadedmetadata', () => {
-  video2W = video2.videoWidth;
-  video2H = video2.videoHeight;
-  // Use intrinsic width so the video is shown at its real size
-  video2.style.width = video2W + 'px';
-  video2.style.height = 'auto';
-  updateBaseScale2();
-});
+
 
 video.addEventListener('canplay', () => {
   showStatus('', false);
@@ -522,6 +516,8 @@ video.play().catch((err) => {
 
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
+let baseScale2 = 1;
+
 function updateBaseScale1(){
   if (!videoW || !videoH) return;
   const scaleX = window.innerWidth / videoW;
@@ -533,14 +529,15 @@ function updateBaseScale1(){
 }
 
 function updateBaseScale2(){
-  if (!video2W || !video2H) return;
-  const scaleX = window.innerWidth / video2W;
-  const scaleY = window.innerHeight / video2H;
-  const needed = Math.max(1, Math.max(scaleX, scaleY)); // ensure video covers viewport
-  baseScale2 = needed;
-  // If the video is intrinsically larger than the viewport, keep its real size but apply a tiny crop to avoid visible slivers
-  if (needed === 1) baseScale2 = slightCrop;
+  const v2 = document.getElementById('bg-video2');
+  if (!v2 || !v2.videoWidth || !v2.videoHeight) { baseScale2 = 1; return; }
+  const scaleX = window.innerWidth / v2.videoWidth;
+  const scaleY = window.innerHeight / v2.videoHeight;
+  const needed = Math.max(1, Math.max(scaleX, scaleY));
+  baseScale2 = needed === 1 ? slightCrop : needed;
 }
+
+
 
 function onMouseMove(e){
   // Normalize -1 .. 1
@@ -815,32 +812,33 @@ window.addEventListener('resize', () => {
 // Video switching controller
 (function(){
   const video1 = document.getElementById('bg-video');
-  const video2 = document.getElementById('bg-video2');
+  const video2 = document.getElementById('bg-video2'); // may be null
 
-  let currentVideo = video1;
+  if (!video1) return;
+
+  // ensure the global currentVideo (used by animate) points to the active element
+  currentVideo = video1;
 
   function switchToVideo(nextVideo) {
-    if (currentVideo === nextVideo) return;
-    // Fade out current
-    currentVideo.style.opacity = '0';
-    // Fade in next
+    if (!nextVideo || currentVideo === nextVideo) return;
+    if (currentVideo) currentVideo.style.opacity = '0';
     nextVideo.style.opacity = '1';
-    // After transition, pause the old one and play the new one
     setTimeout(() => {
-      currentVideo.pause();
-      currentVideo.currentTime = 0;
+      if (currentVideo) { currentVideo.pause(); currentVideo.currentTime = 0; }
       nextVideo.play().catch(err => console.warn('Video play error:', err));
-    }, 1000); // match transition duration
-    currentVideo = nextVideo;
+      currentVideo = nextVideo;
+    }, 1000);
   }
 
-  video1.addEventListener('ended', () => {
-    switchToVideo(video2);
-  });
-
-  video2.addEventListener('ended', () => {
-    switchToVideo(video1);
-  });
+  if (video2) {
+    video1.addEventListener('ended', () => switchToVideo(video2));
+    video2.addEventListener('ended', () => switchToVideo(video1));
+    video2.addEventListener('loadedmetadata', updateBaseScale2);
+    updateBaseScale2();
+  } else {
+    // single-video fallback: loop so it doesn't go blank after ending
+    video1.loop = true;
+  }
 
   // Start with video1 playing
   video1.play().catch(err => console.warn('Video1 play error:', err));
@@ -900,9 +898,9 @@ window.addEventListener('resize', () => {
       ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*inner, cy+Math.sin(ang)*inner); ctx.lineTo(cx+Math.cos(ang)*outer, cy+Math.sin(ang)*outer); ctx.stroke();
     }
 
-    const hh = d.getHours() % 12;
-    const mm = d.getMinutes();
-    const ss = d.getSeconds();
+    const hh = d.getUTCHours() % 12;
+    const mm = d.getUTCMinutes();
+    const ss = d.getUTCSeconds();
     const hourAngle = (Math.PI*2) * ((hh*60 + mm) / (12*60)) - Math.PI/2;
     const minAngle = (Math.PI*2) * ((mm*60 + ss) / 3600) - Math.PI/2;
     const secAngle = (Math.PI*2) * (ss/60) - Math.PI/2;
@@ -954,7 +952,8 @@ window.addEventListener('resize', () => {
 
   // close when clicking outside
   document.addEventListener('click', (e) => {
-    if (!pop.hidden && !pop.contains(e.target) && e.target !== btn) {
+    // Consider clicks inside the popover or inside the toggle button as 'inside'
+    if (!pop.hidden && !pop.contains(e.target) && !btn.contains(e.target)) {
       pop.hidden = true; btn.setAttribute('aria-expanded','false');
     }
   });
