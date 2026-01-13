@@ -32,7 +32,7 @@
 
   /* The video will use its intrinsic size (real pixels) and be centered; wrapper will crop slightly.
      A small scale is applied in JS when needed to ensure a slight crop and avoid tiny slivers. */
-  #bg-video, #bg-video2, #bg-video3, #bg-video4 {
+  #bg-video {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -338,31 +338,13 @@
 <body>
 
 <div class="video-wrapper">
-  <!-- First video -->
-  <video id="bg-video" autoplay muted playsinline preload="auto" style="opacity:1">
-    <source src="bagmati-overflow-4k-drone-shot-1440-publer.io.mp4" type="video/mp4">
+  <!-- Single video -->
+  <video id="bg-video" autoplay muted playsinline preload="auto" loop style="opacity:1">
+    <source src="finalfootage.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 
-  <!-- Second video (Bagmati) — will be used as the alternate/background clip -->
-  <video id="bg-video2" autoplay muted playsinline preload="auto" style="opacity:0">
-    <source src="bagmati-overflow-4k-drone-shot-1440-publer.io.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <!-- Third video (Madhesh) -->
-  <video id="bg-video3" autoplay muted playsinline preload="auto" style="opacity:0">
-    <source src="madhesh.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <!-- Fourth video (Koshi) -->
-  <video id="bg-video4" autoplay muted playsinline preload="auto" style="opacity:0">
-    <source src="Koshi.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-
-  <div id="video-status" aria-live="polite">Loading video…</div> 
+  <div id="video-status" aria-live="polite">Loading video…</div>
   <div id="video-overlay">Credits to Nepal Tourism Board</div>
 </div>
 
@@ -459,13 +441,13 @@
   Your browser does not support the audio element.
 </audio>
 
-<script> 
+<script>
 // Fullscreen background video tilt (rotateX/rotateY) parallax using intrinsic video size
 const video = document.getElementById('bg-video');
 const status = document.getElementById('video-status');
 
 let videoW = 0, videoH = 0;
-let baseScale1 = 1; // per video
+let baseScale1 = 1; // single video
 const slightCrop = 1.02; // minimal crop factor when video is already larger than viewport
 const maxRotate = 10; // degrees of rotation for tilt (increased for stronger tilt)
 const maxTranslate = 60; // px translation for more noticeable parallax shift (increased)
@@ -480,19 +462,6 @@ function showStatus(msg, show = true) {
   status.style.display = show ? 'block' : 'none';
 }
 
-const videoSrc = 'gandaki.mp4';
-const srcEl = video.querySelector('source');
-if (srcEl) {
-  srcEl.src = videoSrc;
-} else {
-  const s = document.createElement('source');
-  s.src = videoSrc;
-  s.type = 'video/mp4';
-  video.appendChild(s);
-}
-video.load();
-showStatus('Loading video: ' + videoSrc + '...');
-
 video.addEventListener('loadedmetadata', () => {
   videoW = video.videoWidth;
   videoH = video.videoHeight;
@@ -502,8 +471,6 @@ video.addEventListener('loadedmetadata', () => {
   updateBaseScale1();
   showStatus('', false);
 });
-
-
 
 video.addEventListener('canplay', () => {
   showStatus('', false);
@@ -528,10 +495,6 @@ video.play().catch((err) => {
 
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-let baseScale2 = 1;
-let baseScale3 = 1;
-let baseScale4 = 1;
-
 function updateBaseScale1(){
   if (!videoW || !videoH) return;
   const scaleX = window.innerWidth / videoW;
@@ -541,35 +504,6 @@ function updateBaseScale1(){
   // If the video is intrinsically larger than the viewport, keep its real size but apply a tiny crop to avoid visible slivers
   if (needed === 1) baseScale1 = slightCrop;
 }
-
-function updateBaseScale2(){
-  const v2 = document.getElementById('bg-video2');
-  if (!v2 || !v2.videoWidth || !v2.videoHeight) { baseScale2 = 1; return; }
-  const scaleX = window.innerWidth / v2.videoWidth;
-  const scaleY = window.innerHeight / v2.videoHeight;
-  const needed = Math.max(1, Math.max(scaleX, scaleY));
-  baseScale2 = needed === 1 ? slightCrop : needed;
-}
-
-function updateBaseScale3(){
-  const v3 = document.getElementById('bg-video3');
-  if (!v3 || !v3.videoWidth || !v3.videoHeight) { baseScale3 = 1; return; }
-  const scaleX = window.innerWidth / v3.videoWidth;
-  const scaleY = window.innerHeight / v3.videoHeight;
-  const needed = Math.max(1, Math.max(scaleX, scaleY));
-  baseScale3 = needed === 1 ? slightCrop : needed;
-}
-
-function updateBaseScale4(){
-  const v4 = document.getElementById('bg-video4');
-  if (!v4 || !v4.videoWidth || !v4.videoHeight) { baseScale4 = 1; return; }
-  const scaleX = window.innerWidth / v4.videoWidth;
-  const scaleY = window.innerHeight / v4.videoHeight;
-  const needed = Math.max(1, Math.max(scaleX, scaleY));
-  baseScale4 = needed === 1 ? slightCrop : needed;
-} 
-
-
 
 function onMouseMove(e){
   // Normalize -1 .. 1
@@ -612,12 +546,8 @@ function animate(now){
   if (Math.abs(currentTY) < 0.02) currentTY = 0;
 
   // GPU-accelerated composite transform
-  let scale = 1;
-  if (currentVideo === video) scale = baseScale1;
-  else if (currentVideo && currentVideo.id === 'bg-video2') scale = baseScale2;
-  else if (currentVideo && currentVideo.id === 'bg-video3') scale = baseScale3;
-  else if (currentVideo && currentVideo.id === 'bg-video4') scale = baseScale4;
-  currentVideo.style.transform = `translate3d(calc(-50% + ${currentTX}px), calc(-50% + ${currentTY}px), 0) rotateX(${currentRX}deg) rotateY(${currentRY}deg) scale(${scale})`; 
+  let scale = baseScale1;
+  currentVideo.style.transform = `translate3d(calc(-50% + ${currentTX}px), calc(-50% + ${currentTY}px), 0) rotateX(${currentRX}deg) rotateY(${currentRY}deg) scale(${scale})`;
 
   requestAnimationFrame(animate);
 }
@@ -625,9 +555,6 @@ requestAnimationFrame(animate);
 
 window.addEventListener('resize', () => {
   updateBaseScale1();
-  updateBaseScale2();
-  updateBaseScale3();
-  updateBaseScale4();
 });
 
 // Reveal the info section only when the user scrolls it into view (homepage remains the video)
