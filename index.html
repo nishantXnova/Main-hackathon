@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3D Parallax Video</title>
 <link href="https://fonts.googleapis.com/css2?family=Jersey+10&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
 <style>
   body, html {
     margin: 0;
@@ -40,10 +42,17 @@
     height: auto; /* keep aspect ratio */
     transform: translate(-50%, -50%) rotateX(0deg) rotateY(0deg) scale(1);
     transform-origin: center center;
-    will-change: transform, opacity;
+    will-change: transform, filter, opacity;
     transition: opacity 1s ease; /* smooth fade when switching videos */
     z-index: 0;
     pointer-events: none;
+
+    /* help the browser keep the video layer crisp during 3D transforms */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+    /* Use natural interpolation for photographic video to avoid sharpening artifacts */
+    image-rendering: auto;
   }
 
   /* Use this for any content that should appear above the video */
@@ -252,13 +261,295 @@
     color: #fff;
   }
 
+  .info-section .info-text h2 {
+    /* image clipped into the text for a masked / clipped-text look (preferred: background-clip; fallback: mask-image) */
+    background-image: url('nepaltext.png');
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+
+    /* fallback mask for browsers that support it */
+    mask-image: url('nepaltext.png');
+    -webkit-mask-image: url('nepaltext.png');
+    mask-size: 0% 0%;
+    -webkit-mask-size: 0% 0%;
+    mask-position: center;
+    -webkit-mask-position: center;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+
+    /* start with the background clipped down and grow it when revealed */
+    background-position: center;
+    background-size: 0% 0%;
+    background-repeat: no-repeat;
+
+    font-size: 2.5rem;
+    text-align: center;
+    margin: 0 0 20px 0;
+    padding: 20px;
+    font-family: "Jersey 10", sans-serif;
+    font-weight: 400;
+
+    transition: mask-size 700ms cubic-bezier(.2,.9,.2,1), -webkit-mask-size 700ms cubic-bezier(.2,.9,.2,1), background-size 700ms cubic-bezier(.2,.9,.2,1), opacity 500ms ease;
+    will-change: mask-size, background-size, opacity;
+  }
+
+  /* when the title is explicitly revealed (after showing the image), grow the mask/background */
+  .info-section .info-text h2.revealed {
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+    background-size: 100% 100%;
+  }
+
   .info-container {
+    position: relative; /* allow banner placement inside */
     max-width: 1100px;
     margin: 0 auto;
     background: rgba(10,10,10,0.55);
     border-radius: 8px;
     padding: 28px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    overflow: visible;
+  }
+
+  /* Montserrat utility classes (pattern: .montserrat-<weight>) */
+  .montserrat-400, .montserrat-500, .montserrat-600, .montserrat-700, .montserrat-800 {
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+  }
+
+  .montserrat-800 {
+    font-weight: 800;
+    font-size: 1.12rem;
+    letter-spacing: 0.6px;
+    background: linear-gradient(90deg,#ffd3a5,#ff7aa2);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* subtle glow for clipped gradient using drop-shadow on an inline element fallback */
+    text-shadow: 0 8px 18px rgba(255,122,162,0.06);
+    transition: transform 220ms cubic-bezier(.2,.9,.2,1);
+  }
+
+  .montserrat-700 {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    letter-spacing: 0.35px;
+  }
+
+  .montserrat-600 {
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: rgba(255,255,255,0.95);
+  }
+
+  .montserrat-400 {
+    font-weight: 400;
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.74);
+    font-style: italic;
+  }
+
+  /* Lora description style for place paragraphs */
+  .lora-400 {
+    font-family: "Lora", serif;
+    font-weight: 400;
+    font-size: 0.98rem;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.68;
+    letter-spacing: 0.12px;
+    white-space: normal; /* ensure text wraps */
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .place-desc { margin-top: 8px; }
+
+
+  /* Places list styling: horizontal slider and polished cards */
+  .places-list {
+    display: flex;
+    gap: 18px;
+    margin-top: 18px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px; /* leave space for scrollbar */
+  }
+
+  .places-list::-webkit-scrollbar { height: 10px; }
+  .places-list::-webkit-scrollbar-track { background: transparent; }
+  .places-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
+
+  .place {
+    position: relative;
+    flex: 0 0 360px; /* card width in the slider */
+    scroll-snap-align: start;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 16px 16px 18px 18px;
+    border-radius: 12px;
+    transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+    display: block;
+    overflow: hidden;
+    box-sizing: border-box; /* ensure padding included in width */
+    word-break: break-word; /* break long words to avoid overflow */
+    hyphens: auto;
+  }
+
+  .place-img { width:100%; height:180px; object-fit:cover; border-radius:8px; display:block; margin-bottom:12px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+
+  .place::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    width: 6px;
+    height: 44px;
+    border-radius: 6px;
+    background: linear-gradient(180deg,#ffb86b,#ff7aa2);
+    box-shadow: 0 6px 18px rgba(255,122,162,0.06);
+  }
+
+  .place:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+  }
+
+  .place h4 { margin: 0 0 8px 0; }
+  .place .img-note { margin-top: 12px; color: rgba(255,255,255,0.65); font-size: 0.9rem; }
+
+  @media (max-width:760px) {
+    .places-list { gap: 12px; padding-bottom: 6px; }
+    .place { flex: 0 0 92%; }
+    .montserrat-800 { font-size: 1.02rem; }
+  }
+
+  /* Homepage banner that sits within the homepage (video area) and hides when the info section becomes visible */
+  .homepage-banner {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    top: 55vh; /* place in lower-middle of viewport to avoid bottom clipping */
+    width: min(calc(100% - 120px), 960px);
+    height: 220px; /* slightly larger for visual impact */
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 15; /* above controls and overlays */
+    display: block;
+    pointer-events: none;
+    opacity: 0;
+    transform-origin: center center;
+    transform: translateX(-50%) translateY(6px);
+    transition: opacity 380ms ease, transform 380ms ease, filter 320ms ease;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.6);
+    backdrop-filter: saturate(1.05) blur(2px);
+  }
+  .homepage-banner img { width: 100%; height: 100%; object-fit: cover; display:block; }
+  .homepage-banner.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Make banner smaller on small screens */
+  @media (max-width: 760px) {
+    .homepage-banner { width: calc(100% - 64px); height: 140px; top: 58vh; border-radius: 8px; }
+  }
+
+  /* Chat Icon */
+  .chat-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1000;
+  }
+  .chat-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+
+  /* Chat Modal */
+  .chat-modal {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 350px;
+    height: 500px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    display: none;
+    flex-direction: column;
+    z-index: 1001;
+    overflow: hidden;
+  }
+  .chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+  }
+  .chat-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: rgba(255,255,255,0.9);
+  }
+  .message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 80%;
+  }
+  .message.user {
+    background: #667eea;
+    color: white;
+    margin-left: auto;
+    text-align: right;
+  }
+  .message.ai {
+    background: #f0f0f0;
+    color: #333;
+  }
+  .chat-input-container {
+    display: flex;
+    padding: 15px;
+    background: rgba(255,255,255,0.95);
+  }
+  .chat-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+  .chat-send {
+    padding: 10px 15px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .chat-send:hover {
+    background: #5a6fd8;
+  }
+
+  /* Slightly lower for very short viewports so it doesn't overlap the quick links */
+  @media (max-height: 650px) {
+    .homepage-banner { top: 48vh; }
   }
 
   /* individual rows: hidden by default, animate into view and have hover feedback */
@@ -309,10 +600,10 @@
     transform: scale(1.04);
   }
 
-  /* Subtle looping blur animation on the video for a slightly dreamy effect */
+  /* Subtle looping blur animation on the video for a slightly dreamy effect (reduced so it doesn't introduce visible softness) */
   @keyframes subtleBlur {
     0% { filter: blur(0px) saturate(1) brightness(1); }
-    50% { filter: blur(0.9px) saturate(1.02) brightness(0.98); }
+    50% { filter: blur(0.25px) saturate(1.01) brightness(0.995); }
     100% { filter: blur(0px) saturate(1) brightness(1); }
   }
 
@@ -333,9 +624,79 @@
     .info-row { flex-direction: column; }
     .info-media { width: 100%; }
   }
+
+  /* Provinces section styles */
+  .nepal-map {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .nepal-map-img {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  }
+
+  .provinces-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .province {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    padding: 16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  }
+
+  .province:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+  }
+
+  .province-text {
+    flex: 1;
+  }
+
+  .province-media {
+    flex: 0 0 200px;
+  }
+
+  .province-img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  }
+
+  @media (max-width: 760px) {
+    .province { flex-direction: column; gap: 16px; }
+    .province-media { width: 100%; }
+  }
 </style>
 </head>
 <body>
+
+<!-- Chat Icon -->
+<div class="chat-icon" id="chat-icon">💬</div>
+
+<!-- Chat Modal -->
+<div class="chat-modal" id="chat-modal">
+  <div class="chat-header">AI Assistant</div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-container">
+    <input type="text" class="chat-input" id="chat-input" placeholder="Type your message...">
+    <button class="chat-send" id="chat-send">Send</button>
+  </div>
+</div>
 
 <div class="video-wrapper">
   <!-- Single video -->
@@ -345,7 +706,7 @@
   </video>
 
   <div id="video-status" aria-live="polite">Loading video…</div>
-  <div id="video-overlay">Credits to Nepal Tourism Board</div>
+  <div id="video-overlay">Credits to Drone Shots on youtube</div>
 </div>
 
 <!-- Quick navigation links (jump to info sections) -->
@@ -353,6 +714,7 @@
   <a href="#info-1">Overview</a>
   <a href="#info-2">Culture</a>
   <a href="#info-3">Outdoors</a>
+  <a href="#provinces">Provinces</a>
 
   <!-- Search UI (toggle + popover) -->
   <div class="search-wrapper">
@@ -394,6 +756,7 @@
     <section class="info-section">
       <div class="info-container">
 
+
       <!-- Info item 1 -->
       <div class="info-row" id="info-1">
         <div class="info-text">
@@ -431,13 +794,130 @@
         </div>
       </div>
 
+      <!-- Top places to visit -->
+      <div class="info-row" id="top-places">
+        <div class="info-text">
+          <h3>Top places to visit</h3>
+
+          <div class="places-list">
+            <div class="place">
+              <img class="place-img" src="top_places/kathmandu.jpg" alt="Kathmandu Valley image" loading="lazy">
+              <h4 class="montserrat-800">Kathmandu Valley</h4>
+              <p class="place-desc lora-400">The Kathmandu Valley is a culturally rich and historically significant region in Nepal, known for its three ancient cities: Kathmandu, Patan, and Bhaktapur. This valley is a UNESCO World Heritage Site, featuring numerous UNESCO World Heritage shrines and exquisite monuments that reflect the artistic genius of the Newars, the original inhabitants. The valley is also home to Pashupatinath Temple, a major Hindu pilgrimage site, and Boudhanath Stupa, a significant Buddhist site. Visitors can explore vibrant markets, ancient temples, and the Kathmandu Durbar Square, which showcases the architectural marvels of the Malla period. The valley's rich tapestry of history, culture, and spirituality makes it a must-visit destination for travelers seeking to experience the essence of Nepal.</p>
+            </div>
+
+            <div class="place">
+              <img class="place-img" src="top_places/pokhara.jpg" alt="Pokhara image" loading="lazy">
+              <h4 class="montserrat-800">Pokhara</h4>
+              <p class="place-desc lora-400">Pokhara, often referred to as the 'Jewel of Nepal,' is a vibrant city nestled in the lap of the Annapurna mountain range. Known for its stunning Fewa Lake and the reflection of the majestic Annapurna peaks, Pokhara offers a blend of natural beauty and cultural richness. The city is a major tourism hub, attracting visitors with its historical temples, such as the Tal Barahi Temple, and various adventure activities like paragliding and bungee jumping. Pokhara's unique position as a crossroads for different cultures, including Hindu and Buddhist traditions, makes it a fascinating destination for travelers seeking both adventure and spirituality.</p>
+            </div>
+
+            <div class="place">
+              <img class="place-img" src="top_places/boudhanath.png" alt="Boudhanath Stupa image" loading="lazy">
+              <h4 class="montserrat-800">Boudhanath Stupa</h4>
+              <p class="place-desc lora-400">The Boudhanath Stupa, located in Kathmandu, Nepal, is one of the largest stupas in the world and a major spiritual landmark in Tibetan Buddhism. Built by King Manadeva, it is believed to house the relics of Kassapa Buddha and is situated along the historic trade route from Tibet to India. The stupa's circular base symbolizes Mount Meru and is adorned with the all-seeing eyes of the Buddha, making it a significant site for meditation and pilgrimage. It has been recognized as a UNESCO World Heritage Site since 1979 and is a vibrant cultural hub, attracting thousands of visitors each year.</p>
+            </div>
+
+
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Provinces of Nepal -->
+      <div class="info-row" id="provinces">
+        <div class="info-text">
+          <h3>Provinces of Nepal</h3>
+
+          <!-- Nepal Map with Provinces -->
+          <div class="nepal-map">
+            <img class="nepal-map-img" src="Provinces/map.png" alt="Nepal Map with Provinces" loading="lazy">
+          </div>
+
+          <!-- Provinces List -->
+          <div class="provinces-list">
+            <div class="province">
+              <div class="province-text">
+                <h4 class="montserrat-700">Province 1</h4>
+                <p class="lora-400">Province 1 is located in the eastern part of Nepal and is known for its diverse landscapes, including mountains, hills, and Terai plains. It is home to Mount Everest and features cultural sites like the Everest region.</p>
+              </div>
+              <div class="province-media">
+                <img class="province-img" src="Provinces/Illam-1631441491.jpg" alt="Province 1 Map" loading="lazy">
+              </div>
+            </div>
+
+            <div class="province">
+              <div class="province-text">
+                <h4 class="montserrat-700">Province 2</h4>
+                <p class="lora-400">Province 2, also known as Madhesh Province, is in the southeastern Terai region. It is rich in agriculture and has historical sites like the ancient city of Janakpur.</p>
+              </div>
+              <div class="province-media">
+                <img class="province-img" src="Provinces/janakpur_ss_lt-1624431003.jpeg" alt="Province 2 Map" loading="lazy">
+              </div>
+            </div>
+
+            <div class="province">
+              <div class="province-text">
+                <h4 class="montserrat-700">Bagmati Province</h4>
+                <p class="lora-400">Bagmati Province is the central province and includes the capital city Kathmandu. It is known for its cultural heritage, temples, and urban development.</p>
+              </div>
+              <div class="province-media">
+                <img class="province-img" src="Provinces/kathmandu_oy_lt2-1624431334.jpeg" alt="Bagmati Province Map" loading="lazy">
+              </div>
+            </div>
+
+            <div class="province">
+              <div class="province-text">
+                <h4 class="montserrat-700">Gandaki Province</h4>
+                <p class="lora-400">Gandaki Province is home to the Annapurna mountain range and Pokhara. It offers stunning natural beauty and is a hub for adventure tourism.</p>
+              </div>
+              <div class="province-media">
+                <img class="province-img" src="Provinces/Gandaki-1631441545.jpg" alt="Gandaki Province Map" loading="lazy">
+              </div>
+            </div>
+
+            <div class="province">
+              <div class="province-text">
+                <h4 class="montserrat-700">Lumbini Province</h4>
+                <p class="lora-400">Lumbini Province is the birthplace of Buddha and includes the Lumbini site. It is significant for its religious and historical importance.</p>
+              </div>
+              <div class="province-media">
+                <img class="province-img" src="Provinces/Lumbini-1631441562.jpg" alt="Lumbini Province Map" loading="lazy">
+              </div>
+            </div>
+
+            <div class="province">
+              <div class="province-text">
+                <h4 class="montserrat-700">Karnali Province</h4>
+                <p class="lora-400">Karnali Province is in the mid-western region and features rugged terrains, rivers, and is known for its natural resources and biodiversity.</p>
+              </div>
+              <div class="province-media">
+                <img class="province-img" src="Provinces/shey-1626727697.jpeg" alt="Karnali Province Map" loading="lazy">
+              </div>
+            </div>
+
+            <div class="province">
+              <div class="province-text">
+                <h4 class="montserrat-700">Sudurpashchim Province</h4>
+                <p class="lora-400">Sudurpashchim Province, the far-western province, includes areas near the border with India and features diverse landscapes from plains to hills.</p>
+              </div>
+              <div class="province-media">
+                <img class="province-img" src="Provinces/Khaptad_taan_trekker_(6)-1624819036.jpg" alt="Sudurpashchim Province Map" loading="lazy">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </section>
 </main>
 
 <!-- Background sound (toggleable) -->
 <audio id="bg-sound" loop preload="auto" aria-hidden="true">
-  <source src="ytmp3free.cc_dar-da-da-dasse-status-lyrics-edit-youtubemp3free.org.mp3" type="audio/mpeg">
+  <source src="Audio.mp3" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
 
@@ -448,7 +928,8 @@ const status = document.getElementById('video-status');
 
 let videoW = 0, videoH = 0;
 let baseScale1 = 1; // single video
-const slightCrop = 1.02; // minimal crop factor when video is already larger than viewport
+const slightCrop = 1.0; // minimal crop factor when video is already larger than viewport (set to 1 to avoid extra zoom)
+const maxUpscale = 1.06; // cap how much we upscale a small source to avoid heavy blur when stretching to fill the viewport
 const maxRotate = 10; // degrees of rotation for tilt (increased for stronger tilt)
 const maxTranslate = 60; // px translation for more noticeable parallax shift (increased)
 
@@ -499,11 +980,18 @@ function updateBaseScale1(){
   if (!videoW || !videoH) return;
   const scaleX = window.innerWidth / videoW;
   const scaleY = window.innerHeight / videoH;
-  const needed = Math.max(1, Math.max(scaleX, scaleY)); // ensure video covers viewport
+  let needed = Math.max(1, Math.max(scaleX, scaleY)); // ensure video covers viewport
+
+  // avoid excessive upscaling which introduces blur — cap the upscale factor
+  if (typeof maxUpscale !== 'undefined' && needed > maxUpscale) {
+    // If we cap, the video might not completely fill both axes, but it will preserve more detail
+    needed = maxUpscale;
+  }
+
   baseScale1 = needed;
-  // If the video is intrinsically larger than the viewport, keep its real size but apply a tiny crop to avoid visible slivers
+  // If the video is intrinsically larger than the viewport, keep its real size but apply minimal crop (often 1.0)
   if (needed === 1) baseScale1 = slightCrop;
-}
+} 
 
 function onMouseMove(e){
   // Normalize -1 .. 1
@@ -519,7 +1007,16 @@ function onMouseMove(e){
   targetTY = clamp(ry * maxTranslate, -maxTranslate, maxTranslate);
 }
 
-window.addEventListener('mousemove', onMouseMove, {passive: true});
+// Respect user 'prefers-reduced-motion'—don't attach a parallax listener if they prefer reduced motion
+const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!reducedMotion) {
+  window.addEventListener('mousemove', onMouseMove, {passive: true});
+} else {
+  // keep video centered and reset any targets to avoid micro-movement
+  targetRX = targetRY = targetTX = targetTY = 0;
+  currentRX = currentRY = currentTX = currentTY = 0;
+  currentVideo.style.transform = `translate(-50%,-50%) rotateX(0deg) rotateY(0deg) scale(${baseScale1})`;
+}
 
 // Smooth animation loop using frame-time damping for buttery motion
 let lastTime = performance.now();
@@ -527,9 +1024,9 @@ function animate(now){
   const dt = Math.min(0.05, (now - lastTime) / 1000); // seconds, capped
   lastTime = now;
 
-  // responsiveness (tweak these for feel)
-  const rotSpeed = 6.5;
-  const transSpeed = 8.5;
+  // responsiveness (tweak these for feel) — lower speeds for smoother, less jittery motion
+  const rotSpeed = 4.2;
+  const transSpeed = 5.2;
 
   const sRot = 1 - Math.exp(-rotSpeed * dt);
   const sTrans = 1 - Math.exp(-transSpeed * dt);
@@ -539,15 +1036,21 @@ function animate(now){
   currentTX += (targetTX - currentTX) * sTrans;
   currentTY += (targetTY - currentTY) * sTrans;
 
-  // remove micro-jitter
-  if (Math.abs(currentRX) < 0.0005) currentRX = 0;
-  if (Math.abs(currentRY) < 0.0005) currentRY = 0;
-  if (Math.abs(currentTX) < 0.02) currentTX = 0;
-  if (Math.abs(currentTY) < 0.02) currentTY = 0;
+  // remove micro-jitter (slightly higher thresholds to avoid visible micro-movement)
+  if (Math.abs(currentRX) < 0.001) currentRX = 0;
+  if (Math.abs(currentRY) < 0.001) currentRY = 0;
+  if (Math.abs(currentTX) < 0.2) currentTX = 0;
+  if (Math.abs(currentTY) < 0.2) currentTY = 0;
 
-  // GPU-accelerated composite transform
+  // round translations to whole pixels to avoid sub-pixel blurring, and rotations to 0.1deg
+  const tx = Math.round(currentTX);
+  const ty = Math.round(currentTY);
+  const rx = Math.round(currentRX * 10) / 10;
+  const ry = Math.round(currentRY * 10) / 10;
+
+  // GPU-accelerated composite transform; separate the percent offset from pixel translations
   let scale = baseScale1;
-  currentVideo.style.transform = `translate3d(calc(-50% + ${currentTX}px), calc(-50% + ${currentTY}px), 0) rotateX(${currentRX}deg) rotateY(${currentRY}deg) scale(${scale})`;
+  currentVideo.style.transform = `translate(-50%,-50%) translate3d(${tx}px, ${ty}px, 0) rotateX(${rx}deg) rotateY(${ry}deg) scale(${scale})`; 
 
   requestAnimationFrame(animate);
 }
@@ -565,13 +1068,48 @@ window.addEventListener('resize', () => {
   // mark hidden for accessibility
   infoSection.setAttribute('aria-hidden', 'true');
 
+  const homepageBanner = document.querySelector('.homepage-banner');
+  const titleEl = document.querySelector('.info-section .info-text h2');
+  let titleSequenceRan = false;
+
+  // ensure banner starts visible on the homepage
+  if (homepageBanner) homepageBanner.classList.add('visible');
+
   const reveal = () => {
     infoSection.classList.add('visible');
     infoSection.setAttribute('aria-hidden', 'false');
+
+    // hide the homepage banner and reveal the title
+    if (homepageBanner) {
+      homepageBanner.classList.remove('visible');
+    }
+
+    // run the title reveal after a short pause so the transition feels natural
+    setTimeout(() => {
+      if (titleEl) titleEl.classList.add('revealed');
+      titleSequenceRan = true;
+    }, 300);
+
+    // also softly blur the video for contrast
+    if (videoWrapper) videoWrapper.classList.add('blurred');
   };
+
   const hide = () => {
     infoSection.classList.remove('visible');
     infoSection.setAttribute('aria-hidden', 'true');
+
+    // show the homepage banner again and reset title
+    if (homepageBanner) {
+      // restart transition cleanly
+      homepageBanner.classList.remove('visible');
+      void homepageBanner.offsetWidth;
+      homepageBanner.classList.add('visible');
+    }
+    if (titleEl) titleEl.classList.remove('revealed');
+    titleSequenceRan = false;
+
+    // remove video blur when the info section is hidden
+    if (videoWrapper) videoWrapper.classList.remove('blurred');
   };
 
   // IntersectionObserver for efficient detection
@@ -638,6 +1176,15 @@ window.addEventListener('resize', () => {
     onScroll();
   }
 })();
+
+// Dynamic mask reveal removed — the banner reveal sequence now controls the heading mask/background.
+// Set an explicit initial state so the .revealed class can animate from 0 -> 100% cleanly.
+const title = document.querySelector('.info-section .info-text h2');
+if (title) {
+  title.style.maskSize = '0% 0%';
+  title.style.webkitMaskSize = '0% 0%';
+  title.style.backgroundSize = '0% 0%';
+}
 
 // Fallback: apply the supplied image URLs to the info items in case an inline src didn't update
 (function applyProvidedImages(){
@@ -971,6 +1518,199 @@ window.addEventListener('resize', () => {
 
   // close on escape
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pop.hidden) { pop.hidden = true; btn.setAttribute('aria-expanded','false'); } });
+})();
+
+// Chat functionality
+(function(){
+  const chatIcon = document.getElementById('chat-icon');
+  const chatModal = document.getElementById('chat-modal');
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input');
+  const chatSend = document.getElementById('chat-send');
+
+  const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+  const API_KEY = '';
+  const MODEL = 'xiaomi/mimo-v2-flash:free';
+  // TODO: Replace with your desired system prompt
+  const SYSTEM_PROMPT = `You are an AI Travel & Experience Assistant embedded inside a premium tourism website inspired by myswitzerland.com.
+
+Your core mission is to inspire, guide, and assist users in discovering destinations, experiences, culture, nature, and activities in a visually rich, emotionally engaging, and practical way.
+
+You are NOT a generic chatbot.
+You behave like a local travel expert, storyteller, and concierge combined.
+
+-----------------------------------
+PERSONALITY & TONE
+-----------------------------------
+- Calm, warm, premium, and inspiring
+- Human, friendly, and emotionally intelligent
+- Never robotic, never overly technical
+- Speak like a passionate local guide who deeply loves the country
+- Short to medium responses by default, but capable of going ultra-detailed if the user asks
+- Use vivid but simple language
+- Avoid emojis unless the website tone explicitly allows minimal use
+
+-----------------------------------
+COMMUNICATION STYLE
+-----------------------------------
+- Focus on experiences, not just facts
+- Use sensory language (views, sounds, feelings)
+- Encourage exploration and curiosity
+- Ask gentle follow-up questions only when it improves the experience
+- Never overwhelm users with too many options at once
+- Prefer storytelling over bullet lists, unless clarity is needed
+
+-----------------------------------
+CORE CAPABILITIES
+-----------------------------------
+
+You can help users with:
+
+1. DESTINATIONS
+- Cities, villages, mountains, lakes, heritage sites
+- Hidden gems and lesser-known places
+- Seasonal recommendations
+- Nature, adventure, spiritual, and cultural spots
+
+2. EXPERIENCES
+- Hiking, trekking, skiing, paragliding, cycling, scenic trains
+- Cultural festivals, local food, traditions
+- Wellness, luxury, slow travel, photography spots
+
+3. TRAVEL PLANNING
+- Trip ideas (1 day, 3 days, 7 days, etc.)
+- Best time to visit places
+- Weather-based suggestions
+- Family, solo, couple, adventure, luxury travel styles
+
+4. VISUAL-FIRST GUIDANCE
+- Describe places as if they appear in cinematic videos
+- Assume the website shows large visuals, maps, and videos
+- Refer to visuals naturally (e.g., “As you scroll, you’ll see…”)
+
+5. BOOKING GUIDANCE (NO DIRECT BOOKINGS)
+- Explain how booking systems work
+- Suggest types of accommodations or experiences
+- Redirect to partners or booking sections without pretending to book
+
+-----------------------------------
+STRICT RULES
+-----------------------------------
+- Never claim real-time availability
+- Never invent prices, hotels, or transport schedules
+- Never pretend to be a human
+- Never break immersion by mentioning “AI model” or “training data”
+- If unsure, say so gracefully and redirect to exploration
+
+-----------------------------------
+CONTENT PRIORITIES
+-----------------------------------
+- Inspiration first
+- Practical help second
+- Technical details last
+
+-----------------------------------
+EXAMPLES OF HOW YOU SHOULD RESPOND
+-----------------------------------
+
+User: “What should I see first?”
+Assistant:
+“Start with the places that make you pause and breathe.
+Snow-covered peaks, quiet lakes, or old streets filled with stories.
+Tell me what kind of journey you’re dreaming of — nature, culture, or adventure?”
+
+User: “Is this place good in winter?”
+Assistant:
+“In winter, this place transforms.
+The air becomes sharper, landscapes turn quieter, and experiences feel more intimate.
+If you enjoy calm beauty and seasonal charm, winter is magical here.”
+
+-----------------------------------
+ADAPTABILITY
+-----------------------------------
+- Adjust tone based on user mood
+- If user sounds rushed → concise
+- If user sounds curious → descriptive
+- If user sounds emotional → empathetic
+
+-----------------------------------
+FINAL OBJECTIVE
+-----------------------------------
+Your goal is not just to answer questions.
+
+Your goal is to make users want to explore,
+scroll further,
+watch the next video,
+and imagine themselves inside the destination.
+
+You are the voice of the country.`;
+
+  chatIcon.addEventListener('click', () => {
+    chatModal.style.display = chatModal.style.display === 'flex' ? 'none' : 'flex';
+  });
+
+  function addMessage(content, type) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.textContent = content;
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function sendMessage() {
+    const userMessage = chatInput.value.trim();
+    if (!userMessage) return;
+
+    addMessage(userMessage, 'user');
+    chatInput.value = '';
+
+    // Add typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message ai';
+    typingDiv.textContent = 'Thinking...';
+    chatMessages.appendChild(typingDiv);
+
+    fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userMessage }
+        ]
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      chatMessages.removeChild(typingDiv);
+      if (data.choices && data.choices[0]) {
+        addMessage(data.choices[0].message.content, 'ai');
+      } else {
+        addMessage('Sorry, I couldn\'t generate a response.', 'ai');
+      }
+    })
+    .catch(error => {
+      chatMessages.removeChild(typingDiv);
+      console.error('Error:', error);
+      addMessage('Error: Unable to connect to AI service.', 'ai');
+    });
+  }
+
+  chatSend.addEventListener('click', sendMessage);
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  // Close modal when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!chatModal.contains(e.target) && e.target !== chatIcon) {
+      chatModal.style.display = 'none';
+    }
+  });
 })();
 
 </script>
