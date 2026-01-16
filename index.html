@@ -8,23 +8,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  * {
-    box-sizing: border-box;
-  }
-
   body, html {
     margin: 0;
     width: 100%;
     height: 100%;
     overflow-x: hidden;
-    overflow-y: auto;
-    background: #0a0a0a;
+    overflow-y: auto; /* enable vertical scrolling */
+    background: #000;
     cursor: default;
-    perspective: 1100px;
-    scroll-behavior: smooth;
-    font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    perspective: 1100px; /* enable 3D tilt perspective for the video */
+    scroll-behavior: smooth; /* smooth navigation to anchors */
   }
 
   /* Fullscreen video wrapper */
@@ -34,35 +27,31 @@
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    pointer-events: none;
+    pointer-events: none; /* allow interactions to pass through */
     z-index: 0;
-    transition: opacity 1s ease, filter 0.8s ease;
+    transition: opacity 1s ease;
   }
 
-  .video-wrapper::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 100%);
-    pointer-events: none;
-    z-index: 1;
-  }
-
+  /* The video will use its intrinsic size (real pixels) and be centered; wrapper will crop slightly.
+     A small scale is applied in JS when needed to ensure a slight crop and avoid tiny slivers. */
   #bg-video {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: auto;
-    height: auto;
+    width: auto; /* use intrinsic width */
+    height: auto; /* keep aspect ratio */
     transform: translate(-50%, -50%) rotateX(0deg) rotateY(0deg) scale(1);
     transform-origin: center center;
     will-change: transform, filter, opacity;
-    transition: opacity 1s ease;
+    transition: opacity 1s ease; /* smooth fade when switching videos */
     z-index: 0;
     pointer-events: none;
+
+    /* help the browser keep the video layer crisp during 3D transforms */
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     transform-style: preserve-3d;
+    /* Use natural interpolation for photographic video to avoid sharpening artifacts */
     image-rendering: auto;
   }
 
@@ -101,110 +90,80 @@
   /* Quick links bar at top of homepage */
   #quick-links {
     position: fixed;
-    top: 20px;
+    top: 14px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 4px;
+    gap: 10px;
     align-items: center;
-    padding: 8px;
-    background: rgba(255,255,255,0.08);
+    padding: 8px 12px;
+    background: rgba(20,20,20,0.36);
     color: #fff;
-    border-radius: 50px;
+    border-radius: 999px;
     z-index: 6;
-    backdrop-filter: blur(20px) saturate(1.8);
-    -webkit-backdrop-filter: blur(20px) saturate(1.8);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    backdrop-filter: blur(6px) saturate(1.05);
+    -webkit-backdrop-filter: blur(6px) saturate(1.05);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
     pointer-events: auto;
-    border: 1px solid rgba(255,255,255,0.1);
+    font-family: sans-serif;
   }
   #quick-links a {
-    color: rgba(255,255,255,0.85);
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 0.2px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-  }
-  #quick-links a:hover {
-    background: rgba(255,255,255,0.15);
     color: #fff;
-    transform: translateY(-1px);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0.92;
+    transition: background 220ms ease, transform 160ms ease, opacity 220ms ease;
   }
-  #quick-links a.active {
-    background: rgba(255,255,255,0.95);
-    color: #0a0a0a;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  }
+  #quick-links a:hover { background: rgba(255,255,255,0.06); transform: translateY(-2px); }
+  #quick-links a.active { background: rgba(255,255,255,0.12); font-weight: 600; }
 
   /* Small circular sound toggle button */
   .sound-btn {
     appearance: none;
     -webkit-appearance: none;
     border: none;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.06);
     color: #fff;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .sound-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: scale(1.05);
+    transition: transform 150ms ease, background 180ms ease, box-shadow 180ms ease;
   }
   .sound-btn.on {
-    background: rgba(255,255,255,0.95);
-    color: #0a0a0a;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(80,80,80,0.12));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.3);
   }
-  .sound-btn:focus {
-    outline: 2px solid rgba(255,255,255,0.3);
-    outline-offset: 2px;
-  }
+  .sound-btn:focus { outline: 2px solid rgba(255,255,255,0.14); outline-offset: 2px; }
+  .sound-btn[aria-pressed="true"] { background: rgba(255,255,255,0.12); }
 
   /* Nepal clock button & popover (updated for digital + analog) */
   .clock-btn {
     appearance: none;
     -webkit-appearance: none;
     border: none;
-    background: rgba(255,255,255,0.1);
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
     color: #fff;
-    padding: 10px 16px;
-    border-radius: 50px;
+    padding: 6px 10px;
+    border-radius: 999px;
     display: inline-flex;
     gap: 8px;
     align-items: center;
     cursor: pointer;
     font-size: 14px;
-    min-width: 80px;
+    min-width: 64px;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 160ms ease, background 180ms ease, box-shadow 180ms ease;
   }
-  .clock-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-1px);
-  }
-  .clock-btn:focus {
-    outline: 2px solid rgba(255,255,255,0.3);
-    outline-offset: 2px;
-  }
-  .clock-btn .clock-time {
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-    font-size: 13px;
-  }
+  .clock-btn:focus { outline: 2px solid rgba(255,255,255,0.14); outline-offset: 2px; }
+  .clock-btn .clock-time { font-variant-numeric: tabular-nums; font-weight:600; font-size:13px; }
 
   /* Blurred, side-oriented popover that holds both the digital and analog clocks */
   .clock-pop {
@@ -248,31 +207,8 @@
 
   /* Search UI */
   .search-wrapper { position: relative; display: inline-block; }
-  .search-btn {
-    appearance: none;
-    -webkit-appearance: none;
-    border: none;
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .search-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: scale(1.05);
-  }
-  .search-btn:focus {
-    outline: 2px solid rgba(255,255,255,0.3);
-    outline-offset: 2px;
-  }
+  .search-btn { appearance: none; -webkit-appearance: none; border: none; background: rgba(255,255,255,0.06); color: #fff; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: transform 150ms ease, background 180ms ease, box-shadow 180ms ease; }
+  .search-btn:focus { outline: 2px solid rgba(255,255,255,0.14); outline-offset: 2px; }
   .search-popover { position: absolute; right: 0; top: 44px; background: rgba(10,10,10,0.94); border-radius: 8px; padding: 10px; min-width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); z-index: 12; }
   .search-popover input[type="search"] { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color: #fff; font-size: 14px; }
   .search-results { list-style: none; margin: 8px 0 0 0; padding: 0; max-height: 220px; overflow:auto; }
@@ -366,24 +302,14 @@
   }
 
   .info-container {
-    position: relative;
-    max-width: 1200px;
+    position: relative; /* allow banner placement inside */
+    max-width: 1100px;
     margin: 0 auto;
-    background: rgba(255,255,255,0.03);
-    border-radius: 24px;
-    padding: 60px 48px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    background: rgba(10,10,10,0.55);
+    border-radius: 8px;
+    padding: 28px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
     overflow: visible;
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-
-  @media (max-width: 768px) {
-    .info-container {
-      padding: 40px 24px;
-      border-radius: 20px;
-    }
   }
 
   /* Montserrat utility classes (pattern: .montserrat-<weight>) */
@@ -395,55 +321,51 @@
 
   .montserrat-800 {
     font-weight: 800;
-    font-size: 1.5rem;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+    font-size: 1.12rem;
+    letter-spacing: 0.6px;
+    background: linear-gradient(90deg,#ffd3a5,#ff7aa2);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    /* subtle glow for clipped gradient using drop-shadow on an inline element fallback */
+    text-shadow: 0 8px 18px rgba(255,122,162,0.06);
     transition: transform 220ms cubic-bezier(.2,.9,.2,1);
-    line-height: 1.3;
   }
 
   .montserrat-700 {
     font-weight: 700;
-    font-size: 1.75rem;
+    font-size: 1rem;
     color: #fff;
-    letter-spacing: -0.02em;
-    line-height: 1.3;
-    margin-bottom: 16px;
+    letter-spacing: 0.35px;
   }
 
   .montserrat-600 {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.98rem;
     color: rgba(255,255,255,0.95);
-    line-height: 1.6;
   }
 
   .montserrat-400 {
     font-weight: 400;
-    font-size: 0.95rem;
-    color: rgba(255,255,255,0.8);
-    line-height: 1.7;
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.74);
+    font-style: italic;
   }
 
   /* Lora description style for place paragraphs */
   .lora-400 {
     font-family: "Lora", serif;
     font-weight: 400;
-    font-size: 1rem;
-    color: rgba(255,255,255,0.85);
-    line-height: 1.8;
-    letter-spacing: 0.01em;
-    white-space: normal;
+    font-size: 0.98rem;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.68;
+    letter-spacing: 0.12px;
+    white-space: normal; /* ensure text wraps */
     overflow-wrap: break-word;
     word-break: break-word;
   }
 
-  .place-desc {
-    margin-top: 12px;
-  }
+  .place-desc { margin-top: 8px; }
 
 
   /* Places list styling: horizontal slider and polished cards */
@@ -463,54 +385,42 @@
 
   .place {
     position: relative;
-    flex: 0 0 400px;
+    flex: 0 0 360px; /* card width in the slider */
     scroll-snap-align: start;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 0;
-    border-radius: 20px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 16px 16px 18px 18px;
+    border-radius: 12px;
+    transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
     display: block;
     overflow: hidden;
-    box-sizing: border-box;
-    word-break: break-word;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    box-sizing: border-box; /* ensure padding included in width */
+    word-break: break-word; /* break long words to avoid overflow */
+    hyphens: auto;
   }
 
-  .place-img {
-    width: 100%;
-    height: 240px;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+  .place-img { width:100%; height:180px; object-fit:cover; border-radius:8px; display:block; margin-bottom:12px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
 
-  .place:hover .place-img {
-    transform: scale(1.05);
+  .place::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    width: 6px;
+    height: 44px;
+    border-radius: 6px;
+    background: linear-gradient(180deg,#ffb86b,#ff7aa2);
+    box-shadow: 0 6px 18px rgba(255,122,162,0.06);
   }
 
   .place:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.6);
   }
 
-  .place h4 {
-    margin: 0 0 12px 0;
-    padding: 24px 24px 0 24px;
-  }
-
-  .place .place-desc {
-    padding: 0 24px 24px 24px;
-  }
-
-  .place .img-note {
-    margin-top: 12px;
-    color: rgba(255,255,255,0.65);
-    font-size: 0.9rem;
-  }
+  .place h4 { margin: 0 0 8px 0; }
+  .place .img-note { margin-top: 12px; color: rgba(255,255,255,0.65); font-size: 0.9rem; }
 
   @media (max-width:760px) {
     .places-list { gap: 12px; padding-bottom: 6px; }
@@ -522,31 +432,24 @@
   .homepage-banner {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    top: 55vh;
-    width: min(calc(100% - 120px), 1000px);
-    height: 240px;
-    border-radius: 24px;
+    transform: translateX(-50%) translateY(0);
+    top: 55vh; /* place in lower-middle of viewport to avoid bottom clipping */
+    width: min(calc(100% - 120px), 960px);
+    height: 220px; /* slightly larger for visual impact */
+    border-radius: 10px;
     overflow: hidden;
-    z-index: 15;
+    z-index: 15; /* above controls and overlays */
     display: block;
     pointer-events: none;
     opacity: 0;
     transform-origin: center center;
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 20px 80px rgba(0,0,0,0.8);
-    border: 2px solid rgba(255,255,255,0.1);
+    transform: translateX(-50%) translateY(6px);
+    transition: opacity 380ms ease, transform 380ms ease, filter 320ms ease;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.6);
+    backdrop-filter: saturate(1.05) blur(2px);
   }
-  .homepage-banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .homepage-banner.visible {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+  .homepage-banner img { width: 100%; height: 100%; object-fit: cover; display:block; }
+  .homepage-banner.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* Make banner smaller on small screens */
   @media (max-width: 760px) {
@@ -562,17 +465,14 @@
   /* individual rows: hidden by default, animate into view and have hover feedback */
   .info-row {
     display: flex;
-    gap: 48px;
+    gap: 24px;
     align-items: center;
-    margin-bottom: 80px;
+    margin-bottom: 28px;
+
     opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(12px);
+    transition: opacity 640ms cubic-bezier(.2,.9,.2,1), transform 640ms cubic-bezier(.2,.9,.2,1), box-shadow 240ms ease;
     will-change: opacity, transform;
-    padding: 40px;
-    border-radius: 20px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
   }
 
   .info-row.in-view {
@@ -581,56 +481,33 @@
   }
 
   .info-row:hover {
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.1);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.35);
   }
 
   .info-text {
     flex: 1 1 60%;
     font-size: 16px;
-    line-height: 1.7;
-  }
-
-  .info-text h2 {
-    font-size: 3rem;
-    font-weight: 800;
-    margin-bottom: 24px;
-    letter-spacing: -0.02em;
-  }
-
-  .info-text h3 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    letter-spacing: -0.02em;
-    color: #fff;
-  }
-
-  .info-text p {
-    font-size: 1.05rem;
-    line-height: 1.8;
-    color: rgba(255,255,255,0.85);
-    margin-bottom: 16px;
+    line-height: 1.6;
   }
 
   .info-media {
-    flex: 0 0 400px;
+    flex: 0 0 320px;
   }
 
   .info-img {
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 16px;
+    border-radius: 6px;
     object-fit: cover;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.5);
+    transition: transform 420ms cubic-bezier(.2,.9,.2,1);
+    will-change: transform;
   }
 
   .info-img:hover {
-    transform: scale(1.02) translateY(-4px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    transform: scale(1.04);
   }
 
   /* Subtle looping blur animation on the video for a slightly dreamy effect (reduced so it doesn't introduce visible softness) */
@@ -648,57 +525,14 @@
 
   /* When content is visible, slightly blur & dim the video for contrast */
   .video-wrapper.blurred {
-    filter: blur(3px) brightness(0.7);
-    transition: filter 0.8s ease;
+    filter: blur(2px) brightness(0.82);
+    transition: filter 600ms ease;
     will-change: filter;
   }
 
-  @media (max-width: 1024px) {
-    .info-row {
-      gap: 32px;
-      padding: 32px 24px;
-      margin-bottom: 60px;
-    }
-
-    .info-media {
-      flex: 0 0 320px;
-    }
-  }
-
   @media (max-width: 760px) {
-    .info-row {
-      flex-direction: column;
-      gap: 24px;
-      padding: 24px;
-      margin-bottom: 40px;
-    }
-
-    .info-media {
-      width: 100%;
-      flex: initial;
-    }
-
-    .info-text h2 {
-      font-size: 2rem;
-    }
-
-    .info-text h3 {
-      font-size: 1.5rem;
-    }
-
-    .info-text p {
-      font-size: 1rem;
-    }
-
-    #quick-links {
-      flex-wrap: wrap;
-      max-width: calc(100% - 32px);
-    }
-
-    #quick-links a {
-      padding: 8px 14px;
-      font-size: 13px;
-    }
+    .info-row { flex-direction: column; }
+    .info-media { width: 100%; }
   }
 
   /* Provinces section styles */
@@ -723,23 +557,19 @@
 
   .province {
     display: flex;
-    gap: 32px;
+    gap: 20px;
     align-items: center;
-    padding: 32px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 20px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    padding: 16px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
   }
 
   .province:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.6);
   }
 
   .province-text {
@@ -747,20 +577,14 @@
   }
 
   .province-media {
-    flex: 0 0 250px;
+    flex: 0 0 200px;
   }
 
   .province-img {
     width: 100%;
     height: auto;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .province:hover .province-img {
-    transform: scale(1.03);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
   }
 
   @media (max-width: 760px) {
@@ -822,7 +646,7 @@
   </nav>
 
   <!-- Nishant text on the right side -->
-  <div class="jersey-10-regular" style="position: fixed; right: 32px; top: 50%; transform: translateY(-50%) rotate(90deg); color: rgba(255,255,255,0.4); font-size: 18px; z-index: 10; letter-spacing: 4px; font-weight: 400; text-transform: uppercase; transform-origin: center;">Nishant</div>
+  <div class="jersey-10-regular" style="position: fixed; right: 20px; top: 50%; transform: translateY(-50%); color: #fff; font-size: 24px; z-index: 10;">Nishant</div>
 
   <!-- Main scrollable content below the homepage -->
   <main class="content">
