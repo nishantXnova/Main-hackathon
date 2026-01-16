@@ -457,96 +457,6 @@
   }
 
   /* Chat Icon */
-  .chat-icon {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    z-index: 1000;
-  }
-  .chat-icon:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-  }
-
-  /* Chat Modal */
-  .chat-modal {
-    position: fixed;
-    bottom: 90px;
-    right: 20px;
-    width: 350px;
-    height: 500px;
-    background: rgba(255,255,255,0.95);
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    display: none;
-    flex-direction: column;
-    z-index: 1001;
-    overflow: hidden;
-  }
-  .chat-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 15px;
-    text-align: center;
-    font-weight: bold;
-  }
-  .chat-messages {
-    flex: 1;
-    padding: 15px;
-    overflow-y: auto;
-    background: rgba(255,255,255,0.9);
-  }
-  .message {
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    max-width: 80%;
-  }
-  .message.user {
-    background: #667eea;
-    color: white;
-    margin-left: auto;
-    text-align: right;
-  }
-  .message.ai {
-    background: #f0f0f0;
-    color: #333;
-  }
-  .chat-input-container {
-    display: flex;
-    padding: 15px;
-    background: rgba(255,255,255,0.95);
-  }
-  .chat-input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-right: 10px;
-  }
-  .chat-send {
-    padding: 10px 15px;
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  .chat-send:hover {
-    background: #5a6fd8;
-  }
-
   /* Slightly lower for very short viewports so it doesn't overlap the quick links */
   @media (max-height: 650px) {
     .homepage-banner { top: 48vh; }
@@ -685,23 +595,10 @@
 </head>
 <body>
 
-<!-- Chat Icon -->
-<div class="chat-icon" id="chat-icon">💬</div>
-
-<!-- Chat Modal -->
-<div class="chat-modal" id="chat-modal">
-  <div class="chat-header">AI Assistant</div>
-  <div class="chat-messages" id="chat-messages"></div>
-  <div class="chat-input-container">
-    <input type="text" class="chat-input" id="chat-input" placeholder="Type your message...">
-    <button class="chat-send" id="chat-send">Send</button>
-  </div>
-</div>
-
 <div class="video-wrapper">
   <!-- Single video -->
   <video id="bg-video" autoplay muted playsinline preload="auto" loop style="opacity:1">
-    <source src="finalfootage.mp4" type="video/mp4">
+    <source src="video.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
 
@@ -929,9 +826,9 @@ const status = document.getElementById('video-status');
 let videoW = 0, videoH = 0;
 let baseScale1 = 1; // single video
 const slightCrop = 1.0; // minimal crop factor when video is already larger than viewport (set to 1 to avoid extra zoom)
-const maxUpscale = 1.06; // cap how much we upscale a small source to avoid heavy blur when stretching to fill the viewport
-const maxRotate = 10; // degrees of rotation for tilt (increased for stronger tilt)
-const maxTranslate = 60; // px translation for more noticeable parallax shift (increased)
+const maxUpscale = 1.01; // cap how much we upscale a small source to avoid heavy blur when stretching to fill the viewport
+const maxRotate = 8; // degrees of rotation for tilt (reduced for smoother feel)
+const maxTranslate = 40; // px translation for smooth parallax shift without excessive movement
 
 let targetRX = 0, targetRY = 0, currentRX = 0, currentRY = 0;
 let targetTX = 0, targetTY = 0, currentTX = 0, currentTY = 0;
@@ -987,10 +884,13 @@ function updateBaseScale1(){
     // If we cap, the video might not completely fill both axes, but it will preserve more detail
     needed = maxUpscale;
   }
-
-  baseScale1 = needed;
-  // If the video is intrinsically larger than the viewport, keep its real size but apply minimal crop (often 1.0)
-  if (needed === 1) baseScale1 = slightCrop;
+  
+  // For videos larger than viewport, use minimal scaling to reduce zoom and preserve quality
+  if (needed <= 1) {
+    baseScale1 = 1.0; // Keep at natural size, no upscaling
+  } else {
+    baseScale1 = Math.min(needed, maxUpscale); // Cap scaling for quality
+  }
 } 
 
 function onMouseMove(e){
@@ -1002,7 +902,7 @@ function onMouseMove(e){
   targetRY = clamp(-rx * maxRotate, -maxRotate, maxRotate);
   targetRX = clamp(ry * maxRotate, -maxRotate, maxRotate);
 
-  // small translation to enhance depth
+  // small translation to enhance depth (adjusted for smooth parallax)
   targetTX = clamp(rx * maxTranslate, -maxTranslate, maxTranslate);
   targetTY = clamp(ry * maxTranslate, -maxTranslate, maxTranslate);
 }
@@ -1024,9 +924,9 @@ function animate(now){
   const dt = Math.min(0.05, (now - lastTime) / 1000); // seconds, capped
   lastTime = now;
 
-  // responsiveness (tweak these for feel) — lower speeds for smoother, less jittery motion
-  const rotSpeed = 4.2;
-  const transSpeed = 5.2;
+  // responsiveness (lowered for smoother, less jittery motion without gaps)
+  const rotSpeed = 3.8;
+  const transSpeed = 4.8;
 
   const sRot = 1 - Math.exp(-rotSpeed * dt);
   const sTrans = 1 - Math.exp(-transSpeed * dt);
@@ -1036,11 +936,11 @@ function animate(now){
   currentTX += (targetTX - currentTX) * sTrans;
   currentTY += (targetTY - currentTY) * sTrans;
 
-  // remove micro-jitter (slightly higher thresholds to avoid visible micro-movement)
+  // remove micro-jitter with higher thresholds to ensure smooth continuous movement
   if (Math.abs(currentRX) < 0.001) currentRX = 0;
   if (Math.abs(currentRY) < 0.001) currentRY = 0;
-  if (Math.abs(currentTX) < 0.2) currentTX = 0;
-  if (Math.abs(currentTY) < 0.2) currentTY = 0;
+  if (Math.abs(currentTX) < 0.1) currentTX = 0;
+  if (Math.abs(currentTY) < 0.1) currentTY = 0;
 
   // round translations to whole pixels to avoid sub-pixel blurring, and rotations to 0.1deg
   const tx = Math.round(currentTX);
@@ -1516,201 +1416,7 @@ if (title) {
     }
   });
 
-  // close on escape
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !pop.hidden) { pop.hidden = true; btn.setAttribute('aria-expanded','false'); } });
-})();
-
-// Chat functionality
-(function(){
-  const chatIcon = document.getElementById('chat-icon');
-  const chatModal = document.getElementById('chat-modal');
-  const chatMessages = document.getElementById('chat-messages');
-  const chatInput = document.getElementById('chat-input');
-  const chatSend = document.getElementById('chat-send');
-
-  const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-  const API_KEY = '';
-  const MODEL = 'xiaomi/mimo-v2-flash:free';
-  // TODO: Replace with your desired system prompt
-  const SYSTEM_PROMPT = `You are an AI Travel & Experience Assistant embedded inside a premium tourism website inspired by myswitzerland.com.
-
-Your core mission is to inspire, guide, and assist users in discovering destinations, experiences, culture, nature, and activities in a visually rich, emotionally engaging, and practical way.
-
-You are NOT a generic chatbot.
-You behave like a local travel expert, storyteller, and concierge combined.
-
------------------------------------
-PERSONALITY & TONE
------------------------------------
-- Calm, warm, premium, and inspiring
-- Human, friendly, and emotionally intelligent
-- Never robotic, never overly technical
-- Speak like a passionate local guide who deeply loves the country
-- Short to medium responses by default, but capable of going ultra-detailed if the user asks
-- Use vivid but simple language
-- Avoid emojis unless the website tone explicitly allows minimal use
-
------------------------------------
-COMMUNICATION STYLE
------------------------------------
-- Focus on experiences, not just facts
-- Use sensory language (views, sounds, feelings)
-- Encourage exploration and curiosity
-- Ask gentle follow-up questions only when it improves the experience
-- Never overwhelm users with too many options at once
-- Prefer storytelling over bullet lists, unless clarity is needed
-
------------------------------------
-CORE CAPABILITIES
------------------------------------
-
-You can help users with:
-
-1. DESTINATIONS
-- Cities, villages, mountains, lakes, heritage sites
-- Hidden gems and lesser-known places
-- Seasonal recommendations
-- Nature, adventure, spiritual, and cultural spots
-
-2. EXPERIENCES
-- Hiking, trekking, skiing, paragliding, cycling, scenic trains
-- Cultural festivals, local food, traditions
-- Wellness, luxury, slow travel, photography spots
-
-3. TRAVEL PLANNING
-- Trip ideas (1 day, 3 days, 7 days, etc.)
-- Best time to visit places
-- Weather-based suggestions
-- Family, solo, couple, adventure, luxury travel styles
-
-4. VISUAL-FIRST GUIDANCE
-- Describe places as if they appear in cinematic videos
-- Assume the website shows large visuals, maps, and videos
-- Refer to visuals naturally (e.g., “As you scroll, you’ll see…”)
-
-5. BOOKING GUIDANCE (NO DIRECT BOOKINGS)
-- Explain how booking systems work
-- Suggest types of accommodations or experiences
-- Redirect to partners or booking sections without pretending to book
-
------------------------------------
-STRICT RULES
------------------------------------
-- Never claim real-time availability
-- Never invent prices, hotels, or transport schedules
-- Never pretend to be a human
-- Never break immersion by mentioning “AI model” or “training data”
-- If unsure, say so gracefully and redirect to exploration
-
------------------------------------
-CONTENT PRIORITIES
------------------------------------
-- Inspiration first
-- Practical help second
-- Technical details last
-
------------------------------------
-EXAMPLES OF HOW YOU SHOULD RESPOND
------------------------------------
-
-User: “What should I see first?”
-Assistant:
-“Start with the places that make you pause and breathe.
-Snow-covered peaks, quiet lakes, or old streets filled with stories.
-Tell me what kind of journey you’re dreaming of — nature, culture, or adventure?”
-
-User: “Is this place good in winter?”
-Assistant:
-“In winter, this place transforms.
-The air becomes sharper, landscapes turn quieter, and experiences feel more intimate.
-If you enjoy calm beauty and seasonal charm, winter is magical here.”
-
------------------------------------
-ADAPTABILITY
------------------------------------
-- Adjust tone based on user mood
-- If user sounds rushed → concise
-- If user sounds curious → descriptive
-- If user sounds emotional → empathetic
-
------------------------------------
-FINAL OBJECTIVE
------------------------------------
-Your goal is not just to answer questions.
-
-Your goal is to make users want to explore,
-scroll further,
-watch the next video,
-and imagine themselves inside the destination.
-
-You are the voice of the country.`;
-
-  chatIcon.addEventListener('click', () => {
-    chatModal.style.display = chatModal.style.display === 'flex' ? 'none' : 'flex';
-  });
-
-  function addMessage(content, type) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.textContent = content;
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
-  function sendMessage() {
-    const userMessage = chatInput.value.trim();
-    if (!userMessage) return;
-
-    addMessage(userMessage, 'user');
-    chatInput.value = '';
-
-    // Add typing indicator
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message ai';
-    typingDiv.textContent = 'Thinking...';
-    chatMessages.appendChild(typingDiv);
-
-    fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: userMessage }
-        ]
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      chatMessages.removeChild(typingDiv);
-      if (data.choices && data.choices[0]) {
-        addMessage(data.choices[0].message.content, 'ai');
-      } else {
-        addMessage('Sorry, I couldn\'t generate a response.', 'ai');
-      }
-    })
-    .catch(error => {
-      chatMessages.removeChild(typingDiv);
-      console.error('Error:', error);
-      addMessage('Error: Unable to connect to AI service.', 'ai');
-    });
-  }
-
-  chatSend.addEventListener('click', sendMessage);
-  chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
-  });
-
-  // Close modal when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!chatModal.contains(e.target) && e.target !== chatIcon) {
-      chatModal.style.display = 'none';
-    }
-  });
 })();
 
 </script>
