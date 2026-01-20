@@ -21,13 +21,6 @@
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   }
 
-  /* Smooth transitions for all elements */
-  * {
-    transition-property: color, background-color, border-color, box-shadow;
-    transition-duration: 0.2s;
-    transition-timing-function: ease;
-  }
-
   /* Override for performance-critical animations */
   .video-wrapper,
   #bg-video,
@@ -951,7 +944,7 @@
     box-shadow: 0 18px 48px rgba(0,0,0,0.6);
     backdrop-filter: saturate(1.05) blur(2px);
   }
-  .homepage-banner img { width: 100%; height: 100%; object-fit: cover; display:block; }
+  .homepage-banner img { width: 100%; height: 100%; object-fit: cover; display:block; loading: lazy; }
   .homepage-banner.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* Make banner smaller on small screens */
@@ -1049,17 +1042,32 @@
     border-color: rgba(255,255,255,0.2);
   }
 
-  /* Subtle looping blur animation on the video for a slightly dreamy effect (reduced so it doesn't introduce visible softness) */
-  @keyframes subtleBlur {
-    0% { filter: blur(0px) saturate(1) brightness(1); }
-    50% { filter: blur(0.25px) saturate(1.01) brightness(0.995); }
-    100% { filter: blur(0px) saturate(1) brightness(1); }
+  /* Reduce expensive filter animations on the video for smoother playback */
+  #bg-video, #bg-video2, #bg-video3, #bg-video4 {
+    will-change: transform;
   }
 
-  #bg-video, #bg-video2, #bg-video3, #bg-video4 {
-    /* existing properties kept above; add animation */
-    animation: subtleBlur 8s ease-in-out infinite;
-    will-change: transform, filter;
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .scroll-arrow,
+    .particle {
+      animation: none !important;
+    }
+
+    .gradient-text {
+      animation: none !important;
+      background-size: 100% auto;
+    }
+
+    .video-wrapper.blurred {
+      filter: none;
+    }
   }
 
   /* When content is visible, slightly blur & dim the video for contrast */
@@ -1137,7 +1145,7 @@
     .province { flex-direction: column; gap: 16px; }
     .province-media { width: 100%; }
   }
-</style>
+
   /* Decorative floating particles */
   .particles {
     position: fixed;
@@ -1555,9 +1563,9 @@
 (function createParticles() {
   const particlesContainer = document.getElementById('particles');
   if (!particlesContainer) return;
-  
-  const particleCount = 30;
-  
+
+  const particleCount = 10;
+
   for (let i = 0; i < particleCount; i++) {
     const particle = document.createElement('div');
     particle.classList.add('particle');
@@ -1615,8 +1623,8 @@ let videoW = 0, videoH = 0;
 let baseScale1 = 1; // single video
 const slightCrop = 1.0; // minimal crop factor when video is already larger than viewport (set to 1 to avoid extra zoom)
 const maxUpscale = 1.01; // cap how much we upscale a small source to avoid heavy blur when stretching to fill the viewport
-const maxRotate = 8; // degrees of rotation for tilt (reduced for smoother feel)
-const maxTranslate = 40; // px translation for smooth parallax shift without excessive movement
+const maxRotate = 4; // degrees of rotation for tilt (reduced for smoother feel)
+const maxTranslate = 20; // px translation for smooth parallax shift without excessive movement
 
 let targetRX = 0, targetRY = 0, currentRX = 0, currentRY = 0;
 let targetTX = 0, targetTY = 0, currentTX = 0, currentTY = 0;
