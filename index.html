@@ -944,7 +944,7 @@
     box-shadow: 0 18px 48px rgba(0,0,0,0.6);
     backdrop-filter: saturate(1.05) blur(2px);
   }
-  .homepage-banner img { width: 100%; height: 100%; object-fit: cover; display:block; loading: lazy; }
+  .homepage-banner img { width: 100%; height: 100%; object-fit: cover; display:block; }
   .homepage-banner.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* Make banner smaller on small screens */
@@ -1680,14 +1680,26 @@ function updateBaseScale1(){
     // If we cap, the video might not completely fill both axes, but it will preserve more detail
     needed = maxUpscale;
   }
-  
+
   // For videos larger than viewport, use minimal scaling to reduce zoom and preserve quality
   if (needed <= 1) {
     baseScale1 = 1.0; // Keep at natural size, no upscaling
   } else {
     baseScale1 = Math.min(needed, maxUpscale); // Cap scaling for quality
   }
-} 
+}
+
+function updateBaseScale2(){
+  // Placeholder for video2 scaling logic
+}
+
+function updateBaseScale3(){
+  // Placeholder for video3 scaling logic
+}
+
+function updateBaseScale4(){
+  // Placeholder for video4 scaling logic
+}
 
 function onMouseMove(e){
   // Normalize -1 .. 1
