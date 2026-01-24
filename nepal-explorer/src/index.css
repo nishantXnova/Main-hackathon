@@ -1,0 +1,32 @@
+body,
+html {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #ffffff;
+  cursor: default;
+  perspective: 1100px;
+  scroll-behavior: smooth;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Override for performance-critical animations */
+.video-wrapper,
+#bg-video,
+.particle,
+.scroll-arrow {
+  transition: none !important;
+}
+
+/* Page load transition */
+@keyframes pageLoad {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
