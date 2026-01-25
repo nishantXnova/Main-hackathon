@@ -1,55 +1,70 @@
-# Nepal Explorer
+# Getting Started with Create React App
 
-Nepal Explorer is a visually immersive, interactive web experience designed to showcase the breathtaking beauty, rich culture, and diverse geography of Nepal. Featuring a 3D parallax video background and real-time utilities, this project provides users with a unique way to discover the Himalayan nation.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## 🚀 Features
+## Available Scripts
 
--   **3D Parallax Video Background:** A cinematic background that responds to mouse movement, creating a sense of depth and immersion.
--   **Nepal Real-Time Clock:** A custom digital and analog clock synced to Nepal Standard Time (UTC+5:45).
--   **Interactive Search:** Quickly find information about various topics like culture, outdoors, and specific regions.
--   **Immersive Audio:** Optional background music to enhance the browsing experience (toggleable).
--   **Responsive Design:** Fully optimized for all devices, from desktop monitors to mobile phones.
--   **Detailed Information:** Comprehensive sections covering Nepal's overview, cultural festivals, outdoor activities, top tourist destinations, and all seven provinces.
--   **Smooth Navigation:** Built-in breadcrumbs and quick links for effortless exploration.
--   **Floating Particles:** Decorative subtle animations that add a touch of magic to the interface.
+In the project directory, you can run:
 
-## 🛠️ Technologies Used
+### `npm start`
 
--   **HTML5:** Structured content with semantic elements.
--   **CSS3:** Advanced animations, 3D transforms, backdrop filters, and responsive layouts.
--   **JavaScript (Vanilla):** Custom parallax engine, real-time clock logic, search functionality, and scroll animations.
--   **Google Fonts:** Utilizing 'Jersey 10', 'Montserrat', and 'Lora' for a modern and readable typography.
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-## 📁 Project Structure
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-```text
-.
-├── Provinces/           # Images of Nepal's provinces
-├── top_places/          # Gallery images for top tourist spots
-├── footage1.mp4         # Background video asset
-├── index.html           # Main entry point of the website
-├── nepaltext.png        # Text mask asset
-├── video.mp4            # Primary background video
-└── README.md            # Project documentation
-```
+### `npm test`
 
-## 🖥️ How to Run
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/nepal-explorer.git
-    ```
-2.  **Open the project:**
-    Simply open `index.html` in any modern web browser.
+### `npm run build`
 
-*Note: For the best experience, including background video and audio, it is recommended to use a browser that supports autoplay (some browsers may require a user interaction first).*
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-## 📸 Credits
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
--   **Videos:** Nepal Tourism Board, PostPati/KB Gurung.
--   **Images:** Various sources (links included in `index.html`).
--   **Development:** Built with passion for showcasing Nepal's heritage.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
----
+### `npm run eject`
 
-Explore the heart of the Himalayas! 🏔️🇳🇵
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

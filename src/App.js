@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
+import Chatbot from './Chatbot';
 
 // Particles Component
 const Particles = () => {
@@ -835,6 +836,7 @@ function App() {
           <p>Built with passion for showcasing Nepal's rich heritage and natural wonders.</p>
         </footer>
       </main>
+      <Chatbot />
     </div>
   );
 }
