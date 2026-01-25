@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Chatbot from './Chatbot';
+import HospitalLocator from './HospitalLocator';
+import PlaceExplorer from './PlaceExplorer';
+
 
 // Particles Component
 const Particles = () => {
@@ -831,6 +834,22 @@ function App() {
       </div>
       <main className="content">
         <InfoSection />
+
+        <section className="hospital-locator-section" style={{ padding: '40px 20px', backgroundColor: '#f0f2f5' }}>
+          <div className="info-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <h2 className="gradient-text" style={{ fontSize: '36px', marginBottom: '20px', textAlign: 'center' }}>Find Emergency Help Nearby</h2>
+            <HospitalLocator />
+          </div>
+        </section>
+
+        <section className="place-explorer-section" style={{ padding: '60px 20px', backgroundColor: '#ffffff' }}>
+          <div className="info-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <h2 className="gradient-text" style={{ fontSize: '36px', marginBottom: '10px', textAlign: 'center' }}>Explore Your Surroundings</h2>
+            <p style={{ textAlign: 'center', color: '#666', marginBottom: '40px' }}>Discover local Mandirs, Heritage sites, Malls, Marts, and more within 3km of your location.</p>
+            <PlaceExplorer />
+          </div>
+        </section>
+
         <footer className="footer-section">
           <p><strong>Nepal Explorer</strong> - Discover the beauty and culture of Nepal</p>
           <p>© 2026 Nepal Tourism. All rights reserved | <a href="#top">Back to Top</a></p>
