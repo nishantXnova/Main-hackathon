@@ -1,5 +1,7 @@
 # GoNepal 🇳🇵
 
+<img src="public/android-chrome-512x512.png" alt="GoNepal Logo" width="150" height="150">
+
 Welcome to **GoNepal**, your ultimate guide to exploring the beauty and heritage of Nepal. This application provides a comprehensive platform for tourists and locals alike to discover hidden gems, locate essential services like hospitals, and explore the rich culture of Nepal.
 
 ## Features
