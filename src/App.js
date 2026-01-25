@@ -241,8 +241,9 @@ const VideoBackground = () => {
         preload="auto"
         loop
         style={{ opacity: 1 }}
+        crossOrigin="anonymous"
       >
-        <source src="/video.mp4" type="video/mp4" />
+        <source src="video.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
       <div id="video-status" ref={statusRef} style={{ display: 'none' }}>Loading video…</div>
