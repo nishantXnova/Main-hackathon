@@ -3,6 +3,7 @@ import './App.css';
 import Chatbot from './Chatbot';
 import HospitalLocator from './HospitalLocator';
 import PlaceExplorer from './PlaceExplorer';
+import SmartWeather from './SmartWeather';
 
 
 // Particles Component
@@ -834,6 +835,18 @@ function App() {
       </div>
       <main className="content">
         <InfoSection />
+
+        <section className="weather-section" style={{ padding: '60px 20px', backgroundColor: '#1a1a1a', textAlign: 'center' }}>
+          <div className="info-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            <h2 className="gradient-text" style={{ fontSize: '36px', marginBottom: '20px' }}>Real-time Weather & Safety</h2>
+            <p style={{ color: '#ccc', marginBottom: '40px' }}>Planning a trek or a visit? Check the current conditions and safety recommendations.</p>
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '30px' }}>
+              <SmartWeather latitude={27.7172} longitude={85.3240} locationName="Kathmandu" />
+              <SmartWeather latitude={28.2096} longitude={83.9856} locationName="Pokhara" />
+              <SmartWeather latitude={27.6939} longitude={86.7308} locationName="Lukla (Everest Region)" />
+            </div>
+          </div>
+        </section>
 
         <section className="hospital-locator-section" style={{ padding: '40px 20px', backgroundColor: '#f0f2f5' }}>
           <div className="info-container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
