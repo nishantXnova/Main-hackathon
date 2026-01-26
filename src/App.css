@@ -1530,3 +1530,52 @@ img {
     height: 450px;
   }
 }
+
+/* Hero Text with Dynamic Color Analysis */
+.hero-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "Jersey 10", "Montserrat", sans-serif;
+  /* Use Jersey-10 if available, otherwise Montserrat */
+  font-size: clamp(3rem, 8vw, 6rem);
+  /* Responsive font size */
+  font-weight: 400;
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+  /* Let clicks pass through to video if needed */
+  transition: color 0.5s ease, text-shadow 0.5s ease;
+  /* Smooth transition */
+  white-space: nowrap;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  /* Initial state */
+  opacity: 0;
+  animation: fadeInHero 1.5s ease-out forwards 0.5s;
+}
+
+@keyframes fadeInHero {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.hero-center-text.light {
+  /* Background is light, so text should be dark */
+  color: #1a1a1a;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+}
+
+.hero-center-text.dark {
+  /* Background is dark, so text should be light */
+  color: #ffffff;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}

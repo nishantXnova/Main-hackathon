@@ -88,10 +88,12 @@ const ScrollIndicator = () => {
 const VideoBackground = () => {
   const videoRef = useRef(null);
   const statusRef = useRef(null);
+  const canvasRef = useRef(null);
   const [videoW, setVideoW] = useState(0);
   const [videoH, setVideoH] = useState(0);
   const [baseScale, setBaseScale] = useState(1);
   const [currentVideo, setCurrentVideo] = useState(null);
+  const [theme, setTheme] = useState('light');
 
   useEffect(() => {
     const video = videoRef.current;
@@ -139,11 +141,41 @@ const VideoBackground = () => {
       video.controls = true;
     });
 
+    // Analyze video color for text contrast
+    const analyzeColor = () => {
+      if (video.paused || video.ended || !canvasRef.current) return;
+
+      try {
+        const ctx = canvasRef.current.getContext('2d', { willReadFrequently: true });
+        // Sample center area
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 50, 50);
+        const data = ctx.getImageData(0, 0, 50, 50).data;
+
+        let r = 0, g = 0, b = 0;
+        const count = data.length / 4;
+
+        for (let i = 0; i < data.length; i += 4) {
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+        }
+
+        // Calculate perceived brightness
+        const brightness = Math.round(((r / count) * 299 + (g / count) * 587 + (b / count) * 114) / 1000);
+        setTheme(brightness > 128 ? 'light' : 'dark');
+      } catch (e) {
+        // Fallback or silence errors (e.g. taint issues)
+      }
+    };
+
+    const intervalId = setInterval(analyzeColor, 1000);
+
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('error', handleError);
       video.removeEventListener('stalled', handleStalled);
+      clearInterval(intervalId);
     };
   }, []);
 
@@ -250,7 +282,13 @@ const VideoBackground = () => {
         <source src="video.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
+      <canvas ref={canvasRef} width="50" height="50" style={{ display: 'none' }}></canvas>
       <div id="video-status" ref={statusRef} style={{ display: 'none' }}>Loading video…</div>
+
+      <div className={`hero-center-text ${theme}`}>
+        We need Nepal
+      </div>
+
       <div id="video-overlay" style={{ background: 'linear-gradient(135deg, rgba(0,0,0,0.6), rgba(106,17,203,0.3))', backdropFilter: 'blur(10px)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', padding: '10px 15px', fontWeight: 500 }}>
         🎥 Credits to Nepal Tourism Board
       </div>
