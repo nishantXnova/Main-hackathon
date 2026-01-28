@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Mountain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,11 +18,27 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { href: "#destinations", label: "Destinations" },
-    { href: "#experiences", label: "Experiences" },
-    { href: "#plan", label: "Plan Your Trip" },
-    { href: "#about", label: "About Nepal" },
+    { href: "/#destinations", label: "Destinations" },
+    { href: "/#experiences", label: "Experiences" },
+    { href: "/#flights", label: "Flights" },
+    { href: "/#plan", label: "Plan Your Trip" },
   ];
+
+  const handleNavClick = (href: string) => {
+    setIsMobileMenuOpen(false);
+    
+    if (href.startsWith("/#")) {
+      const sectionId = href.substring(2);
+      if (isHomePage) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        window.location.href = href;
+      }
+    }
+  };
 
   return (
     <nav
@@ -31,16 +50,16 @@ const Navbar = () => {
     >
       <div className="container-wide flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-2 group">
+        <Link to="/" className="flex items-center gap-2 group">
           <Mountain className={`h-8 w-8 transition-colors duration-300 ${
             isScrolled ? "text-accent" : "text-primary-foreground"
           }`} />
           <span className={`font-display text-2xl font-bold transition-colors duration-300 ${
             isScrolled ? "text-foreground" : "text-primary-foreground"
           }`}>
-            myNepal
+            GoNepal
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
@@ -48,22 +67,34 @@ const Navbar = () => {
             <a
               key={link.href}
               href={link.href}
-              className={`font-medium transition-all duration-300 hover:text-accent ${
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick(link.href);
+              }}
+              className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer ${
                 isScrolled ? "text-foreground" : "text-primary-foreground"
               }`}
             >
               {link.label}
             </a>
           ))}
-          <Button
-            className={`transition-all duration-300 ${
-              isScrolled
-                ? "btn-accent"
-                : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-            }`}
+          <a
+            href="/#plan"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick("/#plan");
+            }}
           >
-            Start Planning
-          </Button>
+            <Button
+              className={`transition-all duration-300 ${
+                isScrolled
+                  ? "btn-accent"
+                  : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+              }`}
+            >
+              Start Planning
+            </Button>
+          </a>
         </div>
 
         {/* Mobile Menu Button */}
@@ -85,13 +116,19 @@ const Navbar = () => {
               <a
                 key={link.href}
                 href={link.href}
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavClick(link.href);
+                }}
                 className="text-foreground font-medium py-2 hover:text-accent transition-colors"
               >
                 {link.label}
               </a>
             ))}
-            <Button className="btn-accent w-full mt-2">
+            <Button 
+              className="btn-accent w-full mt-2"
+              onClick={() => handleNavClick("/#plan")}
+            >
               Start Planning
             </Button>
           </div>
