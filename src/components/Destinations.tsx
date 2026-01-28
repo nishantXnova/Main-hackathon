@@ -1,74 +1,7 @@
+import { Link } from "react-router-dom";
 import { MapPin, Clock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import kathmanduImage from "@/assets/kathmandu-temple.jpg";
-import pokharaImage from "@/assets/pokhara-lake.jpg";
-import chitwanImage from "@/assets/chitwan-wildlife.jpg";
-import annapurnaImage from "@/assets/annapurna-trek.jpg";
-import lumbiniImage from "@/assets/lumbini-temple.jpg";
-import heroImage from "@/assets/hero-everest.jpg";
-
-const destinations = [
-  {
-    id: 1,
-    name: "Kathmandu Valley",
-    tagline: "City of Temples",
-    image: kathmanduImage,
-    duration: "2-4 days",
-    rating: 4.8,
-    highlights: ["Durbar Square", "Swayambhunath", "Boudhanath"],
-    category: "Culture",
-  },
-  {
-    id: 2,
-    name: "Pokhara",
-    tagline: "Gateway to Annapurna",
-    image: pokharaImage,
-    duration: "3-5 days",
-    rating: 4.9,
-    highlights: ["Phewa Lake", "Sarangkot", "Peace Pagoda"],
-    category: "Nature",
-  },
-  {
-    id: 3,
-    name: "Everest Region",
-    tagline: "Top of the World",
-    image: heroImage,
-    duration: "12-16 days",
-    rating: 5.0,
-    highlights: ["Base Camp Trek", "Namche Bazaar", "Tengboche"],
-    category: "Adventure",
-  },
-  {
-    id: 4,
-    name: "Chitwan National Park",
-    tagline: "Jungle Safari",
-    image: chitwanImage,
-    duration: "2-3 days",
-    rating: 4.7,
-    highlights: ["Rhino Safari", "Elephant Rides", "Bird Watching"],
-    category: "Nature",
-  },
-  {
-    id: 5,
-    name: "Annapurna Circuit",
-    tagline: "Epic Mountain Trek",
-    image: annapurnaImage,
-    duration: "10-21 days",
-    rating: 4.9,
-    highlights: ["Thorong La Pass", "Muktinath", "Mountain Views"],
-    category: "Adventure",
-  },
-  {
-    id: 6,
-    name: "Lumbini",
-    tagline: "Birthplace of Buddha",
-    image: lumbiniImage,
-    duration: "1-2 days",
-    rating: 4.6,
-    highlights: ["Maya Devi Temple", "Peace Flame", "Monasteries"],
-    category: "Spirituality",
-  },
-];
+import { destinations } from "@/data/destinations";
 
 const Destinations = () => {
   return (
@@ -84,17 +17,15 @@ const Destinations = () => {
               Where Will You <span className="italic text-accent">Go?</span>
             </h2>
           </div>
-          <Button variant="outline" className="mt-6 md:mt-0 border-accent text-accent hover:bg-accent hover:text-accent-foreground">
-            View All Destinations
-          </Button>
         </div>
 
         {/* Destinations Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {destinations.map((destination, index) => (
-            <div
+            <Link
               key={destination.id}
-              className="group relative bg-card rounded-2xl overflow-hidden card-hover"
+              to={`/destination/${destination.id}`}
+              className="group relative bg-card rounded-2xl overflow-hidden card-hover block"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               {/* Image */}
@@ -155,11 +86,11 @@ const Destinations = () => {
                 </div>
 
                 {/* CTA */}
-                <Button className="w-full btn-primary">
+                <Button className="w-full btn-primary group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
                   Explore {destination.name}
                 </Button>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

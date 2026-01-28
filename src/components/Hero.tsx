@@ -3,6 +3,13 @@ import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-everest.jpg";
 
 const Hero = () => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -25,8 +32,7 @@ const Hero = () => {
 
           {/* Main Heading */}
           <h1 className="heading-display text-primary-foreground mb-6 animate-fade-up delay-100">
-            Experience{" "}
-            <span className="italic text-nepal-gold">Nepal</span>
+            <span className="italic text-nepal-gold">Go</span>Nepal
           </h1>
 
           {/* Subheading */}
@@ -40,6 +46,7 @@ const Hero = () => {
             <Button 
               size="lg" 
               className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-elevated text-lg px-8 py-6"
+              onClick={() => scrollToSection("destinations")}
             >
               Explore Destinations
             </Button>
@@ -47,9 +54,10 @@ const Hero = () => {
               variant="outline" 
               size="lg"
               className="border-primary-foreground/50 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 text-lg px-8 py-6"
+              onClick={() => scrollToSection("flights")}
             >
               <Play className="mr-2 h-5 w-5" />
-              Watch Video
+              Book Flights
             </Button>
           </div>
 
@@ -73,10 +81,13 @@ const Hero = () => {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float">
-        <a href="#categories" className="flex flex-col items-center text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+        <button 
+          onClick={() => scrollToSection("categories")}
+          className="flex flex-col items-center text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+        >
           <span className="text-sm mb-2">Scroll to explore</span>
           <ChevronDown className="h-6 w-6" />
-        </a>
+        </button>
       </div>
     </section>
   );
