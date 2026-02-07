@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Mountain } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, Mountain, User, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,23 +81,36 @@ const Navbar = () => {
               {link.label}
             </a>
           ))}
-          <a
-            href="/#plan"
-            onClick={(e) => {
-              e.preventDefault();
-              handleNavClick("/#plan");
-            }}
-          >
-            <Button
-              className={`transition-all duration-300 ${
-                isScrolled
-                  ? "btn-accent"
-                  : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-              }`}
-            >
-              Start Planning
-            </Button>
-          </a>
+          
+          {/* Auth Button */}
+          {!loading && (
+            user ? (
+              <Button
+                onClick={() => navigate("/profile")}
+                variant="ghost"
+                size="icon"
+                className={`rounded-full transition-all duration-300 ${
+                  isScrolled
+                    ? "text-foreground hover:bg-muted"
+                    : "text-primary-foreground hover:bg-primary-foreground/20"
+                }`}
+              >
+                <User className="h-5 w-5" />
+              </Button>
+            ) : (
+              <Button
+                onClick={() => navigate("/auth")}
+                className={`transition-all duration-300 ${
+                  isScrolled
+                    ? "btn-primary"
+                    : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                }`}
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign In
+              </Button>
+            )
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -125,12 +141,32 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
-            <Button 
-              className="btn-accent w-full mt-2"
-              onClick={() => handleNavClick("/#plan")}
-            >
-              Start Planning
-            </Button>
+            
+            {!loading && (
+              user ? (
+                <Button 
+                  className="btn-primary w-full mt-2"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    navigate("/profile");
+                  }}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  My Profile
+                </Button>
+              ) : (
+                <Button 
+                  className="btn-primary w-full mt-2"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    navigate("/auth");
+                  }}
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              )
+            )}
           </div>
         </div>
       )}
