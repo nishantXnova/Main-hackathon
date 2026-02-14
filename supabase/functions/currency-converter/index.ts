@@ -12,15 +12,10 @@ serve(async (req) => {
 
   try {
     const { from, to, amount } = await req.json();
-    const apiKey = Deno.env.get('EXCHANGE_RATE_API_KEY');
 
-    if (!apiKey) {
-      throw new Error('API key not configured');
-    }
-
+    // Using exchangerate.host - completely free, no API key needed
     const response = await fetch(
-      `https://api.exchangerateapi.net/v1/latest?base=${from}`,
-      { headers: { apikey: apiKey } }
+      `https://api.exchangerate.host/latest?base=${from}&symbols=${to}`
     );
 
     if (!response.ok) {
@@ -29,6 +24,11 @@ serve(async (req) => {
     }
 
     const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error?.info || 'Failed to fetch exchange rates');
+    }
+
     const rate = data.rates?.[to];
 
     if (!rate) {
