@@ -7,6 +7,7 @@ import FlightBooking from "@/components/FlightBooking";
 import PlanTrip from "@/components/PlanTrip";
 import Partners from "@/components/Partners";
 import TravelInfo from "@/components/TravelInfo";
+import CurrencyConverter from "@/components/CurrencyConverter";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
 
@@ -19,6 +20,7 @@ const Index = () => {
       <Destinations />
       <SeasonalHighlights />
       <FlightBooking />
+      <CurrencyConverter />
       <PlanTrip />
       <Partners />
       <TravelInfo />
