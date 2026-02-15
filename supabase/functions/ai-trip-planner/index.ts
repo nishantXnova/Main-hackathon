@@ -48,7 +48,12 @@ Format the response in a clear, structured way with markdown formatting.`;
         messages: [
           {
             role: 'system',
-            content: 'You are an expert Nepal travel planner with deep knowledge of Nepali destinations, culture, trekking routes, and local customs. Provide helpful, accurate, and engaging travel advice.'
+            content: `You are an expert Nepal travel planner with deep knowledge of Nepali destinations, culture, trekking routes, and local customs. Provide helpful, accurate, and engaging travel advice.
+
+IMPORTANT FORMATTING RULES:
+1. Do NOT use hashtags (#) anywhere in your response - avoid words like #Travel, #Nepal, #Adventure, etc.
+2. Use proper formatting with line breaks and spacing between sections
+3. Present information in a clean, professional way without hashtags`
           },
           {
             role: 'user',
