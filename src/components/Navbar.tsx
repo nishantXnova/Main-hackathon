@@ -23,13 +23,14 @@ const Navbar = () => {
   const navLinks = [
     { href: "/#destinations", label: "Destinations" },
     { href: "/#experiences", label: "Experiences" },
+    { href: "/#nearby-places", label: "Nearby" },
     { href: "/#flights", label: "Flights" },
     { href: "/#plan", label: "Plan Your Trip" },
   ];
 
   const handleNavClick = (href: string) => {
     setIsMobileMenuOpen(false);
-    
+
     if (href.startsWith("/#")) {
       const sectionId = href.substring(2);
       if (isHomePage) {
@@ -45,21 +46,18 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
           ? "glass-effect shadow-soft py-3"
           : "bg-transparent py-5"
-      }`}
+        }`}
     >
       <div className="container-wide flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
-          <Mountain className={`h-8 w-8 transition-colors duration-300 ${
-            isScrolled ? "text-accent" : "text-primary-foreground"
-          }`} />
-          <span className={`font-display text-2xl font-bold transition-colors duration-300 ${
-            isScrolled ? "text-foreground" : "text-primary-foreground"
-          }`}>
+          <Mountain className={`h-8 w-8 transition-colors duration-300 ${isScrolled ? "text-accent" : "text-primary-foreground"
+            }`} />
+          <span className={`font-display text-2xl font-bold transition-colors duration-300 ${isScrolled ? "text-foreground" : "text-primary-foreground"
+            }`}>
             GoNepal
           </span>
         </Link>
@@ -74,14 +72,13 @@ const Navbar = () => {
                 e.preventDefault();
                 handleNavClick(link.href);
               }}
-              className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer ${
-                isScrolled ? "text-foreground" : "text-primary-foreground"
-              }`}
+              className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer ${isScrolled ? "text-foreground" : "text-primary-foreground"
+                }`}
             >
               {link.label}
             </a>
           ))}
-          
+
           {/* Auth Button */}
           {!loading && (
             user ? (
@@ -91,11 +88,10 @@ const Navbar = () => {
                     onClick={() => navigate("/admin")}
                     variant="ghost"
                     size="icon"
-                    className={`rounded-full transition-all duration-300 ${
-                      isScrolled
+                    className={`rounded-full transition-all duration-300 ${isScrolled
                         ? "text-foreground hover:bg-muted"
                         : "text-primary-foreground hover:bg-primary-foreground/20"
-                    }`}
+                      }`}
                   >
                     <Shield className="h-5 w-5" />
                   </Button>
@@ -104,11 +100,10 @@ const Navbar = () => {
                   onClick={() => navigate("/profile")}
                   variant="ghost"
                   size="icon"
-                  className={`rounded-full transition-all duration-300 ${
-                    isScrolled
+                  className={`rounded-full transition-all duration-300 ${isScrolled
                       ? "text-foreground hover:bg-muted"
                       : "text-primary-foreground hover:bg-primary-foreground/20"
-                  }`}
+                    }`}
                 >
                   <User className="h-5 w-5" />
                 </Button>
@@ -116,11 +111,10 @@ const Navbar = () => {
             ) : (
               <Button
                 onClick={() => navigate("/auth")}
-                className={`transition-all duration-300 ${
-                  isScrolled
+                className={`transition-all duration-300 ${isScrolled
                     ? "btn-primary"
                     : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-                }`}
+                  }`}
               >
                 <LogIn className="h-4 w-4 mr-2" />
                 Sign In
@@ -132,9 +126,8 @@ const Navbar = () => {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className={`md:hidden p-2 transition-colors ${
-            isScrolled ? "text-foreground" : "text-primary-foreground"
-          }`}
+          className={`md:hidden p-2 transition-colors ${isScrolled ? "text-foreground" : "text-primary-foreground"
+            }`}
         >
           {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -157,12 +150,12 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
-            
+
             {!loading && (
               user ? (
                 <>
                   {isAdmin && (
-                    <Button 
+                    <Button
                       variant="outline"
                       className="w-full"
                       onClick={() => {
@@ -174,7 +167,7 @@ const Navbar = () => {
                       Admin Dashboard
                     </Button>
                   )}
-                  <Button 
+                  <Button
                     className="btn-primary w-full mt-2"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
@@ -186,7 +179,7 @@ const Navbar = () => {
                   </Button>
                 </>
               ) : (
-                <Button 
+                <Button
                   className="btn-primary w-full mt-2"
                   onClick={() => {
                     setIsMobileMenuOpen(false);

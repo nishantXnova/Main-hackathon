@@ -10,6 +10,7 @@ import TravelInfo from "@/components/TravelInfo";
 import CurrencyConverter from "@/components/CurrencyConverter";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
+import NearbyPlaces from "@/components/NearbyPlaces";
 
 const Index = () => {
   return (
@@ -24,6 +25,7 @@ const Index = () => {
       <PlanTrip />
       <Partners />
       <TravelInfo />
+      <NearbyPlaces />
       <Footer />
       <AIChatbot />
     </div>
