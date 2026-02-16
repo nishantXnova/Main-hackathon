@@ -25,6 +25,7 @@ const Navbar = () => {
     { href: "/#experiences", label: "Experiences" },
     { href: "/#nearby-places", label: "Nearby" },
     { href: "/#flights", label: "Flights" },
+    { href: "/#translator", label: "Translator" },
     { href: "/#plan", label: "Plan Your Trip" },
   ];
 

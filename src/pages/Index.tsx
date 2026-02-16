@@ -8,6 +8,7 @@ import PlanTrip from "@/components/PlanTrip";
 import Partners from "@/components/Partners";
 import TravelInfo from "@/components/TravelInfo";
 import CurrencyConverter from "@/components/CurrencyConverter";
+import LanguageTranslator from "@/components/LanguageTranslator";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
 import NearbyPlaces from "@/components/NearbyPlaces";
@@ -22,6 +23,7 @@ const Index = () => {
       <SeasonalHighlights />
       <FlightBooking />
       <CurrencyConverter />
+      <LanguageTranslator />
       <PlanTrip />
       <Partners />
       <TravelInfo />
