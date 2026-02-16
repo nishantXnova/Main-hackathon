@@ -1,57 +1,89 @@
 # GoNepal - Discover the Land of the Himalayas 🇳🇵
 
+[![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.io/)
+
 **Made by Team Valley**
 
-GoNepal is a comprehensive travel platform designed to inspire and assist global tourists in exploring the breathtaking beauty of Nepal. From the peak of Mt. Everest to the ancient temples of Kathmandu, GoNepal brings the best of Nepal to your fingertips.
+GoNepal is a high-performance, premium travel companion platform built to revolutionize how global tourists experience Nepal. By blending real-time geolocation services with a groundbreaking **Site-Wide Auto-Translation Engine**, GoNepal breaks down cultural and language barriers, ensuring a safe, immersive, and guided journey through the heart of the Himalayas.
 
-## 🚀 Key Features
+---
 
-### 📍 Live Exploration & "Take Me Back"
-Stay safe and informed while exploring new areas. Our interactive map feature allows you to:
-- **Discover Nearby Essentials**: Instantly find Hospitals, Hotels, Restaurants, Parks, and Malls within a 3km radius using real-time OpenStreetMap data via the Overpass API.
-- **Home Base (Set Home)**: Drop a pin at your starting point (hotel or base camp) to keep track of your location. Persistent storage ensures your data survives refreshes.
-- **Panic UI & Distance Alert**: A dedicated interface that monitors your distance and alerts you when you wander more than 3km from your saved base.
-- **One-Tap Return**: Deep-linked walking directions directly to your OS's native maps (Google Maps) to ensure you always find your way back.
+## 🌟 Hero Feature: Site-Wide Auto-Translation Engine
 
-### 🏔️ Destination Discovery
-- Explore curated highlights of Nepal, including Everest Base Camp, Pokhara, and Lumbini.
-- Detailed reviews and seasonal highlights to plan your trip effectively.
+GoNepal features a first-of-its-kind **Dynamic Translation Layer** that allows the entire application to be consumed in 22+ languages instantly.
 
-### 🛠️ Travel Utilities
-- **Currency Converter**: Real-time conversion for hassle-free budgeting.
-- **Flight Booking**: Streamlined interface for planning your journey.
-- **AI Chatbot**: Intelligent assistant for instant travel advice and information.
+- **Anywhere, Any Language**: With a single click, the entire DOM—from the Hero headers to your flight booking details—is transformed into your native tongue (e.g., Nepali, Italian, Japanese, Hindi).
+- **MutationObserver Technology**: Our implementation uses a high-performance `MutationObserver` to watch for DOM changes, ensuring that even dynamically loaded content (like search results or chat messages) is translated in real-time.
+- **Intelligent Caching**: To ensure a "buttery-smooth" experience, we've implemented a robust caching layer for translated strings, reducing API latency and preventing redundant network requests.
+- **Brand Preservation**: Our engine is smart enough to preserve brand-critical text like "GoNepal" while translating the context around it.
 
-## 💻 Tech Stack
+---
 
-- **Frontend**: React 18, TypeScript, Vite
-- **Styling**: Tailwind CSS, shadcn/ui, Framer Motion
-- **Map Infrastructure**: Leaflet, React-Leaflet, OpenStreetMap
-- **Backend & Auth**: Supabase
-- **Icons**: Lucide React
+## 📍 Core Capabilities
 
-## 🛠️ Development
+### 🗺️ Live Exploration & "Take Me Back" Safe-Guard
+Designed specifically for the wandering traveler, our map integration is your digital breadcrumb trail.
+- **Nearby Essentials Discovery**: Queries the Overpass API in real-time to find Hospitals, Hotels, Restaurants, Parks, and Malls within a customized 3km radius.
+- **Home Base Persistence**: Users can "Set Home" at their hotel or base camp. This coordinate is saved to persistent local storage, surviving session wipes and refreshes.
+- **Panic UI & Distance Alert**: A visual warning system that triggers when a user wanders >3km from their home base.
+- **Native Navigation**: Deep-links directly to Google Maps or Apple Maps for precise, turn-by-turn walking directions back to safety.
 
-Follow these steps to set up the project locally:
+### 🏔️ Curated Destination Discovery
+- **Peak Experiences**: Real-time information on Everest Base Camp, Annapurna Circuit, and cultural hubs like Pokhara/Lumbini.
+- **Seasonal Intelligence**: Dynamic content that changes based on the best time to visit specific regions.
 
-1. **Clone the repository**
+### 🛠️ Strategic Travel Utilities
+- **Travel Phrasebook**: A localized, high-speed phrasebook for quick communication.
+- **Currency Converter**: Dynamic rate conversion for real-time budgeting in NPR and global currencies.
+- **Intelligent Chatbot**: A contextual assistant ready to handle travel-specific queries.
+
+---
+
+## 🏗️ Technical Architecture
+
+### Frontend Architecture
+- **State Management**: React Context API for Global Language and Auth states.
+- **Styling**: A bespoke design system built on **shadcn/ui** and **Tailwind CSS**, featuring glassmorphism and motion-based navigation via **Framer Motion**.
+- **Real-time Maps**: **Leaflet.js** integrated with OpenStreetMap tiles for lightweight, fast mapping without the overhead of heavy commercial SDKs.
+
+### Directory Structure Highlights
+- `/src/contexts`: Contains the `LanguageContext` and `AuthContext` for global application state.
+- `/src/components/AutoTranslator.tsx`: The core logic for the DOM-observation translation engine.
+- `/src/lib/translationService.ts`: Centralized logic for interacting with translation APIs and local caches.
+
+---
+
+## 🛠️ Local Development
+
+Get the project running on your machine in under 2 minutes:
+
+1. **Clone & Navigate**
    ```bash
    git clone https://github.com/nishantXnova/Main-hackathon.git
+   cd Main-hackathon
    ```
 
-2. **Install dependencies**
+2. **Dependency Installation**
    ```bash
    npm install
    ```
 
-3. **Start the development server**
+3. **Runtime**
    ```bash
    npm run dev
    ```
-
-## 🌐 Deployment
-
-The project is optimized for performance and is deployed on **Vercel**. Every push to the `main` branch triggers an automatic build and deployment cycle.
+   *Vite will automatically allocate a port (usually http://localhost:5173).*
 
 ---
-*Developed with ❤️ by Team Valley for the Nepal Tourism Hackathon.*
+
+## 🌐 Enterprise-Grade Deployment
+
+The platform is continuously integrated and deployed via **Vercel**. 
+- **CI/CD**: Every push to `main` undergoes a production build verification.
+- **Performance**: Edge-cached assets and optimized tree-shaking for minimal JS bundle sizes.
+
+---
+*Developed with Passion & Pride by Team Valley for the Nepal Tourism Hackathon.*
