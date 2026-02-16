@@ -16,7 +16,7 @@ const AIChatbot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Namaste! 🙏 I\'m your Nepal travel assistant. Ask me anything about destinations, trekking, permits, or travel tips!'
+      content: 'Namaste! 🙏 I\'m Go Guide, An Assistant made for helping user travel nepal. Ask me anything about destinations, trekking, permits, or travel tips!'
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,7 +98,7 @@ const AIChatbot = () => {
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Nepal Travel Assistant</h3>
+                  <h3 className="font-semibold">Go Guidet</h3>
                   <p className="text-xs text-primary-foreground/70">Powered by AI</p>
                 </div>
               </div>

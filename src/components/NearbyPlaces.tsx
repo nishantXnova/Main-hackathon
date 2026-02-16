@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Hospital, Hotel, Utensils, TreePine, ShoppingBag, MapPin, Loader2, Navigation } from "lucide-react";
+import { Hospital, Hotel, Utensils, TreePine, ShoppingBag, MapPin, Loader2, Navigation, Home, RotateCcw, ShieldAlert, ExternalLink, MapPinOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,15 @@ L.Icon.Default.mergeOptions({
     iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
     iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
     shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
+
+const goldIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
 });
 
 interface Place {
@@ -47,6 +56,43 @@ const NearbyPlaces = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
+    const [homeLocation, setHomeLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [distanceToHome, setDistanceToHome] = useState<number | null>(null);
+
+    useEffect(() => {
+        const savedHome = localStorage.getItem('user_home_base');
+        if (savedHome) {
+            setHomeLocation(JSON.parse(savedHome));
+        }
+    }, []);
+
+    useEffect(() => {
+        if (location && homeLocation) {
+            const dist = L.latLng(location[0], location[1]).distanceTo(L.latLng(homeLocation.lat, homeLocation.lng));
+            setDistanceToHome(dist);
+        }
+    }, [location, homeLocation]);
+
+    const saveHomeBase = () => {
+        if (location) {
+            const homeBase = { lat: location[0], lng: location[1], timestamp: Date.now() };
+            localStorage.setItem('user_home_base', JSON.stringify(homeBase));
+            setHomeLocation(homeBase);
+        }
+    };
+
+    const clearHomeBase = () => {
+        localStorage.removeItem('user_home_base');
+        setHomeLocation(null);
+        setDistanceToHome(null);
+    };
+
+    const initiateReturn = () => {
+        if (homeLocation) {
+            const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${homeLocation.lat},${homeLocation.lng}&travelmode=walking`;
+            window.open(navUrl, '_blank');
+        }
+    };
 
     const requestLocation = () => {
         setLoading(true);
@@ -191,15 +237,36 @@ const NearbyPlaces = () => {
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 />
 
-                                <Circle
-                                    center={location}
-                                    radius={3000}
-                                    pathOptions={{ color: '#E53E3E', fillColor: '#E53E3E', fillOpacity: 0.05, weight: 1 }}
-                                />
+                                {homeLocation && (
+                                    <>
+                                        <Circle
+                                            center={[homeLocation.lat, homeLocation.lng]}
+                                            radius={3000}
+                                            pathOptions={{
+                                                color: distanceToHome && distanceToHome > 3000 ? '#ef4444' : '#eab308',
+                                                fillColor: distanceToHome && distanceToHome > 3000 ? '#ef4444' : '#eab308',
+                                                fillOpacity: 0.1,
+                                                weight: 2,
+                                                dashArray: '5, 10'
+                                            }}
+                                        />
+                                        <Marker position={[homeLocation.lat, homeLocation.lng]} icon={goldIcon}>
+                                            <Popup>
+                                                <div className="font-semibold text-nepal-gold">Home Base</div>
+                                                <div className="text-xs text-muted-foreground">Your starting point</div>
+                                            </Popup>
+                                        </Marker>
+                                    </>
+                                )}
 
                                 <Marker position={location}>
                                     <Popup className="custom-popup">
                                         <div className="font-semibold text-nepal-terracotta">Your Location</div>
+                                        {distanceToHome && (
+                                            <div className="text-xs text-muted-foreground mt-1">
+                                                {Math.round(distanceToHome)}m from Home Base
+                                            </div>
+                                        )}
                                     </Popup>
                                 </Marker>
 
@@ -228,6 +295,63 @@ const NearbyPlaces = () => {
                                     );
                                 })}
                             </MapContainer>
+                        )}
+
+                        {/* Map Overlay Controls */}
+                        {location && (
+                            <div className="absolute top-4 right-4 z-[400] flex flex-col gap-2">
+                                {!homeLocation ? (
+                                    <Button
+                                        onClick={saveHomeBase}
+                                        className="bg-nepal-gold hover:bg-nepal-gold/90 text-white rounded-full w-12 h-12 p-0 shadow-lg transition-all hover:scale-110"
+                                        title="Set Current Location as Home Base"
+                                    >
+                                        <Home className="w-5 h-5" />
+                                    </Button>
+                                ) : (
+                                    <div className="flex flex-col gap-2">
+                                        <Button
+                                            onClick={clearHomeBase}
+                                            className="bg-white hover:bg-red-50 text-red-600 rounded-full w-12 h-12 p-0 shadow-lg border border-red-100 transition-all hover:scale-110"
+                                            title="Clear Home Base"
+                                        >
+                                            <MapPinOff className="w-5 h-5" />
+                                        </Button>
+                                        <Button
+                                            onClick={initiateReturn}
+                                            className={cn(
+                                                "rounded-full h-12 px-6 gap-2 shadow-lg transition-all hover:scale-105 active:scale-95 text-white border-none",
+                                                distanceToHome && distanceToHome > 3000
+                                                    ? "bg-red-600 hover:bg-red-700 animate-pulse"
+                                                    : "bg-nepal-terracotta hover:bg-nepal-terracotta/90"
+                                            )}
+                                        >
+                                            <RotateCcw className="w-4 h-4" />
+                                            <span>Take Me Back</span>
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Distance Badge */}
+                        {location && homeLocation && distanceToHome !== null && (
+                            <div className="absolute bottom-4 left-4 z-[400]">
+                                <Badge className={cn(
+                                    "px-4 py-2 border shadow-lg flex items-center gap-2 text-sm",
+                                    distanceToHome > 3000
+                                        ? "bg-red-50 text-red-600 border-red-200"
+                                        : "bg-white text-nepal-gold border-nepal-gold/20"
+                                )}>
+                                    {distanceToHome > 3000 ? <ShieldAlert className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+                                    <span>{Math.round(distanceToHome)}m to Home Base</span>
+                                </Badge>
+                                <div className="mt-2 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] text-muted-foreground shadow-sm border border-black/5 flex flex-col">
+                                    <span className="font-mono">Lat: {homeLocation.lat.toFixed(6)}</span>
+                                    <span className="font-mono">Lon: {homeLocation.lng.toFixed(6)}</span>
+                                    <span className="mt-1 flex items-center gap-1 opacity-70"><ExternalLink className="w-3 h-3" /> External OS Nav Ready</span>
+                                </div>
+                            </div>
                         )}
                     </Card>
 
