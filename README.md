@@ -18,7 +18,7 @@ GoNepal features a first-of-its-kind **Dynamic Translation Layer** that allows t
 - **Anywhere, Any Language**: With a single click, the entire DOM—from the Hero headers to your flight booking details—is transformed into your native tongue (e.g., Nepali, Italian, Japanese, Hindi).
 - **MutationObserver Technology**: Our implementation uses a high-performance `MutationObserver` to watch for DOM changes, ensuring that even dynamically loaded content (like search results or chat messages) is translated in real-time.
 - **Intelligent Caching**: To ensure a "buttery-smooth" experience, we've implemented a robust caching layer for translated strings, reducing API latency and preventing redundant network requests.
-- **Brand Preservation**: Our engine is smart enough to preserve brand-critical text like "GoNepal" while translating the context around it.
+- **Brand Preservation**: Our engine employs robust regex-based protection to ensure "GoNepal" and its variations remain untranslated, maintaining brand identity across all languages.
 
 ---
 
@@ -39,6 +39,11 @@ Designed specifically for the wandering traveler, our map integration is your di
 - **Travel Phrasebook**: A localized, high-speed phrasebook for quick communication.
 - **Currency Converter**: Dynamic rate conversion for real-time budgeting in NPR and global currencies.
 - **Intelligent Chatbot**: A contextual assistant ready to handle travel-specific queries.
+
+### ☀️ Live Weather & AI Travel Advisor
+- **Real-Time Forecasts**: Integrates with Open-Meteo to provide accurate, keyless weather data for the user's exact location.
+- **Contextual AI Recommendations**: A smart logic engine that suggests activities based on the current weather (e.g., "Perfect for trekking" vs "Great for museum visits").
+- **Premium UI**: A glassmorphism-based design that blends seamlessly with the application's aesthetic.
 
 ---
 

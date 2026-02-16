@@ -14,6 +14,10 @@ const GOOGLE_TRANSLATE_URL = "https://translate.googleapis.com/translate_a/singl
 // Cache for translations to avoid redundant API calls
 const translationCache: Record<string, string> = {};
 
+export const clearTranslationCache = () => {
+    Object.keys(translationCache).forEach(key => delete translationCache[key]);
+};
+
 export const translateText = async (
     text: string,
     from: string = "auto",

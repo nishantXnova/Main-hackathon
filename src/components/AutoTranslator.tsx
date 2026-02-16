@@ -10,15 +10,24 @@ const AutoTranslator = () => {
     const originalTextMap = useRef<Map<Node, string>>(new Map());
 
     const isBrandName = (text: string) => {
-        return text.trim() === "GoNepal" || text.trim() === "Go Nepal";
+        const protectedPatterns = [
+            /GoNepal/gi,
+            /Go\s+Nepal/gi,
+            /Go-Nepal/gi,
+        ];
+        return protectedPatterns.some(pattern => pattern.test(text.trim()));
     };
 
     const shouldTranslate = (node: Node) => {
         if (!node.textContent || node.textContent.trim().length < 2) return false;
+
+        // Prevent translation if the node or its parent has data-no-translate
+        const parent = node.parentElement;
+        if (parent?.dataset.noTranslate === "true") return false;
+
         if (isBrandName(node.textContent)) return false;
 
         // Ignore script, style, and icon tags
-        const parent = node.parentElement;
         if (parent) {
             const tag = parent.tagName.toLowerCase();
             if (["script", "style", "noscript", "svg", "path"].includes(tag)) return false;

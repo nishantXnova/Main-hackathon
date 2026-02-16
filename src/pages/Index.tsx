@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import WeatherForecast from "@/components/WeatherForecast";
 import Categories from "@/components/Categories";
 import Destinations from "@/components/Destinations";
 import SeasonalHighlights from "@/components/SeasonalHighlights";
@@ -18,6 +19,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Navbar />
       <Hero />
+      <WeatherForecast />
       <Categories />
       <Destinations />
       <SeasonalHighlights />

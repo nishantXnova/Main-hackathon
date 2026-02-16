@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo } from "react";
-import { Languages, ArrowRightLeft, Volume2, Copy, Check, Search } from "lucide-react";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { Languages, ArrowRightLeft, Volume2, Copy, Check, Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -12,11 +12,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Languages, ArrowRightLeft, Volume2, Copy, Check, Search } from "lucide-react";
 import { translateText } from "@/lib/translationService";
 import { languages, Language } from "@/lib/languages";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useEffect } from "react";
 
 // ---------------------------------------------------------------------------
 // Types
