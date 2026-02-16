@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Languages, ArrowRightLeft, Volume2, Copy, Check, Search } from "lucide-react";
+import { translateText } from "@/lib/translationService";
+import { languages, Language } from "@/lib/languages";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect } from "react";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -37,23 +42,8 @@ interface Language {
   nativeName: string;
 }
 
-type LangCode = "en" | "ne" | "hi" | "zh" | "ja" | "ko" | "fr" | "de" | "es";
-
-// ---------------------------------------------------------------------------
-// Supported Languages
-// ---------------------------------------------------------------------------
-
-const languages: Language[] = [
-  { code: "en", name: "English", flag: "\ud83c\uddec\ud83c\udde7", nativeName: "English" },
-  { code: "ne", name: "Nepali", flag: "\ud83c\uddf3\ud83c\uddf5", nativeName: "\u0928\u0947\u092a\u093e\u0932\u0940" },
-  { code: "hi", name: "Hindi", flag: "\ud83c\uddee\ud83c\uddf3", nativeName: "\u0939\u093f\u0928\u094d\u0926\u0940" },
-  { code: "zh", name: "Chinese", flag: "\ud83c\udde8\ud83c\uddf3", nativeName: "\u4e2d\u6587" },
-  { code: "ja", name: "Japanese", flag: "\ud83c\uddef\ud83c\uddf5", nativeName: "\u65e5\u672c\u8a9e" },
-  { code: "ko", name: "Korean", flag: "\ud83c\uddf0\ud83c\uddf7", nativeName: "\ud55c\uad6d\uc5b4" },
-  { code: "fr", name: "French", flag: "\ud83c\uddeb\ud83c\uddf7", nativeName: "Fran\u00e7ais" },
-  { code: "de", name: "German", flag: "\ud83c\udde9\ud83c\uddea", nativeName: "Deutsch" },
-  { code: "es", name: "Spanish", flag: "\ud83c\uddea\ud83c\uddf8", nativeName: "Espa\u00f1ol" },
-];
+// type LangCode = string;
+// Centralized languages are now imported from @/lib/languages
 
 // ---------------------------------------------------------------------------
 // Categories & Phrasebook
@@ -254,18 +244,25 @@ const wordDictionary: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 const LanguageTranslator = () => {
-  const [fromLang, setFromLang] = useState<LangCode>("en");
-  const [toLang, setToLang] = useState<LangCode>("ne");
+  const { currentLanguage } = useLanguage();
+  const [fromLang, setFromLang] = useState<string>("en");
+  const [toLang, setToLang] = useState<string>(currentLanguage.code);
   const [inputText, setInputText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [pronunciation, setPronunciation] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Category>("All");
   const [phraseSearch, setPhraseSearch] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // ---- Translate free text using phrase matching + word dictionary ----
-  const translate = useCallback(() => {
+  // Sync with global language change
+  useEffect(() => {
+    setToLang(currentLanguage.code);
+  }, [currentLanguage]);
+
+  // ---- Translate free text using phrase matching + word dictionary + Google Translate ----
+  const translate = useCallback(async () => {
     const text = inputText.trim();
     if (!text) {
       setTranslatedText("");
@@ -273,57 +270,69 @@ const LanguageTranslator = () => {
       return;
     }
 
+    setIsLoading(true);
     const lowerText = text.toLowerCase();
 
-    // 1. Try exact phrase match first
-    const exactMatch = phrasebook.find(
-      (p) => p[fromLang].toLowerCase() === lowerText
-    );
-    if (exactMatch) {
-      setTranslatedText(exactMatch[toLang]);
-      setPronunciation(toLang === "ne" || fromLang === "ne" ? exactMatch.pronunciation : "");
-      return;
-    }
-
-    // 2. Try partial phrase match
-    const partialMatch = phrasebook.find(
-      (p) =>
-        p[fromLang].toLowerCase().includes(lowerText) ||
-        lowerText.includes(p[fromLang].toLowerCase())
-    );
-    if (partialMatch) {
-      setTranslatedText(partialMatch[toLang]);
-      setPronunciation(toLang === "ne" || fromLang === "ne" ? partialMatch.pronunciation : "");
-      return;
-    }
-
-    // 3. Word-by-word dictionary lookup (only en<->ne supported)
-    if (
-      (fromLang === "en" && toLang === "ne") ||
-      (fromLang === "ne" && toLang === "en")
-    ) {
-      // Try full input as a multi-word key
-      if (wordDictionary[lowerText]) {
-        setTranslatedText(wordDictionary[lowerText]);
-        setPronunciation("");
+    try {
+      // 1. Try exact phrase match first (instant & offline-like)
+      const exactMatch = phrasebook.find(
+        (p) => (p as any)[fromLang]?.toLowerCase() === lowerText
+      );
+      if (exactMatch) {
+        setTranslatedText((exactMatch as any)[toLang] || "");
+        setPronunciation(toLang === "ne" || fromLang === "ne" ? exactMatch.pronunciation : "");
+        setIsLoading(false);
         return;
       }
 
-      const words = text.split(/\s+/);
-      const translated = words.map((w) => {
-        const key = w.toLowerCase();
-        return wordDictionary[key] || w;
-      });
-      setTranslatedText(translated.join(" "));
-      setPronunciation("");
-      return;
-    }
+      // 2. Try partial phrase match
+      const partialMatch = phrasebook.find(
+        (p) =>
+          (p as any)[fromLang]?.toLowerCase().includes(lowerText) ||
+          lowerText.includes((p as any)[fromLang]?.toLowerCase() || "")
+      );
+      if (partialMatch) {
+        setTranslatedText((partialMatch as any)[toLang] || "");
+        setPronunciation(toLang === "ne" || fromLang === "ne" ? partialMatch.pronunciation : "");
+        setIsLoading(false);
+        return;
+      }
 
-    // 4. For other language pairs – try phrasebook best effort
-    setTranslatedText(
-      `[Phrase not found] Try searching the phrasebook below for "${text}"`
-    );
-    setPronunciation("");
+      // 3. Use the new accurate translation service
+      const result = await translateText(text, fromLang, toLang);
+      setTranslatedText(result);
+      setPronunciation("");
+    } catch (error) {
+      console.error("Translation error:", error);
+
+      // 4. Fallback to Word-by-word dictionary lookup (only en<->ne supported)
+      if (
+        (fromLang === "en" && toLang === "ne") ||
+        (fromLang === "ne" && toLang === "en")
+      ) {
+        // Try full input as a multi-word key
+        if (wordDictionary[lowerText]) {
+          setTranslatedText(wordDictionary[lowerText]);
+          setPronunciation("");
+          setIsLoading(false);
+          return;
+        }
+
+        const words = text.split(/\s+/);
+        const translated = words.map((w) => {
+          const key = w.toLowerCase();
+          return wordDictionary[key] || w;
+        });
+        setTranslatedText(translated.join(" "));
+        setPronunciation("");
+      } else {
+        setTranslatedText(
+          `[Connection error] Try searching the phrasebook below for "${text}"`
+        );
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, [inputText, fromLang, toLang]);
 
   const handleSwap = () => {
@@ -403,8 +412,7 @@ const LanguageTranslator = () => {
           </span>
           <h2 className="heading-section text-foreground">Language Translator</h2>
           <p className="text-body-large text-muted-foreground mt-3 max-w-2xl mx-auto">
-            Translate common travel phrases to Nepali and other languages — works
-            completely offline, no API needed
+            Travel confidently,Translate without sharing your data
           </p>
         </div>
 
@@ -436,7 +444,7 @@ const LanguageTranslator = () => {
                     </label>
                     <Select
                       value={fromLang}
-                      onValueChange={(v) => setFromLang(v as LangCode)}
+                      onValueChange={(v) => setFromLang(v)}
                     >
                       <SelectTrigger className="h-12 bg-background/50">
                         <SelectValue>
@@ -475,7 +483,7 @@ const LanguageTranslator = () => {
                     </label>
                     <Select
                       value={toLang}
-                      onValueChange={(v) => setToLang(v as LangCode)}
+                      onValueChange={(v) => setToLang(v)}
                     >
                       <SelectTrigger className="h-12 bg-background/50">
                         <SelectValue>
@@ -528,10 +536,20 @@ const LanguageTranslator = () => {
                 {/* Translate button */}
                 <Button
                   onClick={translate}
+                  disabled={isLoading || !inputText.trim()}
                   className="w-full h-12 bg-nepal-forest text-background hover:bg-nepal-forest/90 text-lg font-semibold rounded-xl shadow-soft hover:shadow-card transition-all duration-300"
                 >
-                  <Languages className="h-5 w-5 mr-2" />
-                  Translate
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Translating...
+                    </>
+                  ) : (
+                    <>
+                      <Languages className="h-5 w-5 mr-2" />
+                      Translate
+                    </>
+                  )}
                 </Button>
 
                 {/* Result */}
@@ -599,11 +617,10 @@ const LanguageTranslator = () => {
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                        selectedCategory === cat
-                          ? "bg-nepal-forest text-background shadow-soft"
-                          : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-                      }`}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${selectedCategory === cat
+                        ? "bg-nepal-forest text-background shadow-soft"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                        }`}
                     >
                       {cat}
                     </button>

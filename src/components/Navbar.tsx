@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Mountain, User, LogIn, Shield, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import LanguageToggle from "./LanguageToggle";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -108,6 +109,9 @@ const Navbar = () => {
                 >
                   <Bookmark className="h-5 w-5" />
                 </Button>
+                <div className="mx-1">
+                  <LanguageToggle isScrolled={isScrolled} />
+                </div>
                 <Button
                   onClick={() => navigate("/profile")}
                   variant="ghost"
@@ -121,16 +125,19 @@ const Navbar = () => {
                 </Button>
               </div>
             ) : (
-              <Button
-                onClick={() => navigate("/auth")}
-                className={`transition-all duration-300 ${isScrolled
-                  ? "btn-primary"
-                  : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-                  }`}
-              >
-                <LogIn className="h-4 w-4 mr-2" />
-                Sign In
-              </Button>
+              <div className="flex items-center gap-2">
+                <LanguageToggle isScrolled={isScrolled} />
+                <Button
+                  onClick={() => navigate("/auth")}
+                  className={`transition-all duration-300 ${isScrolled
+                    ? "btn-primary"
+                    : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                    }`}
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </div>
             )
           )}
         </div>
@@ -164,55 +171,61 @@ const Navbar = () => {
             ))}
 
             {!loading && (
-              user ? (
-                <>
-                  {isAdmin && (
+              <div className="flex flex-col gap-4 mt-2">
+                <div className="flex items-center justify-between px-2 bg-secondary/50 rounded-xl p-2">
+                  <span className="text-sm font-medium text-muted-foreground ml-2">App Language</span>
+                  <LanguageToggle isScrolled={true} />
+                </div>
+                {user ? (
+                  <>
+                    {isAdmin && (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          navigate("/admin");
+                        }}
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Dashboard
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       className="w-full"
                       onClick={() => {
                         setIsMobileMenuOpen(false);
-                        navigate("/admin");
+                        navigate("/saved-places");
                       }}
                     >
-                      <Shield className="h-4 w-4 mr-2" />
-                      Admin Dashboard
+                      <Bookmark className="h-4 w-4 mr-2" />
+                      Saved History
                     </Button>
-                  )}
+                    <Button
+                      className="btn-primary w-full"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        navigate("/profile");
+                      }}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      My Profile
+                    </Button>
+                  </>
+                ) : (
                   <Button
-                    variant="outline"
-                    className="w-full"
+                    className="btn-primary w-full"
                     onClick={() => {
                       setIsMobileMenuOpen(false);
-                      navigate("/saved-places");
+                      navigate("/auth");
                     }}
                   >
-                    <Bookmark className="h-4 w-4 mr-2" />
-                    Saved History
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
                   </Button>
-                  <Button
-                    className="btn-primary w-full mt-2"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      navigate("/profile");
-                    }}
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    My Profile
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  className="btn-primary w-full mt-2"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    navigate("/auth");
-                  }}
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
-              )
+                )}
+              </div>
             )}
           </div>
         </div>
