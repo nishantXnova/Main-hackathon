@@ -274,47 +274,42 @@ const LanguageTranslator = () => {
     const lowerText = text.toLowerCase();
 
     try {
-      // 1. Try exact phrase match first (instant & offline-like)
-      const exactMatch = phrasebook.find(
-        (p) => (p as any)[fromLang]?.toLowerCase() === lowerText
-      );
-      if (exactMatch) {
-        setTranslatedText((exactMatch as any)[toLang] || "");
-        setPronunciation(toLang === "ne" || fromLang === "ne" ? exactMatch.pronunciation : "");
-        setIsLoading(false);
-        return;
-      }
-
-      // 2. Try partial phrase match
-      const partialMatch = phrasebook.find(
-        (p) =>
-          (p as any)[fromLang]?.toLowerCase().includes(lowerText) ||
-          lowerText.includes((p as any)[fromLang]?.toLowerCase() || "")
-      );
-      if (partialMatch) {
-        setTranslatedText((partialMatch as any)[toLang] || "");
-        setPronunciation(toLang === "ne" || fromLang === "ne" ? partialMatch.pronunciation : "");
-        setIsLoading(false);
-        return;
-      }
-
-      // 3. Use the new accurate translation service
+      // 1. Use the highly accurate Google Translate service first
       const result = await translateText(text, fromLang, toLang);
       setTranslatedText(result);
-      setPronunciation("");
+
+      // 2. Try to find a pronunciation in the phrasebook as an enhancement
+      const exactMatch = phrasebook.find(
+        (p) => (p as any)[fromLang]?.toLowerCase() === lowerText ||
+          (p as any)[toLang]?.toLowerCase() === result.toLowerCase()
+      );
+
+      if (exactMatch && (toLang === "ne" || fromLang === "ne")) {
+        setPronunciation(exactMatch.pronunciation);
+      } else {
+        setPronunciation("");
+      }
     } catch (error) {
       console.error("Translation error:", error);
 
-      // 4. Fallback to Word-by-word dictionary lookup (only en<->ne supported)
+      // 3. Fallback: Try phrasebook if the API fails
+      const exactMatchFallback = phrasebook.find(
+        (p) => (p as any)[fromLang]?.toLowerCase() === lowerText
+      );
+
+      if (exactMatchFallback) {
+        setTranslatedText((exactMatchFallback as any)[toLang] || "");
+        setPronunciation(toLang === "ne" || fromLang === "ne" ? exactMatchFallback.pronunciation : "");
+        return;
+      }
+
+      // 4. Word-by-word fallback (only for en<->ne)
       if (
         (fromLang === "en" && toLang === "ne") ||
         (fromLang === "ne" && toLang === "en")
       ) {
-        // Try full input as a multi-word key
         if (wordDictionary[lowerText]) {
           setTranslatedText(wordDictionary[lowerText]);
-          setPronunciation("");
-          setIsLoading(false);
           return;
         }
 
@@ -324,7 +319,6 @@ const LanguageTranslator = () => {
           return wordDictionary[key] || w;
         });
         setTranslatedText(translated.join(" "));
-        setPronunciation("");
       } else {
         setTranslatedText(
           `[Connection error] Try searching the phrasebook below for "${text}"`
