@@ -8,6 +8,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Fix for default marker icon in Leaflet + Webpack/Vite
 // @ts-ignore
@@ -58,11 +60,20 @@ const NearbyPlaces = () => {
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [homeLocation, setHomeLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [distanceToHome, setDistanceToHome] = useState<number | null>(null);
+    const [comfortRadius, setComfortRadius] = useState<number>(3000);
+    const [radiusInput, setRadiusInput] = useState<string>("3000");
 
     useEffect(() => {
         const savedHome = localStorage.getItem('user_home_base');
         if (savedHome) {
             setHomeLocation(JSON.parse(savedHome));
+        }
+
+        const savedRadius = localStorage.getItem('user_comfort_radius');
+        if (savedRadius) {
+            const r = parseInt(savedRadius);
+            setComfortRadius(r);
+            setRadiusInput(savedRadius);
         }
     }, []);
 
@@ -72,6 +83,16 @@ const NearbyPlaces = () => {
             setDistanceToHome(dist);
         }
     }, [location, homeLocation]);
+
+    const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setRadiusInput(val);
+        const parsed = parseInt(val);
+        if (!isNaN(parsed) && parsed > 0) {
+            setComfortRadius(parsed);
+            localStorage.setItem('user_comfort_radius', parsed.toString());
+        }
+    };
 
     const saveHomeBase = () => {
         if (location) {
@@ -241,10 +262,10 @@ const NearbyPlaces = () => {
                                     <>
                                         <Circle
                                             center={[homeLocation.lat, homeLocation.lng]}
-                                            radius={3000}
+                                            radius={comfortRadius}
                                             pathOptions={{
-                                                color: distanceToHome && distanceToHome > 3000 ? '#ef4444' : '#eab308',
-                                                fillColor: distanceToHome && distanceToHome > 3000 ? '#ef4444' : '#eab308',
+                                                color: distanceToHome && distanceToHome > comfortRadius ? '#ef4444' : '#eab308',
+                                                fillColor: distanceToHome && distanceToHome > comfortRadius ? '#ef4444' : '#eab308',
                                                 fillOpacity: 0.1,
                                                 weight: 2,
                                                 dashArray: '5, 10'
@@ -265,6 +286,9 @@ const NearbyPlaces = () => {
                                         {distanceToHome && (
                                             <div className="text-xs text-muted-foreground mt-1">
                                                 {Math.round(distanceToHome)}m from Home Base
+                                                {distanceToHome > comfortRadius && (
+                                                    <span className="block text-red-500 font-bold">Outside comfort zone!</span>
+                                                )}
                                             </div>
                                         )}
                                     </Popup>
@@ -321,7 +345,7 @@ const NearbyPlaces = () => {
                                             onClick={initiateReturn}
                                             className={cn(
                                                 "rounded-full h-12 px-6 gap-2 shadow-lg transition-all hover:scale-105 active:scale-95 text-white border-none",
-                                                distanceToHome && distanceToHome > 3000
+                                                distanceToHome && distanceToHome > comfortRadius
                                                     ? "bg-red-600 hover:bg-red-700 animate-pulse"
                                                     : "bg-nepal-terracotta hover:bg-nepal-terracotta/90"
                                             )}
@@ -339,17 +363,32 @@ const NearbyPlaces = () => {
                             <div className="absolute bottom-4 left-4 z-[400]">
                                 <Badge className={cn(
                                     "px-4 py-2 border shadow-lg flex items-center gap-2 text-sm",
-                                    distanceToHome > 3000
+                                    distanceToHome > comfortRadius
                                         ? "bg-red-50 text-red-600 border-red-200"
                                         : "bg-white text-nepal-gold border-nepal-gold/20"
                                 )}>
-                                    {distanceToHome > 3000 ? <ShieldAlert className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+                                    {distanceToHome > comfortRadius ? <ShieldAlert className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
                                     <span>{Math.round(distanceToHome)}m to Home Base</span>
                                 </Badge>
-                                <div className="mt-2 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] text-muted-foreground shadow-sm border border-black/5 flex flex-col">
-                                    <span className="font-mono">Lat: {homeLocation.lat.toFixed(6)}</span>
-                                    <span className="font-mono">Lon: {homeLocation.lng.toFixed(6)}</span>
-                                    <span className="mt-1 flex items-center gap-1 opacity-70"><ExternalLink className="w-3 h-3" /> External OS Nav Ready</span>
+                                <div className="mt-2 bg-white/80 backdrop-blur-md px-3 py-3 rounded-xl text-[10px] text-muted-foreground shadow-sm border border-black/5 flex flex-col gap-2">
+                                    <div className="flex flex-col gap-1.5">
+                                        <Label htmlFor="radius-input" className="text-[9px] uppercase tracking-wider font-bold opacity-70">Comfort Radius (meters)</Label>
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                id="radius-input"
+                                                type="number"
+                                                value={radiusInput}
+                                                onChange={handleRadiusChange}
+                                                className="h-7 w-20 text-[10px] bg-white/50 border-nepal-gold/20 focus-visible:ring-nepal-gold transition-all"
+                                            />
+                                            <span className="text-[10px] font-medium opacity-60">m</span>
+                                        </div>
+                                    </div>
+                                    <div className="pt-1 border-t border-black/5">
+                                        <span className="font-mono block italic">Lat: {homeLocation.lat.toFixed(6)}</span>
+                                        <span className="font-mono block italic">Lon: {homeLocation.lng.toFixed(6)}</span>
+                                        <span className="mt-1 flex items-center gap-1 opacity-70"><ExternalLink className="w-3 h-3" /> External OS Nav Ready</span>
+                                    </div>
                                 </div>
                             </div>
                         )}
