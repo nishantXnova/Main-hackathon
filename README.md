@@ -41,7 +41,7 @@ Designed specifically for the wandering traveler, our map integration is your di
 - **Intelligent Chatbot**: A contextual assistant ready to handle travel-specific queries.
 
 ### ☀️ Global Weather & AI Travel Advisor
-- **Search Any Location**: Check real-time weather for any city worldwide with our new search feature.
+- **Smart Search**: Find any city worldwide with intelligent autocomplete suggestions.
 - **Contextual AI Recommendations**: A smart logic engine that suggests activities based on the current weather.
 - **Interactive Modal**: Access weather data instantly via the "Weather" quick link in the navigation bar.
 

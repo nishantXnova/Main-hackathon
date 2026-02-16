@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cloud, CloudRain, Sun, Thermometer, MapPin, Loader2, Navigation, Wind, Droplets, Sparkles, AlertTriangle, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,12 @@ interface WeatherData {
     humidity: number;
 }
 
+interface LocationSuggestion {
+    display_name: string;
+    lat: string;
+    lon: string;
+}
+
 const WeatherForecast = () => {
     const { isOpen, closeWeather } = useWeather();
     const [weather, setWeather] = useState<WeatherData | null>(null);
@@ -21,7 +27,11 @@ const WeatherForecast = () => {
     const [error, setError] = useState<string | null>(null);
     const [recommendation, setRecommendation] = useState<string>("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
+    const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
 
     const getWeatherCondition = (code: number) => {
         if (code === 0) return "Clear sky";
@@ -53,7 +63,8 @@ const WeatherForecast = () => {
         try {
             setLoading(true);
             setError(null);
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m`;
+            // Added timezone=auto for accurate local time data syncing
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m&timezone=auto`;
             const response = await fetch(url);
             const data = await response.json();
 
@@ -83,6 +94,8 @@ const WeatherForecast = () => {
 
                 setWeather(weatherData);
                 setRecommendation(generateAIRecommendation(current.temperature, current.weathercode));
+                setSearchQuery(""); // Clear search on success
+                setShowSuggestions(false);
             }
         } catch (err) {
             console.error("Weather fetch error:", err);
@@ -109,29 +122,51 @@ const WeatherForecast = () => {
         }
     };
 
-    const handleSearch = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!searchQuery.trim()) return;
+    // Debounced Search Handler
+    useEffect(() => {
+        if (searchTimeout.current) clearTimeout(searchTimeout.current);
 
-        setIsSearching(true);
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
-            const data = await response.json();
-
-            if (data && data.length > 0) {
-                const { lat, lon, display_name } = data[0];
-                // Extract a shorter name from display_name if possible, or use search query
-                const shortName = display_name.split(",")[0];
-                await fetchWeather(parseFloat(lat), parseFloat(lon), shortName);
-            } else {
-                setError("Location not found.");
-            }
-        } catch (err) {
-            setError("Search failed.");
-        } finally {
+        if (searchQuery.trim().length > 2) {
+            setIsSearching(true);
+            searchTimeout.current = setTimeout(async () => {
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5`);
+                    const data = await response.json();
+                    setSuggestions(data);
+                    setShowSuggestions(true);
+                } catch (e) {
+                    console.error("Search error:", e);
+                    setSuggestions([]);
+                } finally {
+                    setIsSearching(false);
+                }
+            }, 500); // 500ms debounce
+        } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
             setIsSearching(false);
         }
+
+        return () => {
+            if (searchTimeout.current) clearTimeout(searchTimeout.current);
+        };
+    }, [searchQuery]);
+
+    const handleSuggestionClick = (suggestion: LocationSuggestion) => {
+        const shortName = suggestion.display_name.split(",")[0];
+        fetchWeather(parseFloat(suggestion.lat), parseFloat(suggestion.lon), shortName);
     };
+
+    // Close suggestions on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     useEffect(() => {
         if (isOpen && !weather) {
@@ -160,7 +195,7 @@ const WeatherForecast = () => {
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
                         onClick={(e) => e.stopPropagation()}
-                        className="relative w-full max-w-lg bg-background/90 backdrop-blur-md border border-white/20 rounded-3xl shadow-2xl overflow-hidden"
+                        className="relative w-full max-w-lg bg-background/90 backdrop-blur-md border border-white/20 rounded-3xl shadow-2xl overflow-visible"
                     >
                         {/* Header / Close */}
                         <div className="absolute top-4 right-4 z-20">
@@ -170,17 +205,42 @@ const WeatherForecast = () => {
                         </div>
 
                         <div className="p-6 md:p-8">
-                            {/* Search Bar */}
-                            <form onSubmit={handleSearch} className="relative mb-6">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search city (e.g., Pokhara, London)..."
-                                    className="pl-10 rounded-xl bg-secondary/50 border-transparent focus:border-nepal-forest/50"
-                                />
-                                {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
-                            </form>
+                            {/* Search Bar & Suggestions */}
+                            <div ref={wrapperRef} className="relative mb-6 z-30">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search city (e.g., Pokhara, London)..."
+                                        className="pl-10 rounded-xl bg-secondary/80 border-transparent focus:border-nepal-forest/50"
+                                    />
+                                    {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                                </div>
+
+                                {/* Auto-complete Dropdown */}
+                                <AnimatePresence>
+                                    {showSuggestions && suggestions.length > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 overflow-hidden"
+                                        >
+                                            {suggestions.map((suggestion, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => handleSuggestionClick(suggestion)}
+                                                    className="w-full text-left px-4 py-3 hover:bg-secondary/50 transition-colors text-sm border-b last:border-0 border-border/50 flex items-center gap-2"
+                                                >
+                                                    <MapPin className="h-3 w-3 text-muted-foreground" />
+                                                    <span className="truncate">{suggestion.display_name}</span>
+                                                </button>
+                                            ))}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
 
                             {/* Content */}
                             <div className="min-h-[300px] flex flex-col justify-center">
