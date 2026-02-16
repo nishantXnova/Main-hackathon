@@ -153,101 +153,19 @@ const phrasebook: (PhraseEntry & { category: Category })[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Word-level dictionary for free-text translation (EN <-> NE)
+// Language code mapping for translation API
 // ---------------------------------------------------------------------------
 
-const wordDictionary: Record<string, string> = {
-  // English -> Nepali
-  hello: "\u0928\u092e\u0938\u094d\u0924\u0947",
-  hi: "\u0928\u092e\u0938\u094d\u0924\u0947",
-  yes: "\u0939\u094b",
-  no: "\u0939\u094b\u0907\u0928",
-  please: "\u0915\u0943\u092a\u092f\u093e",
-  thanks: "\u0927\u0928\u094d\u092f\u0935\u093e\u0926",
-  "thank you": "\u0927\u0928\u094d\u092f\u0935\u093e\u0926",
-  sorry: "\u092e\u093e\u092b \u0917\u0930\u094d\u0928\u0941\u0939\u094b\u0938\u094d",
-  water: "\u092a\u093e\u0928\u0940",
-  food: "\u0916\u093e\u0928\u093e",
-  rice: "\u092d\u093e\u0924",
-  tea: "\u091a\u093f\u092f\u093e",
-  hotel: "\u0939\u094b\u091f\u0932",
-  room: "\u0915\u094b\u0920\u093e",
-  bus: "\u092c\u0938",
-  taxi: "\u091f\u094d\u092f\u093e\u0915\u094d\u0938\u0940",
-  airport: "\u0935\u093f\u092e\u093e\u0928\u0938\u094d\u0925\u0932",
-  hospital: "\u0905\u0938\u094d\u092a\u0924\u093e\u0932",
-  police: "\u092a\u094d\u0930\u0939\u0930\u0940",
-  help: "\u0917\u0941\u0939\u093e\u0930",
-  good: "\u0930\u093e\u092e\u094d\u0930\u094b",
-  bad: "\u0928\u0930\u093e\u092e\u094d\u0930\u094b",
-  beautiful: "\u0930\u093e\u092e\u094d\u0930\u094b",
-  big: "\u0920\u0942\u0932\u094b",
-  small: "\u0938\u093e\u0928\u094b",
-  hot: "\u0924\u093e\u0924\u094b",
-  cold: "\u091a\u093f\u0938\u094b",
-  left: "\u092c\u093e\u092f\u093e\u0901",
-  right: "\u0926\u093e\u092f\u093e\u0901",
-  near: "\u0928\u091c\u093f\u0915",
-  far: "\u091f\u093e\u0922\u093e",
-  i: "\u092e",
-  you: "\u0924\u092a\u093e\u0908\u0902",
-  he: "\u0909",
-  she: "\u0909\u0928\u0940",
-  we: "\u0939\u093e\u092e\u0940",
-  they: "\u0909\u0928\u0940\u0939\u0930\u0942",
-  am: "\u0939\u0941\u0901",
-  is: "\u091b",
-  are: "\u091b\u0928\u094d",
-  go: "\u091c\u093e\u0928\u0941",
-  come: "\u0906\u0909\u0928\u0941",
-  eat: "\u0916\u093e\u0928\u0941",
-  drink: "\u092a\u093f\u0909\u0928\u0941",
-  sleep: "\u0938\u0941\u0924\u094d\u0928\u0941",
-  see: "\u0939\u0947\u0930\u094d\u0928\u0941",
-  like: "\u092e\u0928 \u092a\u0930\u094d\u091b",
-  love: "\u092e\u093e\u092f\u093e",
-  friend: "\u0938\u093e\u0925\u0940",
-  family: "\u092a\u0930\u093f\u0935\u093e\u0930",
-  mountain: "\u092a\u0939\u093e\u0921",
-  river: "\u0928\u0926\u0940",
-  temple: "\u092e\u0928\u094d\u0926\u093f\u0930",
-  market: "\u092c\u091c\u093e\u0930",
-  money: "\u092a\u0948\u0938\u093e",
-  expensive: "\u092e\u0939\u0902\u0917\u094b",
-  cheap: "\u0938\u0938\u094d\u0924\u094b",
-  today: "\u0906\u091c",
-  tomorrow: "\u092d\u094b\u0932\u093f",
-  now: "\u0905\u0939\u093f\u0932\u0947",
-  morning: "\u092c\u093f\u0939\u093e\u0928",
-  night: "\u0930\u093e\u0924",
-  day: "\u0926\u093f\u0928",
-  name: "\u0928\u093e\u092e",
-  nepal: "\u0928\u0947\u092a\u093e\u0932",
-  kathmandu: "\u0915\u093e\u0920\u092e\u093e\u0921\u094c\u0902",
-  pokhara: "\u092a\u094b\u0916\u0930\u093e",
-  everest: "\u0938\u0917\u0930\u092e\u093e\u0925\u093e",
-  trekking: "\u091f\u094d\u0930\u0947\u0915\u093f\u0919",
-  happy: "\u0916\u0941\u0936\u0940",
-  welcome: "\u0938\u094d\u0935\u093e\u0917\u0924",
-  // Nepali -> English
-  "\u0928\u092e\u0938\u094d\u0924\u0947": "hello",
-  "\u0939\u094b": "yes",
-  "\u0939\u094b\u0907\u0928": "no",
-  "\u092a\u093e\u0928\u0940": "water",
-  "\u0916\u093e\u0928\u093e": "food",
-  "\u092d\u093e\u0924": "rice",
-  "\u091a\u093f\u092f\u093e": "tea",
-  "\u0927\u0928\u094d\u092f\u0935\u093e\u0926": "thank you",
-  "\u0930\u093e\u092e\u094d\u0930\u094b": "good / beautiful",
-  "\u0917\u0941\u0939\u093e\u0930": "help",
-  "\u0905\u0938\u094d\u092a\u0924\u093e\u0932": "hospital",
-  "\u092a\u094d\u0930\u0939\u0930\u0940": "police",
-  "\u0928\u0947\u092a\u093e\u0932": "Nepal",
-  "\u092a\u0939\u093e\u0921": "mountain",
-  "\u0928\u0926\u0940": "river",
-  "\u092e\u0928\u094d\u0926\u093f\u0930": "temple",
-  "\u092c\u091c\u093e\u0930": "market",
-  "\u092a\u0948\u0938\u093e": "money",
+const langCodeMap: Record<LangCode, string> = {
+  en: "en",
+  ne: "ne",
+  hi: "hi",
+  zh: "zh-CN",
+  ja: "ja",
+  ko: "ko",
+  fr: "fr",
+  de: "de",
+  es: "es",
 };
 
 // ---------------------------------------------------------------------------
@@ -260,13 +178,14 @@ const LanguageTranslator = () => {
   const [inputText, setInputText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [pronunciation, setPronunciation] = useState("");
+  const [isTranslating, setIsTranslating] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category>("All");
   const [phraseSearch, setPhraseSearch] = useState("");
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
-  // ---- Translate free text using phrase matching + word dictionary ----
-  const translate = useCallback(() => {
+  // ---- Translate free text using AI via Supabase edge function ----
+  const translate = useCallback(async () => {
     const text = inputText.trim();
     if (!text) {
       setTranslatedText("");
@@ -274,9 +193,8 @@ const LanguageTranslator = () => {
       return;
     }
 
+    // 1. Try exact phrase match first (instant, no API call needed)
     const lowerText = text.toLowerCase();
-
-    // 1. Try exact phrase match first
     const exactMatch = phrasebook.find(
       (p) => p[fromLang].toLowerCase() === lowerText
     );
@@ -286,46 +204,65 @@ const LanguageTranslator = () => {
       return;
     }
 
-    // 2. Try partial phrase match
-    const partialMatch = phrasebook.find(
-      (p) =>
-        p[fromLang].toLowerCase().includes(lowerText) ||
-        lowerText.includes(p[fromLang].toLowerCase())
-    );
-    if (partialMatch) {
-      setTranslatedText(partialMatch[toLang]);
-      setPronunciation(toLang === "ne" || fromLang === "ne" ? partialMatch.pronunciation : "");
-      return;
-    }
-
-    // 3. Word-by-word dictionary lookup (only en<->ne supported)
-    if (
-      (fromLang === "en" && toLang === "ne") ||
-      (fromLang === "ne" && toLang === "en")
-    ) {
-      // Try full input as a multi-word key
-      if (wordDictionary[lowerText]) {
-        setTranslatedText(wordDictionary[lowerText]);
-        setPronunciation("");
-        return;
-      }
-
-      const words = text.split(/\s+/);
-      const translated = words.map((w) => {
-        const key = w.toLowerCase();
-        return wordDictionary[key] || w;
-      });
-      setTranslatedText(translated.join(" "));
-      setPronunciation("");
-      return;
-    }
-
-    // 4. For other language pairs – try phrasebook best effort
-    setTranslatedText(
-      `[Phrase not found] Try searching the phrasebook below for "${text}"`
-    );
+    // 2. Use AI-powered translation via Supabase edge function
+    setIsTranslating(true);
+    setTranslatedText("");
     setPronunciation("");
-  }, [inputText, fromLang, toLang]);
+
+    try {
+      const fromName = languages.find((l) => l.code === fromLang)?.name || fromLang;
+      const toName = languages.find((l) => l.code === toLang)?.name || toLang;
+
+      const { data, error } = await supabase.functions.invoke("ai-chatbot", {
+        body: {
+          message: `Translate the following text from ${fromName} to ${toName}. Only respond with the translated text, nothing else. Do not add quotes, explanations, or any extra text. If the target language is Nepali, also provide the romanized pronunciation on a new line prefixed with "Pronunciation: ".\n\nText to translate: ${text}`,
+          history: [],
+        },
+      });
+
+      if (error) throw error;
+
+      const reply: string = data?.reply || "";
+
+      // Parse pronunciation if present
+      const pronMatch = reply.match(/Pronunciation:\s*(.+)/i);
+      if (pronMatch) {
+        setTranslatedText(reply.replace(/\n?Pronunciation:\s*.+/i, "").trim());
+        setPronunciation(pronMatch[1].trim());
+      } else {
+        setTranslatedText(reply.trim());
+        setPronunciation("");
+      }
+    } catch (err) {
+      console.error("Translation error:", err);
+
+      // Fallback: try MyMemory free translation API
+      try {
+        const fromCode = langCodeMap[fromLang];
+        const toCode = langCodeMap[toLang];
+        const res = await fetch(
+          `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromCode}|${toCode}`
+        );
+        const json = await res.json();
+        if (json.responseStatus === 200 && json.responseData?.translatedText) {
+          setTranslatedText(json.responseData.translatedText);
+          setPronunciation("");
+        } else {
+          throw new Error("MyMemory fallback failed");
+        }
+      } catch {
+        toast({
+          title: "Translation failed",
+          description: "Could not translate. Please try again or use the phrasebook.",
+          variant: "destructive",
+        });
+        setTranslatedText("");
+        setPronunciation("");
+      }
+    } finally {
+      setIsTranslating(false);
+    }
+  }, [inputText, fromLang, toLang, toast]);
 
   const handleSwap = () => {
     setFromLang(toLang);
@@ -529,10 +466,20 @@ const LanguageTranslator = () => {
                 {/* Translate button */}
                 <Button
                   onClick={translate}
-                  className="w-full h-12 bg-nepal-forest text-background hover:bg-nepal-forest/90 text-lg font-semibold rounded-xl shadow-soft hover:shadow-card transition-all duration-300"
+                  disabled={isTranslating || !inputText.trim()}
+                  className="w-full h-12 bg-nepal-forest text-background hover:bg-nepal-forest/90 text-lg font-semibold rounded-xl shadow-soft hover:shadow-card transition-all duration-300 disabled:opacity-60"
                 >
-                  <Languages className="h-5 w-5 mr-2" />
-                  Translate
+                  {isTranslating ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Translating...
+                    </>
+                  ) : (
+                    <>
+                      <Languages className="h-5 w-5 mr-2" />
+                      Translate
+                    </>
+                  )}
                 </Button>
 
                 {/* Result */}
