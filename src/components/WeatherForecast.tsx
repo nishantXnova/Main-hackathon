@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cloud, CloudRain, Sun, Thermometer, MapPin, Loader2, Navigation, Wind, Droplets, Sparkles, AlertTriangle } from "lucide-react";
+import { Cloud, CloudRain, Sun, Thermometer, MapPin, Loader2, Navigation, Wind, Droplets, Sparkles, AlertTriangle, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useWeather } from "@/contexts/WeatherContext";
 
 interface WeatherData {
     temperature: number;
@@ -13,10 +15,13 @@ interface WeatherData {
 }
 
 const WeatherForecast = () => {
+    const { isOpen, closeWeather } = useWeather();
     const [weather, setWeather] = useState<WeatherData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [recommendation, setRecommendation] = useState<string>("");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
 
     const getWeatherCondition = (code: number) => {
         if (code === 0) return "Clear sky";
@@ -31,22 +36,23 @@ const WeatherForecast = () => {
 
     const generateAIRecommendation = (temp: number, conditionCode: number) => {
         if (conditionCode === 0 || (conditionCode >= 1 && conditionCode <= 3)) {
-            if (temp > 20) return "It's a beautiful day! Perfect for a sunrise trek at Sarangkot or exploring the streets of Thamel.";
-            if (temp > 10) return "Crisp and clear. Ideal for sightseeing in Patan Durbar Square or a peaceful walk by Fewa Lake.";
-            return "Chilly but clear. Great for a mountain flight or enjoying a warm cup of Nepali Chiya with a view.";
+            if (temp > 20) return "It's a beautiful day! Perfect for outdoor adventures or exploring local markets.";
+            if (temp > 10) return "Crisp and clear. Ideal for sightseeing and photography.";
+            return "Chilly but clear. Great for enjoying localized warm beverages with a view.";
         }
         if (conditionCode >= 61 && conditionCode <= 82) {
-            return "A bit damp outside. Perfect time to visit the indoor museums or enjoy a traditional Thakali meal indoors.";
+            return "A bit damp outside. Perfect time to visit indoor museums or cozy cafes.";
         }
         if (conditionCode >= 95) {
-            return "Stormy weather. Stay safe indoors! It's a great time to learn some basic Nepali phrases or read about Nepal's history.";
+            return "Stormy weather. Stay safe indoors! Good time to plan your next itinerary.";
         }
-        return "Adaptable weather ahead. Keep a light jacket handy and enjoy the unique atmosphere of Nepal!";
+        return "Adaptable weather ahead. Keep a light jacket handy!";
     };
 
-    const fetchWeather = async (lat: number, lon: number) => {
+    const fetchWeather = async (lat: number, lon: number, customLocationName?: string) => {
         try {
             setLoading(true);
+            setError(null);
             const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m`;
             const response = await fetch(url);
             const data = await response.json();
@@ -55,13 +61,15 @@ const WeatherForecast = () => {
                 const current = data.current_weather;
                 const condition = getWeatherCondition(current.weathercode);
 
-                let locationName = "Your Location";
-                try {
-                    const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-                    const geoData = await geoResponse.json();
-                    locationName = geoData.address.city || geoData.address.town || geoData.address.village || "Nepal";
-                } catch (e) {
-                    console.error("Geocoding error:", e);
+                let locationName = customLocationName || "Your Location";
+                if (!customLocationName) {
+                    try {
+                        const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                        const geoData = await geoResponse.json();
+                        locationName = geoData.address.city || geoData.address.town || geoData.address.village || "Unknown Location";
+                    } catch (e) {
+                        console.error("Geocoding error:", e);
+                    }
                 }
 
                 const weatherData: WeatherData = {
@@ -92,18 +100,44 @@ const WeatherForecast = () => {
                 },
                 (err) => {
                     console.error("Geolocation error:", err);
-                    fetchWeather(27.7172, 85.3240);
-                    setError("Location access denied. Showing weather for Kathmandu.");
+                    fetchWeather(27.7172, 85.3240, "Kathmandu"); // Fallback
+                    setError("Location access denied. Showing Kathmandu.");
                 }
             );
         } else {
-            fetchWeather(27.7172, 85.3240);
+            fetchWeather(27.7172, 85.3240, "Kathmandu");
+        }
+    };
+
+    const handleSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!searchQuery.trim()) return;
+
+        setIsSearching(true);
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
+            const data = await response.json();
+
+            if (data && data.length > 0) {
+                const { lat, lon, display_name } = data[0];
+                // Extract a shorter name from display_name if possible, or use search query
+                const shortName = display_name.split(",")[0];
+                await fetchWeather(parseFloat(lat), parseFloat(lon), shortName);
+            } else {
+                setError("Location not found.");
+            }
+        } catch (err) {
+            setError("Search failed.");
+        } finally {
+            setIsSearching(false);
         }
     };
 
     useEffect(() => {
-        getLocation();
-    }, []);
+        if (isOpen && !weather) {
+            getLocation();
+        }
+    }, [isOpen]);
 
     const getWeatherIcon = (code: number) => {
         if (code === 0) return <Sun className="h-10 w-10 text-nepal-gold" />;
@@ -112,109 +146,105 @@ const WeatherForecast = () => {
     };
 
     return (
-        <section id="weather" className="section-padding bg-secondary/20">
-            <div className="container-wide">
-                <div className="max-w-4xl mx-auto">
-                    <div className="glass-effect rounded-3xl p-8 md:p-10 shadow-card border border-white/20 relative overflow-hidden">
-                        <div className="absolute -top-24 -right-24 w-64 h-64 bg-nepal-forest/5 rounded-full blur-3xl" />
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    onClick={closeWeather}
+                >
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full max-w-lg bg-background/90 backdrop-blur-md border border-white/20 rounded-3xl shadow-2xl overflow-hidden"
+                    >
+                        {/* Header / Close */}
+                        <div className="absolute top-4 right-4 z-20">
+                            <Button variant="ghost" size="icon" onClick={closeWeather} className="rounded-full hover:bg-black/10">
+                                <X className="h-5 w-5" />
+                            </Button>
+                        </div>
 
-                        <div className="relative z-10">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1 text-nepal-forest font-medium">
-                                        <Sparkles className="h-4 w-4" />
-                                        <span className="text-sm uppercase tracking-wider">AI TRAVEL ADVISOR</span>
+                        <div className="p-6 md:p-8">
+                            {/* Search Bar */}
+                            <form onSubmit={handleSearch} className="relative mb-6">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search city (e.g., Pokhara, London)..."
+                                    className="pl-10 rounded-xl bg-secondary/50 border-transparent focus:border-nepal-forest/50"
+                                />
+                                {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                            </form>
+
+                            {/* Content */}
+                            <div className="min-h-[300px] flex flex-col justify-center">
+                                {loading && !weather ? (
+                                    <div className="flex flex-col items-center justify-center py-8">
+                                        <Loader2 className="h-10 w-10 animate-spin text-nepal-forest mb-3" />
+                                        <p className="text-muted-foreground text-sm">Forecasting...</p>
                                     </div>
-                                    <h2 className="heading-section text-foreground flex items-center gap-3">
-                                        <MapPin className="h-6 w-6 text-nepal-forest" />
-                                        {loading ? "Locating..." : weather?.locationName}
-                                    </h2>
-                                </div>
+                                ) : weather ? (
+                                    <div className="space-y-6">
+                                        <div className="text-center">
+                                            <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
+                                                <MapPin className="h-5 w-5 text-nepal-forest" />
+                                                {weather.locationName}
+                                            </h2>
+                                            <p className="text-muted-foreground text-sm">{weather.condition}</p>
+                                        </div>
 
-                                {!loading && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={getLocation}
-                                        className="rounded-full border-nepal-forest/20 hover:bg-nepal-forest/10 hover:border-nepal-forest text-nepal-forest transition-all"
-                                    >
-                                        Refresh
-                                    </Button>
+                                        <div className="flex items-center justify-center gap-6 py-4">
+                                            <div className="p-4 bg-secondary/50 rounded-2xl">
+                                                {getWeatherIcon(weather.conditionCode)}
+                                            </div>
+                                            <div className="text-5xl font-bold">
+                                                {weather.temperature}°
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="flex flex-col items-center p-3 bg-secondary/30 rounded-xl">
+                                                <Wind className="h-4 w-4 mb-1 text-muted-foreground" />
+                                                <span className="font-semibold text-sm">{weather.windSpeed} km/h</span>
+                                            </div>
+                                            <div className="flex flex-col items-center p-3 bg-secondary/30 rounded-xl">
+                                                <Droplets className="h-4 w-4 mb-1 text-muted-foreground" />
+                                                <span className="font-semibold text-sm">{weather.humidity}%</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-nepal-forest/5 p-4 rounded-xl border border-nepal-forest/10">
+                                            <div className="flex items-center gap-2 mb-2 text-nepal-forest text-xs font-bold uppercase tracking-wide">
+                                                <Sparkles className="h-3 w-3" />
+                                                Travel AI
+                                            </div>
+                                            <p className="text-sm text-foreground/90 leading-relaxed">
+                                                "{recommendation}"
+                                            </p>
+                                        </div>
+
+                                        {error && (
+                                            <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 p-2 rounded-lg justify-center">
+                                                <AlertTriangle className="h-3 w-3" />
+                                                {error}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="text-center text-muted-foreground">Search for a location to see the forecast.</p>
                                 )}
                             </div>
-
-                            <AnimatePresence mode="wait">
-                                {loading ? (
-                                    <motion.div
-                                        key="loading"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        className="flex flex-col items-center justify-center py-12"
-                                    >
-                                        <Loader2 className="h-12 w-12 animate-spin text-nepal-forest mb-4" />
-                                        <p className="text-muted-foreground">Analyzing local weather patterns...</p>
-                                    </motion.div>
-                                ) : weather ? (
-                                    <motion.div
-                                        key="weather-content"
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="grid grid-cols-1 md:grid-cols-2 gap-10"
-                                    >
-                                        <div className="bg-white/40 dark:bg-black/20 rounded-2xl p-6 backdrop-blur-sm border border-white/30">
-                                            <div className="flex items-center gap-6 mb-6">
-                                                <div className="bg-background rounded-2xl p-4 shadow-soft">
-                                                    {getWeatherIcon(weather.conditionCode)}
-                                                </div>
-                                                <div>
-                                                    <p className="text-5xl font-bold text-foreground">
-                                                        {weather.temperature}°<span className="text-2xl text-muted-foreground">C</span>
-                                                    </p>
-                                                    <p className="text-lg text-muted-foreground capitalize">{weather.condition}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <div className="flex items-center gap-3 p-3 rounded-xl bg-background/50">
-                                                    <Wind className="h-5 w-5 text-nepal-forest" />
-                                                    <div>
-                                                        <p className="text-xs text-muted-foreground uppercase">Wind</p>
-                                                        <p className="text-sm font-semibold">{weather.windSpeed} km/h</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3 p-3 rounded-xl bg-background/50">
-                                                    <Droplets className="h-5 w-5 text-nepal-forest" />
-                                                    <div>
-                                                        <p className="text-xs text-muted-foreground uppercase">Humidity</p>
-                                                        <p className="text-sm font-semibold">{weather.humidity}%</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-col justify-center">
-                                            <h3 className="text-2xl font-bold text-foreground mb-4">GoNepal Recommendation</h3>
-                                            <div className="relative">
-                                                <div className="absolute -left-4 top-0 bottom-0 w-1 bg-nepal-forest/30 rounded-full" />
-                                                <p className="text-lg text-body-large text-muted-foreground leading-relaxed pl-4">
-                                                    "{recommendation}"
-                                                </p>
-                                            </div>
-                                            {error && (
-                                                <div className="mt-4 flex items-center gap-2 text-xs text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100 italic">
-                                                    {error}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                ) : null}
-                            </AnimatePresence>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 

@@ -40,10 +40,10 @@ Designed specifically for the wandering traveler, our map integration is your di
 - **Currency Converter**: Dynamic rate conversion for real-time budgeting in NPR and global currencies.
 - **Intelligent Chatbot**: A contextual assistant ready to handle travel-specific queries.
 
-### ☀️ Live Weather & AI Travel Advisor
-- **Real-Time Forecasts**: Integrates with Open-Meteo to provide accurate, keyless weather data for the user's exact location.
-- **Contextual AI Recommendations**: A smart logic engine that suggests activities based on the current weather (e.g., "Perfect for trekking" vs "Great for museum visits").
-- **Premium UI**: A glassmorphism-based design that blends seamlessly with the application's aesthetic.
+### ☀️ Global Weather & AI Travel Advisor
+- **Search Any Location**: Check real-time weather for any city worldwide with our new search feature.
+- **Contextual AI Recommendations**: A smart logic engine that suggests activities based on the current weather.
+- **Interactive Modal**: Access weather data instantly via the "Weather" quick link in the navigation bar.
 
 ---
 

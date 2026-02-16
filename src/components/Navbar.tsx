@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "./LanguageToggle";
 
+import { useWeather } from "@/contexts/WeatherContext";
+
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { openWeather } = useWeather();
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
@@ -80,6 +83,18 @@ const Navbar = () => {
               {link.label}
             </a>
           ))}
+
+          {/* Weather Quick Link */}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              openWeather();
+            }}
+            className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer ${isScrolled ? "text-foreground" : "text-primary-foreground"
+              }`}
+          >
+            Weather
+          </button>
 
           {/* Auth Button */}
           {!loading && (
@@ -169,6 +184,16 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
+
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                openWeather();
+              }}
+              className="text-foreground font-medium py-2 hover:text-accent transition-colors text-left"
+            >
+              Weather Check
+            </button>
 
             {!loading && (
               <div className="flex flex-col gap-4 mt-2">

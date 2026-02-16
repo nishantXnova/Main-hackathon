@@ -15,6 +15,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CategoryPage from "./pages/CategoryPage";
 import NotFound from "./pages/NotFound";
 import AutoTranslator from "./components/AutoTranslator";
+import WeatherForecast from "./components/WeatherForecast";
+import { WeatherProvider } from "./contexts/WeatherContext";
 
 const queryClient = new QueryClient();
 
@@ -23,44 +25,47 @@ const App = () => (
     <AuthProvider>
       <LanguageProvider>
         <AutoTranslator />
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/destination/:id" element={<DestinationDetail />} />
-              <Route path="/category/:slug" element={<CategoryPage />} />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/saved-places"
-                element={
-                  <ProtectedRoute>
-                    <SavedPlaces />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute requireAdmin>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <WeatherProvider>
+          <WeatherForecast />
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/destination/:id" element={<DestinationDetail />} />
+                <Route path="/category/:slug" element={<CategoryPage />} />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/saved-places"
+                  element={
+                    <ProtectedRoute>
+                      <SavedPlaces />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute requireAdmin>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </WeatherProvider>
       </LanguageProvider>
     </AuthProvider>
   </QueryClientProvider>
