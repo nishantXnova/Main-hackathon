@@ -16,6 +16,7 @@ import CategoryPage from "./pages/CategoryPage";
 import NotFound from "./pages/NotFound";
 import AutoTranslator from "./components/AutoTranslator";
 import WeatherForecast from "./components/WeatherForecast";
+import TestAuth from "./components/TestAuth";
 import { WeatherProvider } from "./contexts/WeatherContext";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,7 @@ const App = () => (
                   }
                 />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="/test-auth" element={<TestAuth />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

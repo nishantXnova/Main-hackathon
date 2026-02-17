@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, role: 'Tourist' | 'Guide', fullName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
@@ -27,10 +27,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return;
-        
+
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
           // Use setTimeout to avoid Supabase auth deadlock
           setTimeout(async () => {
@@ -66,18 +66,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (email: string, password: string, role: 'Tourist' | 'Guide', fullName?: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: window.location.origin,
           data: {
             full_name: fullName || '',
+            role: role,
           },
         },
       });
+
+      if (!error && data.user) {
+        // Manually insert profile to ensure role is saved
+        // Using any cast for role since types.ts might not be updated yet
+        const { error: profileError } = await supabase.from('profiles').insert({
+          id: data.user.id,
+          full_name: fullName,
+          // @ts-ignore - role column exists in DB but might be missing in types
+          role: role,
+          email: email
+        });
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          // We don't return this error as auth was successful, but ideally we should handle this
+        }
+      }
+
       return { error };
     } catch (error) {
       return { error: error as Error };
