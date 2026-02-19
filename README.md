@@ -24,12 +24,19 @@ GoNepal features a first-of-its-kind **Dynamic Translation Layer** that allows t
 
 ## 📍 Core Capabilities
 
-### 📰 Live Travel News Feed
-A dedicated **Nepal Travel News** page powered by real-time RSS feeds.
-- **Live Source**: Fetches from [OnlineKhabar English](https://english.onlinekhabar.com) with automatic fallback to the Nepali edition.
-- **Emergency Alerts**: Articles mentioning floods, landslides, or earthquakes are highlighted with a pulsing red emergency badge.
-- **AI News Buddy**: Each article has a one-click **"AI Summary"** button that sends the article to a tourist-focused AI assistant, giving you a plain-English TL;DR and travel-impact analysis.
-- **Verified Source**: Every article carries a source verification tag.
+### 🪄 Plan My Day (AI Concierge) — *NEW*
+A groundbreaking weather-aware itinerary generator that acts as your personal digital guide.
+- **Weather-Responsive Engineering**: Dynamically fetches real-time weather and geolocation to curate the perfect day. Rain in Kathmandu? It suggests indoor cultural gems and cozy tea houses. Sun in Pokhara? It points you to Phewa Lake and sunrise viewpoints.
+- **Curated Spot Intelligence**: Powered by a hand-picked database of 50+ Nepalese landmarks, each with "Pro Tips" and duration estimates.
+- **One-Tap Navigation**: Generates a unified Google Maps walking route combining all itinerary stops, synced directly to your phone.
+- **Premium UI**: Features a glassmorphic interface with staggered animations and real-time weather status.
+
+### 🪪 Digital Tourist ID & FNMIS Simulation — *NEW*
+A high-security digital identity card simulating integration with Nepal's **Foreigner National Management Information System (FNMIS)**.
+- **Secure QR Core**: Encodes encrypted tourist data into a dynamic QR code for instant official verification.
+- **Hotel Check-In Simulator**: A fully animated 4-step verification flow (Secure Connection → Visa Auth → Biometric Check → Identity Clear) for seamless hotel arrivals.
+- **Official Compliance**: Designed with Nepal Government's aesthetic standards, featuring "Verified" badges, stay-tracking, and holographic shimmer effects.
+- **Panic Integration**: Instant access to overstay alerts and emergency protocols directly from the digital card.
 
 ### 🔄 Smooth Page Transitions
 All page navigations feature a fluid **fade + slide animation** powered by Framer Motion, giving the app a premium, native-app feel.

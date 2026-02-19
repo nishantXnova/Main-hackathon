@@ -15,6 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CategoryPage from "./pages/CategoryPage";
 import NotFound from "./pages/NotFound";
 import NewsPage from "./pages/NewsPage";
+import DigitalTouristID from "./pages/DigitalTouristID";
 import AutoTranslator from "./components/AutoTranslator";
 import WeatherForecast from "./components/WeatherForecast";
 import TestAuth from "./components/TestAuth";
@@ -60,6 +61,7 @@ const AnimatedRoutes = () => {
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="/test-auth" element={<TestAuth />} />
         <Route path="/news" element={<NewsPage />} />
+        <Route path="/tourist-id" element={<DigitalTouristID />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>

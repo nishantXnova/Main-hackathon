@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Mountain, User, LogIn, Shield, Bookmark, Newspaper } from "lucide-react";
+import { Menu, X, Mountain, User, LogIn, Shield, Bookmark, Newspaper, BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "./LanguageToggle";
@@ -95,6 +95,16 @@ const Navbar = () => {
           >
             Weather
           </button>
+
+          {/* Tourist ID Link */}
+          <Link
+            to="/tourist-id"
+            className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer flex items-center gap-1 ${isScrolled ? "text-foreground" : "text-primary-foreground"
+              }`}
+          >
+            <BadgeCheck className="w-3.5 h-3.5" />
+            Tourist ID
+          </Link>
 
           {/* News Quick Link */}
           <Link
@@ -204,6 +214,15 @@ const Navbar = () => {
             >
               Weather Check
             </button>
+
+            <Link
+              to="/tourist-id"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-foreground font-medium py-2 hover:text-accent transition-colors flex items-center gap-2"
+            >
+              <BadgeCheck className="w-4 h-4" />
+              Tourist ID
+            </Link>
 
             <Link
               to="/news"
