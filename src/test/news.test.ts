@@ -20,6 +20,7 @@ describe("newsService", () => {
         };
 
         global.fetch = vi.fn().mockResolvedValue({
+            ok: true,
             json: () => Promise.resolve(mockResponse)
         });
 
@@ -28,7 +29,7 @@ describe("newsService", () => {
         expect(news).toHaveLength(3); // Should filter out "Irrelevant news"
         expect(news[0].title).toBe("Airport is open");
         expect(news[2].isEmergency).toBe(true); // "Flood warning" should be emergency
-        expect(news[0].source).toBe("Verified Source: OnlineKhabar");
+        expect(news[0].source).toBe("Verified Source: OnlineKhabar English");
     });
 
     it("should handle API errors gracefully", async () => {

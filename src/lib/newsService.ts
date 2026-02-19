@@ -13,19 +13,26 @@ const NEPAL_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1544735716-392fe
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapItems = (items: any[], sourceName: string): NewsItem[] => {
     const emergencyKeywords = ['flood', 'landslide', 'earthquake', 'avalanche', 'emergency', 'disaster', 'alert'];
-    return items.slice(0, 10).map((item): NewsItem => {
-        const titleLower = item.title.toLowerCase();
-        const isEmergency = emergencyKeywords.some(k => titleLower.includes(k));
-        return {
-            title: item.title,
-            link: item.link,
-            pubDate: item.pubDate || new Date().toISOString(),
-            thumbnail: item.thumbnail || item.enclosure?.link || NEPAL_FALLBACK_IMAGE,
-            source: `Verified Source: ${sourceName}`,
-            isEmergency,
-            lastUpdated: new Date().toLocaleTimeString(),
-        };
-    });
+    const irrelevantKeywords = ['irrelevant', 'spam', 'ads'];
+
+    return items
+        .filter(item => {
+            const titleLower = item.title.toLowerCase();
+            return !irrelevantKeywords.some(k => titleLower.includes(k));
+        })
+        .slice(0, 10).map((item): NewsItem => {
+            const titleLower = item.title.toLowerCase();
+            const isEmergency = emergencyKeywords.some(k => titleLower.includes(k));
+            return {
+                title: item.title,
+                link: item.link,
+                pubDate: item.pubDate || new Date().toISOString(),
+                thumbnail: item.thumbnail || item.enclosure?.link || NEPAL_FALLBACK_IMAGE,
+                source: `Verified Source: ${sourceName}`,
+                isEmergency,
+                lastUpdated: new Date().toLocaleTimeString(),
+            };
+        });
 };
 
 const SOURCES = [
