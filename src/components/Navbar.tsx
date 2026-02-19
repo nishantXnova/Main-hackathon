@@ -63,12 +63,22 @@ const Navbar = () => {
             }`} />
           <span className={`font-display text-2xl font-bold transition-colors duration-300 ${isScrolled ? "text-foreground" : "text-primary-foreground"
             }`}>
-            GoNepal <span className="text-[10px] opacity-50 ml-1">v2.1</span>
+            GoNepal <span className="text-[10px] opacity-50 ml-1">v2.2</span>
           </span>
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-5 text-sm">
+          {/* Tourist ID Link */}
+          <Link
+            to="/tourist-id"
+            className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer flex items-center gap-1 ${isScrolled ? "text-foreground" : "text-primary-foreground"
+              }`}
+          >
+            <BadgeCheck className="w-3.5 h-3.5" />
+            Tourist ID
+          </Link>
+
           {navLinks.map((link) => (
             <a
               key={link.href}
@@ -96,15 +106,6 @@ const Navbar = () => {
             Weather
           </button>
 
-          {/* Tourist ID Link */}
-          <Link
-            to="/tourist-id"
-            className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer flex items-center gap-1 ${isScrolled ? "text-foreground" : "text-primary-foreground"
-              }`}
-          >
-            <BadgeCheck className="w-3.5 h-3.5" />
-            Tourist ID
-          </Link>
 
           {/* News Quick Link */}
           <Link
