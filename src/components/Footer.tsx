@@ -78,7 +78,7 @@ const Footer = () => {
               <span className="font-display text-2xl font-bold">GoNepal</span>
             </Link>
             <p className="text-primary-foreground/70 mb-6 max-w-sm">
-              Your gateway to the Himalayas. Discover Nepal's breathtaking mountains, 
+              Your gateway to the Himalayas. Discover Nepal's breathtaking mountains,
               rich culture, and warm hospitality.
             </p>
             {/* Contact Info */}
@@ -104,8 +104,8 @@ const Footer = () => {
             <ul className="space-y-2">
               {footerLinks.destinations.map((link) => (
                 <li key={link.name}>
-                  <Link 
-                    to={link.href} 
+                  <Link
+                    to={link.href}
                     className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-sm"
                   >
                     {link.name}
@@ -121,7 +121,7 @@ const Footer = () => {
             <ul className="space-y-2">
               {footerLinks.experiences.map((link) => (
                 <li key={link.name}>
-                  <button 
+                  <button
                     onClick={() => scrollToSection(link.section)}
                     className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-sm text-left"
                   >
@@ -138,7 +138,7 @@ const Footer = () => {
             <ul className="space-y-2">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
-                  <button 
+                  <button
                     onClick={() => scrollToSection(link.section)}
                     className="text-primary-foreground/70 hover:text-primary-foreground transition-colors text-sm text-left"
                   >

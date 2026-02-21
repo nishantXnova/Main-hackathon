@@ -65,24 +65,28 @@ const cardVariants = {
 
 const SeasonalHighlights = () => {
   return (
-    <section className="section-padding bg-secondary">
-      <div className="container-wide">
+    <section className="section-padding bg-secondary relative overflow-hidden">
+      <div className="container-wide relative z-10">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          transition={{ duration: 0.8 }}
+          className="text-center mb-24"
         >
-          <p className="text-accent uppercase tracking-widest text-sm font-medium mb-4">
-            Best Time to Visit
-          </p>
-          <h2 className="heading-section text-foreground mb-4">
-            Every Season is <span className="italic text-accent">Beautiful</span>
+          <div className="inline-flex items-center gap-4 mb-6">
+            <div className="h-[1px] w-8 bg-accent" />
+            <p className="text-accent uppercase tracking-[0.4em] text-xs font-bold">
+              The Ethereal Cycle
+            </p>
+            <div className="h-[1px] w-8 bg-accent" />
+          </div>
+          <h2 className="heading-section text-foreground leading-tight">
+            Nepal: Timeless in <span className="italic text-accent">Every Season</span>
           </h2>
-          <p className="text-body-large text-muted-foreground max-w-2xl mx-auto">
-            Nepal offers unique experiences throughout the year. Discover what each season has to offer.
+          <p className="text-body-large text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
+            From snow-capped peaks to lush summer valleys, discover the magnificent transformation of the Himalayas throughout the year.
           </p>
         </motion.div>
 
@@ -92,41 +96,46 @@ const SeasonalHighlights = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
         >
           {seasons.map((season) => (
             <motion.div
               key={season.name}
               variants={cardVariants}
-              whileHover={{ y: -8, transition: { duration: 0.3 } }}
-              className="group bg-card rounded-2xl p-6 relative overflow-hidden shadow-soft hover:shadow-card transition-shadow duration-500"
+              whileHover={{ y: -15, transition: { duration: 0.5, ease: "easeOut" } }}
+              className="group bg-card rounded-[2.5rem] p-8 relative overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-700 border border-white/5"
             >
+              {/* Decorative Background Element */}
+              <div className={`absolute -top-12 -right-12 w-24 h-24 rounded-full bg-gradient-to-br ${season.color} opacity-10 blur-2xl group-hover:scale-150 transition-transform duration-700`} />
+
               {/* Icon */}
               <motion.div
-                whileHover={{ rotate: 10, scale: 1.1 }}
+                whileHover={{ rotate: 15, scale: 1.1 }}
                 transition={{ type: "spring", stiffness: 300 }}
-                className={`w-14 h-14 rounded-xl bg-gradient-to-br ${season.color} flex items-center justify-center mb-4 shadow-soft`}
+                className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${season.color} flex items-center justify-center mb-8 shadow-elevated group-hover:glow-hover`}
               >
-                <season.icon className="h-7 w-7 text-primary-foreground" />
+                <season.icon className="h-8 w-8 text-primary-foreground" />
               </motion.div>
 
               {/* Season Name */}
-              <h3 className="font-display text-xl font-semibold text-foreground mb-1 group-hover:text-accent transition-colors duration-300">
-                {season.name}
-              </h3>
-              <p className="text-accent text-sm font-medium mb-3">{season.months}</p>
+              <div className="mb-6">
+                <h3 className="font-display text-2xl font-bold text-foreground mb-1 group-hover:text-accent transition-colors duration-500">
+                  {season.name}
+                </h3>
+                <p className="text-accent text-[11px] font-bold uppercase tracking-widest">{season.months}</p>
+              </div>
 
               {/* Description */}
-              <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                {season.description}
+              <p className="text-muted-foreground/80 text-sm leading-relaxed mb-8 font-light italic">
+                "{season.description}"
               </p>
 
               {/* Highlights */}
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-2 mb-8 border-t border-black/5 pt-6">
                 {season.highlights.map((highlight) => (
                   <span
                     key={highlight}
-                    className="bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs"
+                    className="bg-secondary/80 text-secondary-foreground/80 px-3 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-bold"
                   >
                     {highlight}
                   </span>
@@ -134,9 +143,12 @@ const SeasonalHighlights = () => {
               </div>
 
               {/* Best For */}
-              <p className="text-xs text-muted-foreground">
-                <span className="font-medium text-foreground">Best for:</span> {season.bestFor}
-              </p>
+              <div className="flex items-center gap-2 mt-auto">
+                <div className="h-[1px] w-4 bg-accent/30" />
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest leading-none">
+                  {season.bestFor}
+                </p>
+              </div>
             </motion.div>
           ))}
         </motion.div>

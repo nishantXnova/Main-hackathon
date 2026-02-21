@@ -207,28 +207,31 @@ const NearbyPlaces = () => {
         : showNearby ? places : [];
 
     return (
-        <section className="py-20 px-4 md:px-8 bg-background relative overflow-hidden" id="nearby-places">
-            <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-                    <div className="space-y-4">
-                        <Badge variant="outline" className="text-nepal-terracotta border-nepal-terracotta/30 bg-nepal-terracotta/5 px-4 py-1">
-                            Live Exploration
-                        </Badge>
-                        <h2 className="text-4xl md:text-5xl font-display text-nepal-stone">
-                            Discover <span className="text-nepal-terracotta italic">Nearby</span> Essentials
+        <section className="section-padding px-4 md:px-8 bg-background relative overflow-hidden" id="nearby-places">
+            <div className="container-wide relative z-10">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+                    <div className="space-y-6 max-w-2xl">
+                        <p className="text-accent uppercase tracking-[0.4em] text-xs font-bold flex items-center gap-4">
+                            <span className="h-[1px] w-8 bg-accent" />
+                            Live Discovery
+                        </p>
+                        <h2 className="heading-section text-foreground leading-tight">
+                            Explore <span className="italic text-accent text-glow">Nearby</span> Treasures
                         </h2>
-                        <p className="text-muted-foreground max-w-2xl text-lg">
-                            Explore hospitals, hotels, restaurants, and more within 3km of your current location.
+                        <p className="text-muted-foreground text-lg font-light leading-relaxed">
+                            Discover essential services, hidden gems, and local favorites within a 3km radius of your current location.
                         </p>
                     </div>
 
                     <Button
                         onClick={requestLocation}
                         disabled={loading || !showNearby}
-                        className="bg-nepal-terracotta hover:bg-nepal-terracotta/90 text-white gap-2 h-12 px-6 rounded-full transition-all hover:scale-105 active:scale-95 shadow-lg shadow-nepal-terracotta/20 disabled:opacity-50 disabled:hover:scale-100"
+                        className="btn-accent gap-3 h-16 px-10 rounded-full transition-all hover:scale-105 active:scale-95 shadow-elevated disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
-                        {location ? "Refresh Location" : "Find Nearby Places"}
+                        <span className="uppercase tracking-widest font-bold text-sm">
+                            {location ? "Update Location" : "Unlock Nearby Discovery"}
+                        </span>
                     </Button>
                 </div>
 

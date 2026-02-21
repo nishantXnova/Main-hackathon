@@ -37,29 +37,29 @@ const Hero = () => {
         <div className="relative z-10 container-wide text-center px-4">
           <div className="max-w-4xl mx-auto">
             {/* Tagline */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-primary-foreground/80 uppercase tracking-[0.3em] text-sm md:text-base mb-6"
+            <motion.div
+              initial={{ opacity: 0, letterSpacing: "0.1em" }}
+              animate={{ opacity: 1, letterSpacing: "0.3em" }}
+              transition={{ duration: 1.2, delay: 0.2 }}
+              className="flex items-center justify-center gap-3 text-nepal-gold uppercase text-xs md:text-sm font-semibold mb-6"
             >
-              Discover the Land of the Himalayas
-            </motion.p>
+              <div className="h-[1px] w-6 md:w-12 bg-nepal-gold/50" />
+              <span>Timeless Spirit of the Himalayas</span>
+              <div className="h-[1px] w-6 md:w-12 bg-nepal-gold/50" />
+            </motion.div>
 
             {/* Main Heading */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="heading-display text-primary-foreground mb-6"
+              transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+              className="heading-display text-primary-foreground mb-8 leading-tight"
             >
-              <span className="italic text-nepal-gold">Go</span>Nepal
+              Nepal: Land <br className="hidden md:block" /> of <span className="italic text-nepal-gold">Legends</span>
             </motion.h1>
 
             {/* Subheading */}
             <motion.p
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
               className="text-body-large text-primary-foreground/90 mb-10 max-w-2xl mx-auto"
             >
@@ -100,6 +100,7 @@ const Hero = () => {
               className="mt-5"
             >
               <motion.button
+                id="plan-my-day-trigger"
                 whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(255,215,0,0.35)" }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setShowPlanMyDay(true)}

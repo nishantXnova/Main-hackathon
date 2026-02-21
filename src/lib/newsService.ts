@@ -12,7 +12,11 @@ const NEPAL_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1544735716-392fe
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapItems = (items: any[], sourceName: string): NewsItem[] => {
-    const emergencyKeywords = ['flood', 'landslide', 'earthquake', 'avalanche', 'emergency', 'disaster', 'alert'];
+    const emergencyKeywords = [
+        'flood', 'landslide', 'earthquake', 'avalanche', 'emergency', 'disaster', 'alert',
+        'strike', 'bandh', 'protest', 'demonstration', 'blockade',
+        'holi', 'dashain', 'tihar', 'festival', 'parade'
+    ];
     const irrelevantKeywords = ['irrelevant', 'spam', 'ads'];
 
     return items
@@ -33,6 +37,11 @@ const mapItems = (items: any[], sourceName: string): NewsItem[] => {
                 lastUpdated: new Date().toLocaleTimeString(),
             };
         });
+};
+
+export const fetchAlerts = async (): Promise<NewsItem[]> => {
+    const news = await fetchNepalNews();
+    return news.filter(item => item.isEmergency);
 };
 
 const SOURCES = [

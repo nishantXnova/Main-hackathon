@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Mountain, User, LogIn, Shield, Bookmark, Newspaper, BadgeCheck } from "lucide-react";
+import { Menu, X, Mountain, User, LogIn, Shield, Bookmark, Newspaper, BadgeCheck, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "./LanguageToggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { useWeather } from "@/contexts/WeatherContext";
 
@@ -24,13 +30,9 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
+  const mainNavLinks = [
     { href: "/#destinations", label: "Destinations" },
     { href: "/#experiences", label: "Experiences" },
-    { href: "/#nearby-places", label: "Nearby" },
-    { href: "/#flights", label: "Flights" },
-    { href: "/#translator", label: "Translator" },
-    { href: "/#plan", label: "Plan Your Trip" },
   ];
 
   const handleNavClick = (href: string) => {
@@ -58,28 +60,18 @@ const Navbar = () => {
     >
       <div className="container-wide flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <Mountain className={`h-8 w-8 transition-colors duration-300 ${isScrolled ? "text-accent" : "text-primary-foreground"
+        <Link to="/" id="navbar-logo" className="flex items-center gap-2 group">
+          <Mountain className={`h-8 w-8 transition-all duration-300 ${isScrolled ? "text-accent" : "text-nepal-gold"
             }`} />
-          <span className={`font-display text-2xl font-bold transition-colors duration-300 ${isScrolled ? "text-foreground" : "text-primary-foreground"
+          <span className={`font-display text-2xl font-bold transition-colors duration-300 ${isScrolled ? "text-foreground" : "text-white"
             }`}>
-            GoNepal <span className="text-[10px] opacity-50 ml-1">v2.3</span>
+            GoNepal <span className="text-[10px] opacity-40 ml-1 font-sans tracking-widest">PREMIUM</span>
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-5 text-sm">
-          {/* Tourist ID Link */}
-          <Link
-            to="/tourist-id"
-            className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer flex items-center gap-1 ${isScrolled ? "text-foreground" : "text-primary-foreground"
-              }`}
-          >
-            <BadgeCheck className="w-3.5 h-3.5" />
-            Tourist ID
-          </Link>
-
-          {navLinks.map((link) => (
+        <div className="hidden md:flex items-center gap-8 text-sm">
+          {mainNavLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
@@ -87,95 +79,118 @@ const Navbar = () => {
                 e.preventDefault();
                 handleNavClick(link.href);
               }}
-              className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer ${isScrolled ? "text-foreground" : "text-primary-foreground"
+              className={`font-medium tracking-wide transition-all duration-300 hover:text-accent cursor-pointer ${isScrolled ? "text-foreground" : "text-white/90"
                 }`}
             >
               {link.label}
             </a>
           ))}
 
-          {/* Weather Quick Link */}
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              openWeather();
-            }}
-            className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer ${isScrolled ? "text-foreground" : "text-primary-foreground"
+          {/* Tourist ID Link */}
+          <Link
+            to="/tourist-id"
+            id="tourist-id-link"
+            className={`font-medium tracking-wide transition-all duration-300 hover:text-accent cursor-pointer flex items-center gap-1.5 ${isScrolled ? "text-foreground" : "text-white/90"
               }`}
           >
-            Weather
-          </button>
-
+            <BadgeCheck className="w-4 h-4 text-nepal-gold" />
+            Tourist ID
+          </Link>
 
           {/* News Quick Link */}
           <Link
             to="/news"
-            className={`font-medium transition-all duration-300 hover:text-accent cursor-pointer flex items-center gap-1 ${isScrolled ? "text-foreground" : "text-primary-foreground"
+            id="news-link"
+            className={`font-medium tracking-wide transition-all duration-300 hover:text-accent cursor-pointer flex items-center gap-1.5 ${isScrolled ? "text-foreground" : "text-white/90"
               }`}
           >
-            <Newspaper className="w-3.5 h-3.5" />
-            News
+            <Newspaper className="w-4 h-4" />
+            Insights
           </Link>
 
-          {/* Auth Button */}
-          {!loading && (
-            user ? (
-              <div className="flex items-center gap-2">
-                {isAdmin && (
+          {/* Travel Tools Dropdown Placeholder for now as I need to import it properly, 
+              but actually I can just use a simple list or improve the current one.
+              Wait, I'll use the proper DropdownMenu if I can.
+          */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className={`flex items-center gap-1 font-medium tracking-wide transition-all duration-300 hover:text-accent outline-none ${isScrolled ? "text-foreground" : "text-white/90"}`}>
+              Travel Tools <ChevronDown className="w-3 h-3 opacity-50" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="glass-effect border-white/10 shadow-elevated min-w-[180px] p-2">
+              <DropdownMenuItem onClick={() => handleNavClick("/#nearby-places")} className="cursor-pointer py-2 px-3 rounded-lg hover:bg-accent/10 focus:bg-accent/10">
+                Discovery Map
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavClick("/#flights")} className="cursor-pointer py-2 px-3 rounded-lg hover:bg-accent/10 focus:bg-accent/10">
+                Flight Bookings
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => openWeather()} className="cursor-pointer py-2 px-3 rounded-lg hover:bg-accent/10 focus:bg-accent/10">
+                Weather Forecast
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavClick("/#translator")} className="cursor-pointer py-2 px-3 rounded-lg hover:bg-accent/10 focus:bg-accent/10">
+                Translator
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Auth/Profile Section */}
+          <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/10">
+            {!loading && (
+              user ? (
+                <div className="flex items-center gap-3">
+                  {isAdmin && (
+                    <Button
+                      onClick={() => navigate("/admin")}
+                      variant="ghost"
+                      size="icon"
+                      className={`h-9 w-9 rounded-full transition-all duration-300 ${isScrolled
+                        ? "text-foreground hover:bg-muted"
+                        : "text-white hover:bg-white/10"
+                        }`}
+                    >
+                      <Shield className="h-5 w-5" />
+                    </Button>
+                  )}
                   <Button
-                    onClick={() => navigate("/admin")}
+                    onClick={() => navigate("/saved-places")}
                     variant="ghost"
                     size="icon"
-                    className={`rounded-full transition-all duration-300 ${isScrolled
+                    className={`h-9 w-9 rounded-full transition-all duration-300 ${isScrolled
                       ? "text-foreground hover:bg-muted"
-                      : "text-primary-foreground hover:bg-primary-foreground/20"
+                      : "text-white hover:bg-white/10"
                       }`}
                   >
-                    <Shield className="h-5 w-5" />
+                    <Bookmark className="h-5 w-5" />
                   </Button>
-                )}
-                <Button
-                  onClick={() => navigate("/saved-places")}
-                  variant="ghost"
-                  size="icon"
-                  className={`rounded-full transition-all duration-300 ${isScrolled
-                    ? "text-foreground hover:bg-muted"
-                    : "text-primary-foreground hover:bg-primary-foreground/20"
-                    }`}
-                >
-                  <Bookmark className="h-5 w-5" />
-                </Button>
-                <div className="mx-1">
                   <LanguageToggle isScrolled={isScrolled} />
+                  <Button
+                    onClick={() => navigate("/profile")}
+                    variant="ghost"
+                    size="icon"
+                    className={`h-9 w-9 rounded-full border border-white/10 transition-all duration-300 ${isScrolled
+                      ? "text-foreground hover:bg-muted border-black/5"
+                      : "text-white hover:bg-white/10"
+                      }`}
+                  >
+                    <User className="h-5 w-5" />
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => navigate("/profile")}
-                  variant="ghost"
-                  size="icon"
-                  className={`rounded-full transition-all duration-300 ${isScrolled
-                    ? "text-foreground hover:bg-muted"
-                    : "text-primary-foreground hover:bg-primary-foreground/20"
-                    }`}
-                >
-                  <User className="h-5 w-5" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <LanguageToggle isScrolled={isScrolled} />
-                <Button
-                  onClick={() => navigate("/auth")}
-                  className={`transition-all duration-300 ${isScrolled
-                    ? "btn-primary"
-                    : "bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-                    }`}
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
-              </div>
-            )
-          )}
+              ) : (
+                <div className="flex items-center gap-4">
+                  <LanguageToggle isScrolled={isScrolled} />
+                  <Button
+                    onClick={() => navigate("/auth")}
+                    className={`rounded-full px-6 font-semibold transition-all duration-500 shadow-lg ${isScrolled
+                      ? "btn-primary"
+                      : "bg-white text-primary hover:bg-white/90 scale-100 hover:scale-105"
+                      }`}
+                  >
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                </div>
+              )
+            )}
+          </div>
         </div>
 
         {/* Mobile Menu Button */}
@@ -192,7 +207,7 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 glass-effect shadow-card animate-fade-up">
           <div className="container-wide py-6 flex flex-col gap-4">
-            {navLinks.map((link) => (
+            {mainNavLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}

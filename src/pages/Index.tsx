@@ -12,6 +12,7 @@ import LanguageTranslator from "@/components/LanguageTranslator";
 import Footer from "@/components/Footer";
 import AIChatbot from "@/components/AIChatbot";
 import NearbyPlaces from "@/components/NearbyPlaces";
+import GuidedTour from "@/components/GuidedTour";
 
 const Index = () => {
   return (
@@ -30,6 +31,7 @@ const Index = () => {
       <NearbyPlaces />
       <Footer />
       <AIChatbot />
+      <GuidedTour />
     </div>
   );
 };

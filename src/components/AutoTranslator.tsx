@@ -9,11 +9,16 @@ const AutoTranslator = () => {
     // Track original text for each node to allow switching back to English
     const originalTextMap = useRef<Map<Node, string>>(new Map());
 
-    const isBrandName = (text: string) => {
+    const shouldShield = (text: string) => {
         const protectedPatterns = [
             /GoNepal/gi,
             /Go\s+Nepal/gi,
             /Go-Nepal/gi,
+            /Rs\.?\s?\d+/i,        // Rs. 500
+            /NPR\.?\s?\d+/i,       // NPR 1000
+            /\$\d+/g,              // $50
+            /\d{1,2}\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}/gi, // 20 Feb 2026
+            /\d{4}-\d{2}-\d{2}/g,  // 2026-02-20
         ];
         return protectedPatterns.some(pattern => pattern.test(text.trim()));
     };
@@ -25,7 +30,7 @@ const AutoTranslator = () => {
         const parent = node.parentElement;
         if (parent?.dataset.noTranslate === "true") return false;
 
-        if (isBrandName(node.textContent)) return false;
+        if (shouldShield(node.textContent)) return false;
 
         // Ignore script, style, and icon tags
         if (parent) {

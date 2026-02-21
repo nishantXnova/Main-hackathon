@@ -4,6 +4,7 @@ import { Cloud, CloudRain, Sun, Thermometer, MapPin, Loader2, Navigation, Wind, 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWeather } from "@/contexts/WeatherContext";
+import { GlassmorphicSkeleton } from "@/components/ui/GlassmorphicSkeleton";
 
 interface WeatherData {
     temperature: number;
@@ -258,9 +259,24 @@ const WeatherForecast = () => {
                             {/* Content */}
                             <div className="min-h-[300px] flex flex-col justify-center">
                                 {loading && !weather ? (
-                                    <div className="flex flex-col items-center justify-center py-8">
-                                        <Loader2 className="h-10 w-10 animate-spin text-nepal-forest mb-3" />
-                                        <p className="text-muted-foreground text-sm">Forecasting...</p>
+                                    <div className="space-y-6 py-4">
+                                        <div className="flex flex-col items-center justify-center py-4">
+                                            <Loader2 className="h-8 w-8 animate-spin text-nepal-forest mb-2" />
+                                            <p className="text-muted-foreground text-xs">Forecasting...</p>
+                                        </div>
+                                        <div className="text-center space-y-2">
+                                            <GlassmorphicSkeleton className="h-8 w-48 mx-auto" variant="text" />
+                                            <GlassmorphicSkeleton className="h-4 w-32 mx-auto" variant="text" />
+                                        </div>
+                                        <div className="flex items-center justify-center gap-6 py-2">
+                                            <GlassmorphicSkeleton className="h-16 w-16 rounded-2xl" />
+                                            <GlassmorphicSkeleton className="h-12 w-24" variant="text" />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <GlassmorphicSkeleton className="h-14" variant="card" />
+                                            <GlassmorphicSkeleton className="h-14" variant="card" />
+                                        </div>
+                                        <GlassmorphicSkeleton className="h-20" variant="card" />
                                     </div>
                                 ) : weather ? (
                                     <div className="space-y-6">

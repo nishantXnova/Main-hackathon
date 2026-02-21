@@ -4,15 +4,32 @@ import {
     QrCode, Shield, CheckCircle2, Download, Share2,
     Globe, Calendar, CreditCard, User, Flag, Fingerprint,
     Phone, AlertTriangle, Wifi, WifiOff, Copy, ChevronLeft,
-    Loader2, Scan, IdCard, Sparkles, Verified, X
+    Loader2, Scan, IdCard, Sparkles, Verified, X, Briefcase, Map, Languages, Plus
 } from "lucide-react";
+import { cacheTrip, getCachedTrip, isOffline, CachedTripData } from "@/lib/offlineService";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
-// ── Tourist Data (Mock) ──────────────────────────────────────────────────────
-const TOURIST_DATA = {
+// ── Tourist Data Schema ──────────────────────────────────────────────────────
+interface TouristData {
+    touristId: string;
+    name: string;
+    nationality: string;
+    nationalityFlag: string;
+    passportNumber: string;
+    visaType: string;
+    visaNumber: string;
+    entryDate: string;
+    exitDate: string;
+    status: string;
+    expiry: string;
+    emergencyContact: string;
+    photo: string | null;
+}
+
+const DEFAULT_TOURIST_DATA: TouristData = {
     touristId: "NPL-2026-0021",
     name: "John Smith",
     nationality: "United States",
@@ -28,16 +45,16 @@ const TOURIST_DATA = {
     photo: null,
 };
 
-const QR_PAYLOAD = JSON.stringify({
-    touristId: TOURIST_DATA.touristId,
-    name: TOURIST_DATA.name,
-    visaType: TOURIST_DATA.visaType,
-    expiry: TOURIST_DATA.exitDate,
-    status: TOURIST_DATA.status,
-});
-
-// ── QR Code via Google Chart API (no npm required, just HTTPS GET) ───────────
-const QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(QR_PAYLOAD)}&bgcolor=ffffff&color=1a1a1a&margin=10`;
+function getQRUrl(data: TouristData) {
+    const payload = JSON.stringify({
+        touristId: data.touristId,
+        name: data.name,
+        visaType: data.visaType,
+        expiry: data.exitDate,
+        status: data.status,
+    });
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}&bgcolor=ffffff&color=1a1a1a&margin=10`;
+}
 
 // ── Hotel Check-In Simulator ──────────────────────────────────────────────────
 const VERIFY_STEPS = [
@@ -47,7 +64,7 @@ const VERIFY_STEPS = [
     { label: "Check complete: Identity Verified ✅", icon: <CheckCircle2 className="w-4 h-4 text-green-500" />, duration: 0 },
 ];
 
-function HotelCheckin({ onClose }: { onClose: () => void }) {
+function HotelCheckin({ onClose, touristData }: { onClose: () => void; touristData: TouristData }) {
     const [phase, setPhase] = useState<"scan" | "verifying" | "done">("scan");
     const [stepIndex, setStepIndex] = useState(0);
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -79,7 +96,7 @@ function HotelCheckin({ onClose }: { onClose: () => void }) {
     const handleEmergencyContact = () => {
         toast({
             title: "📞 Emergency Contact",
-            description: `Contacting ${TOURIST_DATA.emergencyContact} via FNMIS emergency protocol…`,
+            description: `Contacting ${touristData.emergencyContact} via FNMIS emergency protocol…`,
         });
     };
 
@@ -127,7 +144,7 @@ function HotelCheckin({ onClose }: { onClose: () => void }) {
                             {/* Fake QR Scanner UI */}
                             <div className="relative mx-auto w-60 h-60 bg-gray-900 rounded-[2.5rem] overflow-hidden flex items-center justify-center border-[6px] border-[#E41B17]/10 shadow-inner">
                                 <div className="absolute inset-0 bg-gradient-to-br from-[#E41B17]/5 to-transparent" />
-                                <img src={QR_URL} alt="Tourist QR" className="w-48 h-48 opacity-40 brightness-150" />
+                                <img src={getQRUrl(touristData)} alt="Tourist QR" className="w-48 h-48 opacity-40 brightness-150" />
 
                                 {/* Animated scanning beam */}
                                 <motion.div
@@ -224,12 +241,12 @@ function HotelCheckin({ onClose }: { onClose: () => void }) {
                                             </div>
                                             <div className="grid grid-cols-2 gap-2 text-xs">
                                                 {[
-                                                    { label: "Name", value: TOURIST_DATA.name },
-                                                    { label: "Tourist ID", value: TOURIST_DATA.touristId },
-                                                    { label: "Visa Type", value: TOURIST_DATA.visaType },
-                                                    { label: "Status", value: "✅ " + TOURIST_DATA.status },
-                                                    { label: "Nationality", value: TOURIST_DATA.nationalityFlag + " " + TOURIST_DATA.nationality },
-                                                    { label: "Exit Date", value: TOURIST_DATA.exitDate },
+                                                    { label: "Name", value: touristData.name },
+                                                    { label: "Tourist ID", value: touristData.touristId },
+                                                    { label: "Visa Type", value: touristData.visaType },
+                                                    { label: "Status", value: "✅ " + touristData.status },
+                                                    { label: "Nationality", value: touristData.nationalityFlag + " " + touristData.nationality },
+                                                    { label: "Exit Date", value: touristData.exitDate },
                                                 ].map(f => (
                                                     <div key={f.label} className="bg-white/70 rounded-lg px-2.5 py-2">
                                                         <p className="text-gray-400 text-[10px] uppercase tracking-wider mb-0.5">{f.label}</p>
@@ -277,13 +294,148 @@ function HotelCheckin({ onClose }: { onClose: () => void }) {
     );
 }
 
+// ── Edit Profile Form ────────────────────────────────────────────────────────
+function EditProfileModal({ data, onSave, onClose }: { data: TouristData; onSave: (d: TouristData) => void; onClose: () => void }) {
+    const [formData, setFormData] = useState<TouristData>(data);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={onClose}
+        >
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={e => e.stopPropagation()}
+                className="w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+            >
+                <div className="bg-gray-900 text-white p-5 flex items-center justify-between">
+                    <h3 className="font-bold text-lg">Customize Your ID</h3>
+                    <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto">
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase text-gray-400">Full Name</label>
+                        <input
+                            type="text"
+                            value={formData.name}
+                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                            className="w-full bg-gray-50 border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#E41B17] outline-none"
+                            required
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-gray-400">Nationality</label>
+                            <input
+                                type="text"
+                                value={formData.nationality}
+                                onChange={e => setFormData({ ...formData, nationality: e.target.value })}
+                                className="w-full bg-gray-50 border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#E41B17] outline-none"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-gray-400">Flag Emoji</label>
+                            <input
+                                type="text"
+                                value={formData.nationalityFlag}
+                                onChange={e => setFormData({ ...formData, nationalityFlag: e.target.value })}
+                                className="w-full bg-gray-50 border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#E41B17] outline-none"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-gray-400">Passport No.</label>
+                            <input
+                                type="text"
+                                value={formData.passportNumber}
+                                onChange={e => setFormData({ ...formData, passportNumber: e.target.value })}
+                                className="w-full bg-gray-50 border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#E41B17] outline-none"
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase text-gray-400">Visa Type</label>
+                            <input
+                                type="text"
+                                value={formData.visaType}
+                                onChange={e => setFormData({ ...formData, visaType: e.target.value })}
+                                className="w-full bg-gray-50 border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#E41B17] outline-none"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase text-gray-400">Emergency Contact</label>
+                        <input
+                            type="text"
+                            value={formData.emergencyContact}
+                            onChange={e => setFormData({ ...formData, emergencyContact: e.target.value })}
+                            className="w-full bg-gray-50 border-gray-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#E41B17] outline-none"
+                            required
+                        />
+                    </div>
+                    <Button type="submit" className="w-full bg-[#E41B17] hover:bg-[#c0151a] text-white rounded-xl py-6 font-bold text-lg mt-4 shadow-lg shadow-red-500/20">
+                        Save Changes
+                    </Button>
+                </form>
+            </motion.div>
+        </motion.div>
+    );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 const DigitalTouristID = () => {
     const [showCheckin, setShowCheckin] = useState(false);
+    const [showEdit, setShowEdit] = useState(false);
     const [qrLoaded, setQrLoaded] = useState(false);
+    const [touristData, setTouristData] = useState<TouristData>(DEFAULT_TOURIST_DATA);
+    const [cachedTrip, setCachedTrip] = useState<CachedTripData | null>(null);
+    const [isCaching, setIsCaching] = useState(false);
     const { toast } = useToast();
 
-    const maskedPassport = TOURIST_DATA.passportNumber.slice(0, -4).replace(/./g, "*") + TOURIST_DATA.passportNumber.slice(-4);
+    useEffect(() => {
+        setCachedTrip(getCachedTrip());
+    }, []);
+
+    // Load from localStorage on mount
+    useEffect(() => {
+        const saved = localStorage.getItem("tourist_id_data");
+        if (saved) {
+            try {
+                setTouristData(JSON.parse(saved));
+            } catch (e) {
+                console.error("Failed to parse saved tourist data", e);
+            }
+        }
+    }, []);
+
+    const handleSave = (newData: TouristData) => {
+        setTouristData(newData);
+        localStorage.setItem("tourist_id_data", JSON.stringify(newData));
+        setShowEdit(false);
+        setQrLoaded(false); // Trigger QR reload
+        toast({
+            title: "✅ Profile Updated",
+            description: "Your Digital Tourist ID has been successfully updated.",
+        });
+    };
+
+    const maskedPassport = touristData.passportNumber.slice(0, -4).replace(/./g, "*") + touristData.passportNumber.slice(-4);
 
     const handleDownload = () => {
         toast({
@@ -297,21 +449,82 @@ const DigitalTouristID = () => {
             try {
                 await navigator.share({
                     title: "My Nepal Tourist ID",
-                    text: `Tourist ID: ${TOURIST_DATA.touristId} | ${TOURIST_DATA.name} | Visa: ${TOURIST_DATA.visaType}`,
+                    text: `Tourist ID: ${touristData.touristId} | ${touristData.name} | Visa: ${touristData.visaType}`,
                     url: window.location.href,
                 });
             } catch {
                 // Cancelled
             }
         } else {
-            await navigator.clipboard.writeText(`Tourist ID: ${TOURIST_DATA.touristId}`);
+            await navigator.clipboard.writeText(`Tourist ID: ${touristData.touristId}`);
             toast({ title: "📋 Copied to clipboard!", description: "Tourist ID copied successfully." });
         }
     };
 
     const handleCopyId = async () => {
-        await navigator.clipboard.writeText(TOURIST_DATA.touristId);
-        toast({ title: "Copied!", description: TOURIST_DATA.touristId });
+        await navigator.clipboard.writeText(touristData.touristId);
+        toast({ title: "Copied!", description: touristData.touristId });
+    };
+
+    const handleCacheTrip = async () => {
+        setIsCaching(true);
+        try {
+            // Get location
+            const pos: GeolocationPosition = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject);
+            });
+            const { latitude, longitude } = pos.coords;
+
+            // Fetch weather
+            const wRes = await fetch(
+                `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code`
+            );
+            const wData = await wRes.json();
+
+            // Reverse geocode for location name
+            let locationName = 'Current Location';
+            try {
+                const gRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                const gData = await gRes.json();
+                locationName = gData.address?.city || gData.address?.town || gData.address?.village || 'Nepal';
+            } catch { /* ignore */ }
+
+            const weatherLabel = (code: number) => {
+                if (code === 0) return 'Clear';
+                if (code < 3) return 'Partly Cloudy';
+                if (code < 50) return 'Overcast';
+                if (code < 70) return 'Rainy';
+                return 'Stormy';
+            };
+
+            cacheTrip({
+                weather: {
+                    temp: Math.round(wData.current.temperature_2m),
+                    condition: weatherLabel(wData.current.weather_code),
+                    location: locationName,
+                },
+                homeCoords: {
+                    lat: latitude,
+                    lng: longitude,
+                    address: locationName,
+                },
+            });
+
+            setCachedTrip(getCachedTrip());
+            toast({
+                title: "🎒 Trip Cached Offline",
+                description: "Weather and coordinates saved for offline access.",
+            });
+        } catch (error) {
+            console.error("Caching error:", error);
+            toast({
+                variant: "destructive",
+                title: "Failed to cache trip",
+                description: "Please check your connection and location permissions.",
+            });
+        } finally {
+            setIsCaching(false);
+        }
     };
 
     return (
@@ -320,23 +533,32 @@ const DigitalTouristID = () => {
 
             {/* Hotel Check-in Modal */}
             <AnimatePresence>
-                {showCheckin && <HotelCheckin onClose={() => setShowCheckin(false)} />}
+                {showCheckin && <HotelCheckin onClose={() => setShowCheckin(false)} touristData={touristData} />}
+            </AnimatePresence>
+
+            {/* Edit Profile Modal */}
+            <AnimatePresence>
+                {showEdit && <EditProfileModal data={touristData} onSave={handleSave} onClose={() => setShowEdit(false)} />}
             </AnimatePresence>
 
             <div className="pt-20 pb-12 px-4">
                 <div className="max-w-sm mx-auto space-y-4">
 
                     {/* Back + Header */}
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center justify-between mb-2">
                         <Link to="/" className="flex items-center gap-1.5 text-gray-500 hover:text-[#E41B17] transition-colors text-sm">
                             <ChevronLeft className="w-4 h-4" />
                             Back
                         </Link>
-                        <div className="flex-1" />
-                        <div className="flex items-center gap-1.5 text-xs text-gray-400 bg-white rounded-full px-3 py-1 border border-gray-100 shadow-sm">
-                            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                            FNMIS Connected
-                        </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowEdit(true)}
+                            className="text-xs font-bold text-[#E41B17] hover:bg-red-50 rounded-full"
+                        >
+                            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                            Customize ID
+                        </Button>
                     </div>
 
                     {/* ── Official ID Card ── */}
@@ -391,18 +613,18 @@ const DigitalTouristID = () => {
                             {/* Tourist Name */}
                             <div>
                                 <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-0.5">Tourist Name</p>
-                                <p className="text-gray-900 font-bold text-xl">{TOURIST_DATA.name}</p>
+                                <p className="text-gray-900 font-bold text-xl">{touristData.name}</p>
                             </div>
 
                             {/* Info Grid */}
                             <div className="grid grid-cols-2 gap-3">
                                 {[
-                                    { label: "Nationality", value: `${TOURIST_DATA.nationalityFlag} ${TOURIST_DATA.nationality}`, icon: <Flag className="w-3 h-3" /> },
-                                    { label: "Visa Type", value: TOURIST_DATA.visaType, icon: <Globe className="w-3 h-3" /> },
-                                    { label: "Entry Date", value: TOURIST_DATA.entryDate, icon: <Calendar className="w-3 h-3" /> },
-                                    { label: "Exit Date", value: TOURIST_DATA.exitDate, icon: <Calendar className="w-3 h-3" /> },
+                                    { label: "Nationality", value: `${touristData.nationalityFlag} ${touristData.nationality}`, icon: <Flag className="w-3 h-3" /> },
+                                    { label: "Visa Type", value: touristData.visaType, icon: <Globe className="w-3 h-3" /> },
+                                    { label: "Entry Date", value: touristData.entryDate, icon: <Calendar className="w-3 h-3" /> },
+                                    { label: "Exit Date", value: touristData.exitDate, icon: <Calendar className="w-3 h-3" /> },
                                     { label: "Passport No.", value: maskedPassport, icon: <CreditCard className="w-3 h-3" /> },
-                                    { label: "Visa No.", value: TOURIST_DATA.visaNumber, icon: <IdCard className="w-3 h-3" /> },
+                                    { label: "Visa No.", value: touristData.visaNumber, icon: <IdCard className="w-3 h-3" /> },
                                 ].map(field => (
                                     <div key={field.label} className="bg-[#F8F8F8] rounded-xl px-3 py-2.5">
                                         <div className="flex items-center gap-1 mb-1 text-gray-400">
@@ -418,7 +640,7 @@ const DigitalTouristID = () => {
                             <div className="bg-gray-900 rounded-2xl px-4 py-3 flex items-center justify-between">
                                 <div>
                                     <p className="text-gray-400 text-[9px] uppercase tracking-widest mb-0.5">Unique Tourist ID</p>
-                                    <p className="text-white font-bold font-mono text-base tracking-wider">{TOURIST_DATA.touristId}</p>
+                                    <p className="text-white font-bold font-mono text-base tracking-wider">{touristData.touristId}</p>
                                 </div>
                                 <button onClick={handleCopyId} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
                                     <Copy className="w-4 h-4 text-white" />
@@ -445,7 +667,7 @@ const DigitalTouristID = () => {
                                         className="p-3 bg-white border-2 border-gray-100 rounded-2xl shadow-sm"
                                     >
                                         <img
-                                            src={QR_URL}
+                                            src={getQRUrl(touristData)}
                                             alt="Tourist ID QR Code"
                                             className="w-44 h-44"
                                             onLoad={() => setQrLoaded(true)}
@@ -491,7 +713,7 @@ const DigitalTouristID = () => {
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[9px] text-gray-400 uppercase tracking-widest">Valid Until</p>
-                                    <p className="text-gray-700 font-bold text-xs mt-0.5">{TOURIST_DATA.exitDate}</p>
+                                    <p className="text-gray-700 font-bold text-xs mt-0.5">{touristData.exitDate}</p>
                                 </div>
                             </div>
                         </div>
@@ -536,6 +758,95 @@ const DigitalTouristID = () => {
                             Simulate Hotel Check-In
                             <div className="ml-auto text-xs bg-white/10 px-2 py-0.5 rounded-full">FNMIS</div>
                         </button>
+                    </motion.div>
+
+                    {/* ── Trekker's Offline Toolkit ── */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-gray-100"
+                    >
+                        <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <Briefcase className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-lg leading-tight">Trekker's Offline Toolkit</h3>
+                                    <p className="text-white/70 text-xs">Essential data for dead zones</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-5 space-y-4">
+                            {!cachedTrip ? (
+                                <div className="text-center py-4 space-y-4">
+                                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto">
+                                        <WifiOff className="w-8 h-8 text-gray-300" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="font-bold text-gray-800">No cached data found</p>
+                                        <p className="text-xs text-gray-500">Cache your current trip before heading into the mountains.</p>
+                                    </div>
+                                    <Button
+                                        onClick={handleCacheTrip}
+                                        disabled={isCaching}
+                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 font-bold"
+                                    >
+                                        {isCaching ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
+                                        Cache Current Trip
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-emerald-50 rounded-2xl p-3 border border-emerald-100">
+                                            <div className="flex items-center gap-2 mb-2 text-emerald-700">
+                                                <Map className="w-3.5 h-3.5" />
+                                                <p className="text-[10px] font-bold uppercase tracking-wider">Set Home</p>
+                                            </div>
+                                            <p className="text-sm font-bold text-emerald-900 truncate">{cachedTrip.homeCoords.address}</p>
+                                            <p className="text-[10px] text-emerald-600">{cachedTrip.homeCoords.lat.toFixed(4)}, {cachedTrip.homeCoords.lng.toFixed(4)}</p>
+                                        </div>
+                                        <div className="bg-blue-50 rounded-2xl p-3 border border-blue-100">
+                                            <div className="flex items-center gap-2 mb-2 text-blue-700">
+                                                <Sun className="w-3.5 h-3.5" />
+                                                <p className="text-[10px] font-bold uppercase tracking-wider">Cached Sky</p>
+                                            </div>
+                                            <p className="text-sm font-bold text-blue-900">{cachedTrip.weather.temp}° {cachedTrip.weather.condition}</p>
+                                            <p className="text-[10px] text-blue-600">Saved: {new Date(cachedTrip.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                                        <div className="flex items-center gap-2 mb-3 text-gray-600">
+                                            <Languages className="w-4 h-4" />
+                                            <p className="text-[11px] font-bold uppercase tracking-wider">Emergency Phrases</p>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {cachedTrip.emergencyPhrases.slice(0, 3).map((p, i) => (
+                                                <div key={i} className="space-y-0.5">
+                                                    <p className="text-[11px] font-bold text-gray-800">{p.english}</p>
+                                                    <p className="text-xs text-emerald-700 font-medium">{p.nepali}</p>
+                                                </div>
+                                            ))}
+                                            <p className="text-[9px] text-gray-400 text-center pt-1">+ 7 more phrases saved</p>
+                                        </div>
+                                    </div>
+
+                                    <Button
+                                        onClick={handleCacheTrip}
+                                        variant="outline"
+                                        disabled={isCaching}
+                                        className="w-full border-emerald-200 text-emerald-700 hover:bg-emerald-50 rounded-xl py-5 font-bold text-xs"
+                                    >
+                                        {isCaching ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                                        Update Cached Trip
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </motion.div>
 
                     {/* Disclaimer */}

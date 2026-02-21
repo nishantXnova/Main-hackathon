@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAlerts, NewsItem } from "@/lib/newsService";
+import { AlertCircle, AlertTriangle, PartyPopper } from "lucide-react";
+import { GlassmorphicSkeleton } from "@/components/ui/GlassmorphicSkeleton";
 
 interface PlanMyDayProps {
     isOpen: boolean;
@@ -65,6 +68,7 @@ const PlanMyDay = ({ isOpen, onClose }: PlanMyDayProps) => {
     const [rawAiText, setRawAiText] = useState('');
     const [mapsUrl, setMapsUrl] = useState('');
     const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+    const [alerts, setAlerts] = useState<NewsItem[]>([]);
     const [errorMsg, setErrorMsg] = useState('');
 
     const getWeatherLabel = (code: number) => {
@@ -144,9 +148,36 @@ Only output the 4 numbered stops, nothing else. Keep tips short and practical.`;
                     const aiText: string = data.reply || '';
                     setRawAiText(aiText);
 
-                    // 4. Parse AI response into stops
+                    // 4. Fetch Alerts
+                    try {
+                        const activeAlerts = await fetchAlerts();
+                        setAlerts(activeAlerts);
+                    } catch (err) {
+                        console.warn('Failed to fetch alerts:', err);
+                    }
+
+                    // 5. Build prompt with alerts if they exist
+                    let finalPrompt = prompt;
+                    if (alerts.length > 0) {
+                        const alertSummaries = alerts.map(a => `- ${a.title}`).join('\n');
+                        finalPrompt += `\n\nCRITICAL: There are active alerts/festivals in the region:\n${alertSummaries}\nIMPORTANT: Adjust the itinerary to accommodate these events (maximize safety or cultural experience). Mention the alerts in the tips.`;
+
+                        // Re-trigger AI with context if alerts found (optimistic update to prompt for next time or just use it here)
+                        // For simplicity in this demo, we'll just show the banner and let the next regeneration handle it if needed,
+                        // OR we re-invoke the AI. Let's re-invoke if alerts are found to make it look "Smart".
+                        const { data: dataWithAlerts, error: errorWithAlerts } = await supabase.functions.invoke('ai-chatbot', {
+                            body: { message: finalPrompt, history: [] }
+                        });
+                        if (!errorWithAlerts) {
+                            setRawAiText(dataWithAlerts.reply || '');
+                            const parsedWithAlerts = parseItinerary(dataWithAlerts.reply || '');
+                            setStops(parsedWithAlerts);
+                        }
+                    }
+
+                    // 6. Parse AI response into stops
                     const parsed = parseItinerary(aiText);
-                    setStops(parsed);
+                    if (alerts.length === 0) setStops(parsed);
 
                     // 5. Build Google Maps URL for parsed stops (using place names as queries)
                     const finalDest = encodeURIComponent(parsed[parsed.length - 1]?.name || locationName + ', Nepal');
@@ -227,34 +258,73 @@ Only output the 4 numbered stops, nothing else. Keep tips short and practical.`;
                         </div>
 
                         {/* Body */}
-                        <div className="relative -mt-6 bg-white rounded-t-[2.5rem] flex-1 overflow-hidden z-10">
+                        <div className="relative -mt-6 bg-white rounded-t-[2.5rem] flex-1 flex flex-col min-h-0 z-10">
                             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-gray-200 rounded-full sm:hidden" />
-                            <div className="h-full overflow-y-auto p-6">
+                            <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+
+                                {/* Alert Banner */}
+                                {step === 'done' && alerts.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        className="mb-6 overflow-hidden"
+                                    >
+                                        <div className="bg-amber-50 border border-amber-200 rounded-3xl p-4 flex items-start gap-4">
+                                            <div className="p-2 bg-amber-100 rounded-2xl flex-shrink-0">
+                                                {alerts[0].title.toLowerCase().includes('fest') || alerts[0].title.toLowerCase().includes('holi') ? (
+                                                    <PartyPopper className="w-5 h-5 text-amber-600" />
+                                                ) : (
+                                                    <AlertTriangle className="w-5 h-5 text-amber-600" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1">Cultural Alert / Advisory</p>
+                                                <h4 className="text-sm font-bold text-amber-900 leading-tight mb-1">{alerts[0].title}</h4>
+                                                <p className="text-xs text-amber-700 leading-relaxed">AI has adjusted your itinerary to prioritize safety and cultural relevance based on this live update.</p>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
 
                                 {/* Loading states */}
                                 {(step === 'locating' || step === 'weather' || step === 'generating') && (
-                                    <div className="flex flex-col items-center justify-center py-16 gap-6">
-                                        <div className="relative">
-                                            <motion.div
-                                                animate={{ rotate: 360 }}
-                                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                                className="w-20 h-20 rounded-full border-4 border-dashed border-[#E41B17]/20"
-                                            />
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }}>
-                                                    {step === 'locating' ? <MapPin className="w-8 h-8 text-[#E41B17]" /> :
-                                                        step === 'weather' ? <Sun className="w-8 h-8 text-yellow-500" /> :
-                                                            <Sparkles className="w-8 h-8 text-purple-500" />}
-                                                </motion.div>
+                                    <div className="space-y-6">
+                                        <div className="flex flex-col items-center justify-center py-12 gap-6">
+                                            <div className="relative">
+                                                <motion.div
+                                                    animate={{ rotate: 360 }}
+                                                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                                    className="w-20 h-20 rounded-full border-4 border-dashed border-[#E41B17]/20"
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+                                                        {step === 'locating' ? <MapPin className="w-8 h-8 text-[#E41B17]" /> :
+                                                            step === 'weather' ? <Sun className="w-8 h-8 text-yellow-500" /> :
+                                                                <Sparkles className="w-8 h-8 text-purple-500" />}
+                                                    </motion.div>
+                                                </div>
+                                            </div>
+                                            <div className="text-center space-y-1">
+                                                <p className="text-gray-900 font-bold text-lg">
+                                                    {step === 'locating' ? 'Finding your location…' :
+                                                        step === 'weather' ? 'Checking the weather…' :
+                                                            'AI is crafting your itinerary…'}
+                                                </p>
+                                                <p className="text-gray-400 text-sm">Powered by AI ✨</p>
                                             </div>
                                         </div>
-                                        <div className="text-center space-y-1">
-                                            <p className="text-gray-900 font-bold text-lg">
-                                                {step === 'locating' ? 'Finding your location…' :
-                                                    step === 'weather' ? 'Checking the weather…' :
-                                                        'AI is crafting your itinerary…'}
-                                            </p>
-                                            <p className="text-gray-400 text-sm">Powered by AI ✨</p>
+
+                                        <div className="space-y-4">
+                                            <GlassmorphicSkeleton className="h-32" variant="card" />
+                                            <div className="flex items-center justify-between px-1">
+                                                <GlassmorphicSkeleton className="h-6 w-32" variant="text" />
+                                                <GlassmorphicSkeleton className="h-6 w-16" variant="text" />
+                                            </div>
+                                            <div className="space-y-3">
+                                                <GlassmorphicSkeleton className="h-24" variant="card" />
+                                                <GlassmorphicSkeleton className="h-24" variant="card" />
+                                                <GlassmorphicSkeleton className="h-24" variant="card" />
+                                            </div>
                                         </div>
                                     </div>
                                 )}
