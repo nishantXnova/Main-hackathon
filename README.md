@@ -80,6 +80,8 @@ Designed specifically for the wandering traveler, our map integration is your di
 
 ## 🏗️ Technical Architecture
 
+![GoNepal Workflow Architecture](./flowchart.png)
+
 ### Frontend Architecture
 - **State Management**: React Context API for Global Language and Auth states.
 - **Styling**: A bespoke design system built on **shadcn/ui** and **Tailwind CSS**, featuring glassmorphism and motion-based navigation via **Framer Motion**.
