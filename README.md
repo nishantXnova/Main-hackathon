@@ -22,15 +22,16 @@ GoNepal is a high-performance, premium travel companion platform built to revolu
 
 ---
 
-## ⚡ TECHNICAL ACHIEVEMENTS: Built Different
+## ⚡ TECHNICAL ACHIEVEMENTS: Engineered for Excellence
+*Reframing the future of travel tech with architectural precision.*
 
-### 📊 Performance Metrics That Matter
-| Metric | **GoNepal** | Industry Avg | Advantage |
+### 📊 Performance Targets (Architectural Benchmarks)
+| Metric | **GoNepal Target** | Industry Avg | Advantage |
 | :--- | :--- | :--- | :--- |
 | **Cache Hit Rate** | **73.4%** | 20-30% | **3.5x higher** |
 | **API Cost Savings** | **64%** | 0% | **Industry leading** |
 | **Battery Drain** | **-22%** | +15% | **37% better** |
-| **Load Time** | **0.3s** | 5s | **16x faster** |
+| **Projected Load Time**| **0.3s** | 5s | **16x faster** |
 | **Offline Critical Features** | **100%** | 10-20% | **Himalaya-ready** |
 
 ### 🧠 The Cache Architecture (That Makes This Possible)
@@ -46,11 +47,11 @@ const STORAGE_KEY = "trekker_offline_toolkit";
 // Persists: Weather, GPS Home Base, Emergency Phrasebook
 ```
 
-### 💰 The Math: $30,000+ Annual Savings
+### 💰 The Math: $30,000+ Projected Annual Savings
 - **Without GoNepal Caching**: $42,000/year
 - **With GoNepal Caching**: $11,220/year
 - **━━━━━━━━━━━━━━━━━━━━━━━━━━━━**
-- **SAVINGS: $30,780/year 🚀**
+- **PROJECTED SAVINGS: $30,780/year 🚀**
 
 ### 🔋 Real-World Impact at 4,000m
 > "Other apps die when signal drops. GoNepal thrives."
@@ -68,11 +69,11 @@ In the Annapurna Base Camp (No Signal):
 ### 🏆 Why We're First in Nepal
 | Feature | Others | **GoNepal** |
 | :--- | :--- | :--- |
-| **Cache Hit Rate Published** | ❌ None | ✅ **73.4% (PROVEN)** |
+| **Cache Hit Rate Strategy**| ❌ None | ✅ **73.4% (Architectural)** |
 | **Auto-Translation Cache** | ❌ None | ✅ **Memory + localStorage** |
 | **Offline Digital ID** | ❌ None | ✅ **100% functional** |
-| **Battery Optimization** | ❌ Not measured | ✅ **22% improvement** |
-| **API Cost Optimization** | ❌ Not tracked | ✅ **64% savings** |
+| **Battery Optimization** | ❌ Not measured | ✅ **22% Est. improvement** |
+| **API Cost Optimization** | ❌ Not tracked | ✅ **64% Projected savings** |
 
 ### 🎯 The Proof Is in the Code
 Our **Neural DOM Translation Layer** doesn't just translate—it learns. By caching every translated string in memory (`translationCache`), subsequent visits to any page are instant. No network call. No waiting. No battery drain.
@@ -126,6 +127,21 @@ Based on Google Translate API pricing ($20 / 1M characters):
 ### 🏔️ EQUATION 5: Offline Availability
 We verified the **Top 9 Critical Features** (ID, Emergency Contacts, Phrases, Maps, etc.). All 9 are backed by persistent local storage.
 **Result**: **100% Offline Critical Feature Availability.**
+
+---
+
+## 📊 THE HONEST TRUTH: Targets vs. Proof
+> "We're a hackathon project with zero real users... yet. But we built for millions."
+
+We want to be 100% transparent: The numbers above are **architectural targets** and **mathematical projections**, not measured production data. 
+
+**What's REAL right now:**
+- ✅ Our **`translationCache`** object is implemented and functioning in every session.
+- ✅ Our **`localStorage`** persistence is live and keeping users safe offline.
+- ✅ **Google's API Pricing ($20/M chars)** is public and the basis for our math.
+- ✅ **Android Power Profiles (0.8mAh/request)** are industry standards we designed against.
+
+The **73.4%** is the target efficiency of our cache-first system based on our current UI/Data ratio. We haven't reached it in production yet, but the architecture is ready to hit it on Day 1.
 
 ---
 
