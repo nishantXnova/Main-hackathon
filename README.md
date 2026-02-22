@@ -29,7 +29,7 @@ GoNepal is a high-performance, premium travel companion platform built to revolu
 | Metric | **GoNepal Target** | Industry Avg | Advantage |
 | :--- | :--- | :--- | :--- |
 | **Cache Hit Rate** | **73.4%** | 20-30% | **3.5x higher** |
-| **API Cost Savings** | **64%** | 0% | **Industry leading** |
+| **API Cost Savings** | **64%** | 0% | **Architecturally Optimized** |
 | **Battery Drain** | **-22%** | +15% | **37% better** |
 | **Projected Load Time**| **0.3s** | 5s | **16x faster** |
 | **Offline Critical Features** | **100%** | 10-20% | **Himalaya-ready** |
@@ -66,7 +66,7 @@ In the Annapurna Base Camp (No Signal):
 
 **The Result**: 22% longer battery life = **2+ extra hours** of trekking when it matters most.
 
-### 🏆 Why We're First in Nepal
+### 🏆 Specialized for Nepalese Terrain
 | Feature | Others | **GoNepal** |
 | :--- | :--- | :--- |
 | **Cache Hit Rate Strategy**| ❌ None | ✅ **73.4% (Architectural)** |
@@ -84,8 +84,8 @@ The **Trekker's Offline Toolkit** (`localStorage`) ensures that even when users 
 
 ---
 
-## 🧮 THE MATH: Pure, Unarguable, Set in Stone
-*"Math is Math - It Cannot Be Wrong"*
+## 🧮 THE VERIFICATION: Architectural Proof & Models
+*"Engineering Logic - Verifiable by Design"*
 
 ### 📊 EQUATION 1: Cache Hit Rate
 **The Formula**: `Cache Hit Rate = (HITS) ÷ (TOTAL REQUESTS) × 100`

@@ -68,11 +68,14 @@ const AnimatedRoutes = () => {
   );
 };
 
+import PerformanceMonitor from "./components/PerformanceMonitor";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <LanguageProvider>
         <AutoTranslator />
+        <PerformanceMonitor />
         <WeatherProvider>
           <WeatherForecast />
           <TooltipProvider>

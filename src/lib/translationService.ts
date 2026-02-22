@@ -18,6 +18,8 @@ export const clearTranslationCache = () => {
     Object.keys(translationCache).forEach(key => delete translationCache[key]);
 };
 
+import { trackMetric } from "./metricsService";
+
 export const translateText = async (
     text: string,
     from: string = "auto",
@@ -25,11 +27,17 @@ export const translateText = async (
 ): Promise<string> => {
     if (!text.trim()) return "";
 
+    trackMetric('translation_request');
+
     // Create a unique cache key
     const cacheKey = `${from}-${to}-${text}`;
     if (translationCache[cacheKey]) {
+        trackMetric('translation_cache_hit');
         return translationCache[cacheKey];
     }
+
+    trackMetric('translation_cache_miss');
+    const startTime = Date.now();
 
     try {
         const params = new URLSearchParams({
@@ -47,6 +55,8 @@ export const translateText = async (
         }
 
         const data = await response.json();
+        const duration = Date.now() - startTime;
+        trackMetric('api_call', duration);
 
         if (data && data[0]) {
             const translatedParts = data[0].map((part: any) => part[0]);

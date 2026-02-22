@@ -41,9 +41,16 @@ export const cacheTrip = (data: Omit<CachedTripData, "timestamp" | "emergencyPhr
     localStorage.setItem(STORAGE_KEY, JSON.stringify(fullData));
 };
 
+import { trackMetric } from "./metricsService";
+
 export const getCachedTrip = (): CachedTripData | null => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) return null;
+
+    if (!navigator.onLine) {
+        trackMetric('offline_access');
+    }
+
     try {
         return JSON.parse(saved);
     } catch {

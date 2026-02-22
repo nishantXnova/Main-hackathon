@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, Play, Sparkles } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-everest.jpg";
 import PlanMyDay from "./PlanMyDay";
@@ -19,146 +19,107 @@ const Hero = () => {
     <>
       <PlanMyDay isOpen={showPlanMyDay} onClose={() => setShowPlanMyDay(false)} />
 
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+        {/* Background Image with optimized transition */}
+        <div className="absolute inset-0 z-0">
           <motion.img
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
             src={heroImage}
-            alt="Mount Everest at sunrise with prayer flags"
-            className="w-full h-full object-cover"
+            alt="Mount Everest"
+            className="w-full h-full object-cover opacity-70"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
         </div>
 
         {/* Content */}
-        <div className="relative z-10 container-wide text-center px-4">
-          <div className="max-w-4xl mx-auto">
+        <div className="relative z-10 container-wide px-4 pt-20">
+          <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
             {/* Tagline */}
             <motion.div
-              initial={{ opacity: 0, letterSpacing: "0.1em" }}
-              animate={{ opacity: 1, letterSpacing: "0.3em" }}
-              transition={{ duration: 1.2, delay: 0.2 }}
-              className="flex items-center justify-center gap-3 text-nepal-gold uppercase text-xs md:text-sm font-semibold mb-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="mb-8"
             >
-              <div className="h-[1px] w-6 md:w-12 bg-nepal-gold/50" />
-              <span>Timeless Spirit of the Himalayas</span>
-              <div className="h-[1px] w-6 md:w-12 bg-nepal-gold/50" />
+              <span className="px-4 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-[10px] md:text-xs font-medium uppercase tracking-[0.3em] text-white/80">
+                Beyond the Peaks
+              </span>
             </motion.div>
 
             {/* Main Heading */}
             <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-              className="heading-display text-primary-foreground mb-8 leading-tight"
+              transition={{ duration: 1, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className="text-5xl md:text-8xl lg:text-9xl font-bold text-white mb-8 tracking-tight leading-[0.9] font-sans"
             >
-              Nepal: Land <br className="hidden md:block" /> of <span className="italic text-nepal-gold">Legends</span>
+              Nepal. <br />
+              <span className="text-white/60">Land of Legends.</span>
             </motion.h1>
 
             {/* Subheading */}
             <motion.p
-              transition={{ duration: 0.8, delay: 0.6 }}
-              className="text-body-large text-primary-foreground/90 mb-10 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.9 }}
+              className="text-lg md:text-xl text-white/50 mb-12 max-w-2xl font-light leading-relaxed"
             >
-              From the world's highest peaks to ancient temples and vibrant cultures.
-              Your journey to the heart of the Himalayas begins here.
+              Experience the majestic Himalayas and ancient wonders through a modern lens.
+              Your journey begins at the roof of the world.
             </motion.p>
 
             {/* CTA Buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+              transition={{ duration: 1, delay: 1.1 }}
+              className="flex flex-col sm:flex-row items-center gap-6"
             >
               <Button
                 size="lg"
-                className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-elevated text-lg px-8 py-6 transition-all duration-300 hover:scale-105"
+                className="bg-white text-black hover:bg-white/90 rounded-full px-10 py-7 text-lg font-medium transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl"
                 onClick={() => scrollToSection("destinations")}
               >
-                Explore Destinations
+                Start Exploring
               </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="border-primary-foreground/50 text-primary-foreground bg-transparent hover:bg-primary-foreground/10 text-lg px-8 py-6 transition-all duration-300 hover:scale-105"
+
+              <button
                 onClick={() => scrollToSection("flights")}
+                className="group flex items-center gap-2 text-white text-lg font-medium hover:text-white/80 transition-colors"
               >
-                <Play className="mr-2 h-5 w-5" />
                 Book Flights
-              </Button>
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </button>
             </motion.div>
 
-            {/* Plan My Day Button */}
+            {/* Premium AI Trigger */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.0 }}
-              className="mt-5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 1.5 }}
+              className="mt-20"
             >
-              <motion.button
-                id="plan-my-day-trigger"
-                whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(255,215,0,0.35)" }}
-                whileTap={{ scale: 0.97 }}
+              <button
                 onClick={() => setShowPlanMyDay(true)}
-                className="inline-flex items-center gap-2.5 bg-gradient-to-r from-nepal-gold via-yellow-400 to-amber-400 text-gray-900 font-bold px-7 py-3.5 rounded-full shadow-lg text-sm md:text-base transition-all duration-300 border-2 border-yellow-300/40"
+                className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-all duration-500 group"
               >
-                <Sparkles className="w-5 h-5" />
-                ✨ Plan My Day — AI Itinerary
-                <Sparkles className="w-5 h-5" />
-              </motion.button>
-              <p className="text-primary-foreground/50 text-xs mt-2">
-                Uses your location & weather to craft a perfect day
-              </p>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.1 }}
-              className="grid grid-cols-3 gap-6 md:gap-12 mt-14 md:mt-20"
-            >
-              {[
-                { value: "8", label: "of 14 Highest Peaks" },
-                { value: "10+", label: "UNESCO Sites" },
-                { value: "125+", label: "Ethnic Groups" },
-              ].map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 1.3 + index * 0.1 }}
-                  className="text-center"
-                >
-                  <p className="font-display text-3xl md:text-5xl font-bold text-primary-foreground">{stat.value}</p>
-                  <p className="text-primary-foreground/70 text-sm md:text-base mt-1">{stat.label}</p>
-                </motion.div>
-              ))}
+                <Sparkles className="w-5 h-5 text-nepal-gold transition-transform group-hover:rotate-12" />
+                <span className="text-white/80 font-medium">✨ Design your perfect day with AI</span>
+              </button>
             </motion.div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
+        {/* Minimal Scroll Indicator */}
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1, y: [0, 10, 0] }}
-          transition={{
-            opacity: { duration: 0.6, delay: 1.5 },
-            y: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-          }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 2 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
-          <button
-            onClick={() => scrollToSection("categories")}
-            className="flex flex-col items-center text-primary-foreground/70 hover:text-primary-foreground transition-colors"
-          >
-            <span className="text-sm mb-2">Scroll to explore</span>
-            <ChevronDown className="h-6 w-6" />
-          </button>
+          <div className="w-[1px] h-12 bg-gradient-to-b from-white/50 to-transparent" />
         </motion.div>
       </section>
     </>
@@ -166,3 +127,4 @@ const Hero = () => {
 };
 
 export default Hero;
+
