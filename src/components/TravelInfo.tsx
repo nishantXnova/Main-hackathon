@@ -82,7 +82,7 @@ const TravelInfo = () => {
     <section className="section-padding bg-secondary">
       <div className="container-wide">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <p className="text-accent uppercase tracking-widest text-sm font-medium mb-4">
             Travel Essentials
           </p>
@@ -103,9 +103,7 @@ const TravelInfo = () => {
             >
               {/* Category Header */}
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <category.icon className="h-6 w-6 text-accent" />
-                </div>
+                <category.icon className="w-8 h-8 text-orange-400" />
                 <h3 className="font-display text-xl font-semibold text-foreground">
                   {category.title}
                 </h3>

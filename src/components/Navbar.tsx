@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Mountain, User, LogIn, Shield, Bookmark, Newspaper, BadgeCheck, ChevronDown } from "lucide-react";
+import { Menu, X, Mountain, User, LogIn, Shield, Bookmark, Newspaper, BadgeCheck, ChevronDown, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "./LanguageToggle";
+import OfflineToolkit from "./OfflineToolkit";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { openWeather } = useWeather();
+  const [isOfflineToolkitOpen, setIsOfflineToolkitOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
@@ -58,6 +60,7 @@ const Navbar = () => {
         : "bg-transparent py-5"
         }`}
     >
+      <OfflineToolkit isOpen={isOfflineToolkitOpen} onClose={() => setIsOfflineToolkitOpen(false)} />
       <div className="container-wide flex items-center justify-between">
         {/* Logo */}
         <Link to="/" id="navbar-logo" className="flex items-center gap-2 group">
@@ -125,6 +128,10 @@ const Navbar = () => {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => openWeather()} className="cursor-pointer py-2 px-3 rounded-lg hover:bg-accent/10 focus:bg-accent/10">
                 Weather Forecast
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsOfflineToolkitOpen(true)} className="cursor-pointer py-2 px-3 rounded-lg hover:bg-accent/10 focus:bg-accent/10 flex items-center gap-2">
+                <Package className="w-4 h-4" />
+                Offline Toolkit
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleNavClick("/#translator")} className="cursor-pointer py-2 px-3 rounded-lg hover:bg-accent/10 focus:bg-accent/10">
                 Translator

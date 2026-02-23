@@ -1,3 +1,13 @@
+import { trackMetric } from "./metricsService";
+
+export interface DigitalID {
+    name: string;
+    passportNumber: string;
+    nationality: string;
+    emergencyContact: string;
+    dob: string;
+}
+
 export interface CachedTripData {
     weather: {
         temp: number;
@@ -14,8 +24,24 @@ export interface CachedTripData {
         nepali: string;
         phonetic: string;
     }[];
+    digitalID?: DigitalID;
     timestamp: number;
 }
+
+// TTL Constants (in milliseconds)
+export const TTL = {
+    WEATHER: 6 * 60 * 60 * 1000,        // 6 hours
+    MAPS: 7 * 24 * 60 * 60 * 1000,     // 7 days
+    EMERGENCY_PHRASES: Infinity,        // forever
+    DIGITAL_ID: Infinity,               // forever
+} as const;
+
+// Check if weather data is stale
+export const isWeatherStale = (timestamp: number): boolean => {
+    const currentTime = Date.now();
+    const age = currentTime - timestamp;
+    return age > TTL.WEATHER;
+};
 
 const STORAGE_KEY = "trekker_offline_toolkit";
 
@@ -40,8 +66,6 @@ export const cacheTrip = (data: Omit<CachedTripData, "timestamp" | "emergencyPhr
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(fullData));
 };
-
-import { trackMetric } from "./metricsService";
 
 export const getCachedTrip = (): CachedTripData | null => {
     const saved = localStorage.getItem(STORAGE_KEY);

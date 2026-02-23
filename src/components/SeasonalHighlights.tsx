@@ -6,7 +6,6 @@ const seasons = [
     name: "Spring",
     months: "March - May",
     icon: Sun,
-    color: "from-pink-400 to-rose-500",
     description: "Rhododendrons bloom across the hills. Perfect trekking weather with clear mountain views.",
     highlights: ["Wildflower blooms", "Holi festival", "Clear skies"],
     bestFor: "Trekking, Photography",
@@ -15,7 +14,6 @@ const seasons = [
     name: "Monsoon",
     months: "June - August",
     icon: Cloud,
-    color: "from-emerald-400 to-teal-500",
     description: "Lush green landscapes and fewer tourists. Great for cultural experiences and budget travel.",
     highlights: ["Green valleys", "Lower prices", "Cultural tours"],
     bestFor: "Culture, Budget Travel",
@@ -24,7 +22,6 @@ const seasons = [
     name: "Autumn",
     months: "September - November",
     icon: Leaf,
-    color: "from-amber-400 to-orange-500",
     description: "Peak season with crystal-clear visibility. The best time for mountain views and festivals.",
     highlights: ["Best visibility", "Dashain festival", "Ideal weather"],
     bestFor: "Trekking, Festivals",
@@ -33,7 +30,6 @@ const seasons = [
     name: "Winter",
     months: "December - February",
     icon: Snowflake,
-    color: "from-sky-400 to-blue-500",
     description: "Crisp, clear days with stunning mountain views. Perfect for lower altitude treks.",
     highlights: ["Snow-capped peaks", "Wildlife spotting", "Fewer crowds"],
     bestFor: "Wildlife, Photography",
@@ -73,7 +69,7 @@ const SeasonalHighlights = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-24"
+          className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-4 mb-6">
             <div className="h-[1px] w-8 bg-accent" />
@@ -106,16 +102,10 @@ const SeasonalHighlights = () => {
               className="group bg-card rounded-[2.5rem] p-8 relative overflow-hidden shadow-soft hover:shadow-elevated transition-all duration-700 border border-white/5"
             >
               {/* Decorative Background Element */}
-              <div className={`absolute -top-12 -right-12 w-24 h-24 rounded-full bg-gradient-to-br ${season.color} opacity-10 blur-2xl group-hover:scale-150 transition-transform duration-700`} />
+              <div className={`absolute -top-12 -right-12 w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 opacity-10 blur-2xl group-hover:scale-150 transition-transform duration-700`} />
 
               {/* Icon */}
-              <motion.div
-                whileHover={{ rotate: 15, scale: 1.1 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${season.color} flex items-center justify-center mb-8 shadow-elevated group-hover:glow-hover`}
-              >
-                <season.icon className="h-8 w-8 text-primary-foreground" />
-              </motion.div>
+              <season.icon className="w-8 h-8 text-orange-400 mb-4" />
 
               {/* Season Name */}
               <div className="mb-6">

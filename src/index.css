@@ -114,9 +114,16 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   h1,
@@ -126,6 +133,12 @@
   h5,
   h6 {
     font-family: 'Playfair Display', serif;
+  }
+  
+  /* GPU acceleration for all animated elements */
+  *, *::before, *::after {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 }
 
@@ -150,13 +163,13 @@
   }
 
   .card-hover {
-    @apply transition-all duration-700 hover:shadow-elevated hover:-translate-y-2;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    @apply transition-transform duration-300 hover:shadow-elevated hover:-translate-y-2;
+    will-change: transform;
   }
 
   .image-zoom {
-    @apply transition-transform duration-1000;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    @apply transition-transform duration-300;
+    will-change: transform;
   }
 
   .image-zoom:hover {
@@ -164,7 +177,8 @@
   }
 
   .glow-hover {
-    @apply transition-all duration-500 hover:shadow-[0_0_20px_rgba(25,85,55,0.3)] hover:scale-105;
+    @apply transition-transform duration-300 hover:shadow-[0_0_20px_rgba(25,85,55,0.3)] hover:scale-105;
+    will-change: transform;
   }
 
   .text-glow {
@@ -176,17 +190,24 @@
   }
 
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-500;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-transform duration-200;
     @apply shadow-soft hover:shadow-elevated hover:scale-105 active:scale-95 rounded-full;
+    will-change: transform;
   }
 
   .btn-accent {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-500;
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-transform duration-200;
     @apply shadow-soft hover:shadow-elevated hover:scale-105 active:scale-95 rounded-full;
+    will-change: transform;
   }
 
   .section-padding {
-    @apply py-24 md:py-32 lg:py-48;
+    @apply py-16 md:py-20 lg:py-24;
+  }
+
+  /* Section header margin reduction */
+  .section-header {
+    @apply mb-8 md:mb-10 lg:mb-12;
   }
 
   .container-wide {
@@ -197,23 +218,28 @@
 
 @layer utilities {
   .animate-fade-up {
-    animation: fadeUp 0.8s ease-out forwards;
+    animation: fadeUp 0.5s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
+    animation: fadeIn 0.4s ease-out forwards;
+    will-change: opacity;
   }
 
   .animate-scale-in {
-    animation: scaleIn 0.5s ease-out forwards;
+    animation: scaleIn 0.3s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .animate-slide-in-left {
-    animation: slideInLeft 0.6s ease-out forwards;
+    animation: slideInLeft 0.4s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .animate-slide-in-right {
-    animation: slideInRight 0.6s ease-out forwards;
+    animation: slideInRight 0.4s ease-out forwards;
+    will-change: transform, opacity;
   }
 
   .delay-100 {
@@ -235,17 +261,21 @@
   .delay-500 {
     animation-delay: 500ms;
   }
+
+  .section-divider {
+    @apply border-t border-orange-100/50;
+  }
 }
 
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translate3d(0, 20px, 0);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -262,36 +292,36 @@
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale3d(0.95, 0.95, 1);
   }
 
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale3d(1, 1, 1);
   }
 }
 
 @keyframes slideInLeft {
   from {
     opacity: 0;
-    transform: translateX(-30px);
+    transform: translate3d(-20px, 0, 0);
   }
 
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(30px);
+    transform: translate3d(20px, 0, 0);
   }
 
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 

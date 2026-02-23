@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-everest.jpg";
-import PlanMyDay from "./PlanMyDay";
+
+const PlanMyDay = lazy(() => import("./PlanMyDay"));
 
 const Hero = () => {
   const [showPlanMyDay, setShowPlanMyDay] = useState(false);
@@ -17,18 +18,21 @@ const Hero = () => {
 
   return (
     <>
-      <PlanMyDay isOpen={showPlanMyDay} onClose={() => setShowPlanMyDay(false)} />
+      {showPlanMyDay && (
+        <Suspense fallback={null}>
+          <PlanMyDay isOpen={showPlanMyDay} onClose={() => setShowPlanMyDay(false)} />
+        </Suspense>
+      )}
 
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
         {/* Background Image with optimized transition */}
         <div className="absolute inset-0 z-0">
-          <motion.img
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
+          <img
             src={heroImage}
             alt="Mount Everest"
             className="w-full h-full object-cover opacity-70"
+            loading="eager"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black" />
         </div>
@@ -40,7 +44,7 @@ const Hero = () => {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
               className="mb-8"
             >
               <span className="px-4 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-[10px] md:text-xs font-medium uppercase tracking-[0.3em] text-white/80">
@@ -52,18 +56,18 @@ const Hero = () => {
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: 0.4 }}
               className="text-5xl md:text-8xl lg:text-9xl font-bold text-white mb-8 tracking-tight leading-[0.9] font-sans"
             >
               Nepal. <br />
-              <span className="text-white/60">Land of Legends.</span>
+              <span className="text-white/60">Soul of the Himalayas.</span>
             </motion.h1>
 
             {/* Subheading */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.9 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
               className="text-lg md:text-xl text-white/50 mb-12 max-w-2xl font-light leading-relaxed"
             >
               Experience the majestic Himalayas and ancient wonders through a modern lens.
@@ -74,12 +78,12 @@ const Hero = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 1.1 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
               className="flex flex-col sm:flex-row items-center gap-6"
             >
               <Button
                 size="lg"
-                className="bg-white text-black hover:bg-white/90 rounded-full px-10 py-7 text-lg font-medium transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl"
+                className="bg-white text-black hover:bg-white/90 rounded-full px-10 py-7 text-lg font-medium transition-transform duration-200 hover:scale-105 active:scale-95 shadow-2xl"
                 onClick={() => scrollToSection("destinations")}
               >
                 Start Exploring
@@ -98,12 +102,12 @@ const Hero = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 1.5 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
               className="mt-20"
             >
               <button
                 onClick={() => setShowPlanMyDay(true)}
-                className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-all duration-500 group"
+                className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl hover:bg-white/10 transition-colors duration-200 group"
               >
                 <Sparkles className="w-5 h-5 text-nepal-gold transition-transform group-hover:rotate-12" />
                 <span className="text-white/80 font-medium">✨ Design your perfect day with AI</span>
@@ -116,7 +120,7 @@ const Hero = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 2 }}
+          transition={{ duration: 0.5, delay: 1 }}
           className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
           <div className="w-[1px] h-12 bg-gradient-to-b from-white/50 to-transparent" />

@@ -104,9 +104,7 @@ const PlanTrip = () => {
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-accent" />
-                  </div>
+                  <Sparkles className="w-5 h-5 text-orange-400" />
                   <h3 className="font-display text-xl font-semibold text-foreground">Your Custom Itinerary</h3>
                 </div>
                 <Button variant="ghost" size="icon" onClick={resetItinerary}>

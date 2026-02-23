@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Cloud, CloudRain, Sun, Thermometer, MapPin, Loader2, Navigation, Wind, Droplets, Sparkles, AlertTriangle, X, Search, LocateFixed } from "lucide-react";
+import { Cloud, CloudRain, Sun, Thermometer, MapPin, Loader2, Navigation, Wind, Droplets, Sparkles, AlertTriangle, X, Search, LocateFixed, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWeather } from "@/contexts/WeatherContext";
 import { GlassmorphicSkeleton } from "@/components/ui/GlassmorphicSkeleton";
+import { getCachedTrip, isWeatherStale } from "@/lib/offlineService";
 
 interface WeatherData {
     temperature: number;
@@ -32,8 +33,26 @@ const WeatherForecast = () => {
     const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
+    const [isOffline, setIsOffline] = useState(false);
+    const [isStale, setIsStale] = useState(false);
     const searchTimeout = useRef<NodeJS.Timeout | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
+
+    // Monitor online/offline status
+    useEffect(() => {
+        const updateOnlineStatus = () => {
+            setIsOffline(!navigator.onLine);
+        };
+        
+        updateOnlineStatus();
+        window.addEventListener("online", updateOnlineStatus);
+        window.addEventListener("offline", updateOnlineStatus);
+        
+        return () => {
+            window.removeEventListener("online", updateOnlineStatus);
+            window.removeEventListener("offline", updateOnlineStatus);
+        };
+    }, []);
 
     const getWeatherCondition = (code: number) => {
         if (code === 0) return "Clear sky";
@@ -62,9 +81,29 @@ const WeatherForecast = () => {
     };
 
     const fetchWeather = async (lat: number, lon: number, customLocationName?: string, iscurrent: boolean = false) => {
+        // If offline, try to use cached data
+        if (!navigator.onLine) {
+            const cached = getCachedTrip();
+            if (cached?.weather) {
+                setWeather({
+                    temperature: cached.weather.temp,
+                    condition: cached.weather.condition,
+                    conditionCode: 0, // Default code for cached data
+                    locationName: cached.weather.location,
+                    windSpeed: 0,
+                    humidity: 50,
+                    isCurrentLocation: false
+                });
+                setIsStale(isWeatherStale(cached.timestamp));
+                setLoading(false);
+                return;
+            }
+        }
+
         try {
             setLoading(true);
             setError(null);
+            setIsStale(false);
             // Added timezone=auto for accurate local time data syncing
             const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relativehumidity_2m&timezone=auto`;
             const response = await fetch(url);
@@ -293,6 +332,20 @@ const WeatherForecast = () => {
                                                 )}
                                             </h2>
                                             <p className="text-muted-foreground text-sm mt-1">{weather.condition}</p>
+                                            {isOffline && (
+                                                <div className="flex items-center justify-center gap-2 mt-2">
+                                                    <WifiOff className="h-4 w-4 text-amber-500" />
+                                                    {isStale ? (
+                                                        <span className="text-amber-500 text-xs bg-amber-500/10 px-2 py-1 rounded-lg">
+                                                            cached weather may be old
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-green-500 text-xs">
+                                                            Showing cached data
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="flex items-center justify-center gap-6 py-4">

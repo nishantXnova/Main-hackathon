@@ -209,7 +209,7 @@ const NearbyPlaces = () => {
     return (
         <section className="section-padding px-4 md:px-8 bg-background relative overflow-hidden" id="nearby-places">
             <div className="container-wide relative z-10">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-8">
                     <div className="space-y-6 max-w-2xl">
                         <p className="text-accent uppercase tracking-[0.4em] text-xs font-bold flex items-center gap-4">
                             <span className="h-[1px] w-8 bg-accent" />
@@ -247,9 +247,7 @@ const NearbyPlaces = () => {
                     <Card className="lg:col-span-2 overflow-hidden border-none shadow-soft h-full relative group">
                         {!location ? (
                             <div className="absolute inset-0 z-10 bg-nepal-stone/5 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 transition-all group-hover:bg-nepal-stone/10">
-                                <div className="w-20 h-20 rounded-full bg-white shadow-elevated flex items-center justify-center mb-6 animate-float">
-                                    <MapPin className="w-10 h-10 text-nepal-terracotta" />
-                                </div>
+                                <MapPin className="w-10 h-10 text-orange-400 mb-4" />
                                 <h3 className="text-2xl font-display text-nepal-stone mb-2">Location Required</h3>
                                 <p className="text-muted-foreground max-w-sm mb-8">
                                     Allow location access to visualize nearby facilities on our interactive map.

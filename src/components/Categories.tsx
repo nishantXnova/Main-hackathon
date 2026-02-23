@@ -8,28 +8,24 @@ const categories = [
     title: "Adventure",
     slug: "adventure",
     description: "Trek to Everest Base Camp, conquer mountain passes, and experience world-class adventures.",
-    color: "from-nepal-sky to-primary",
   },
   {
     icon: Landmark,
     title: "Culture",
     slug: "culture",
     description: "Explore ancient temples, vibrant festivals, and centuries-old traditions.",
-    color: "from-nepal-terracotta to-accent",
   },
   {
     icon: Trees,
     title: "Nature",
     slug: "nature",
     description: "Discover pristine national parks, rare wildlife, and breathtaking landscapes.",
-    color: "from-nepal-forest to-nepal-sky",
   },
   {
     icon: Sparkles,
     title: "Spirituality",
     slug: "spirituality",
     description: "Find peace at sacred sites, monasteries, and the birthplace of Buddha.",
-    color: "from-nepal-gold to-nepal-terracotta",
   },
 ];
 
@@ -65,7 +61,7 @@ const Categories = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-10"
         >
           <p className="text-accent uppercase tracking-widest text-sm font-medium mb-4">
             Find Your Experience
@@ -96,17 +92,11 @@ const Categories = () => {
               >
                 {/* Gradient Background on Hover */}
                 <motion.div
-                  className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
+                  className={`absolute inset-0 bg-gradient-to-br from-nepal-sky to-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500`}
                 />
 
                 {/* Icon */}
-                <motion.div
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className={`w-16 h-16 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-6 shadow-soft`}
-                >
-                  <category.icon className="h-8 w-8 text-primary-foreground" />
-                </motion.div>
+                <category.icon className="w-8 h-8 text-orange-400 mb-4" />
 
                 {/* Content */}
                 <h3 className="font-display text-2xl font-semibold text-foreground mb-3 group-hover:text-accent transition-colors duration-300">

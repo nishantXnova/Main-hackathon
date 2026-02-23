@@ -27,11 +27,26 @@ const mapItems = (items: any[], sourceName: string): NewsItem[] => {
         .slice(0, 10).map((item): NewsItem => {
             const titleLower = item.title.toLowerCase();
             const isEmergency = emergencyKeywords.some(k => titleLower.includes(k));
+
+            // More robust thumbnail extraction
+            let thumbnail = item.thumbnail || item.enclosure?.link;
+
+            // If still missing, try to find in description or content
+            if (!thumbnail && item.description) {
+                const imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
+                if (imgMatch) thumbnail = imgMatch[1];
+            }
+
+            if (!thumbnail && item.content) {
+                const imgMatch = item.content.match(/<img[^>]+src="([^">]+)"/);
+                if (imgMatch) thumbnail = imgMatch[1];
+            }
+
             return {
                 title: item.title,
                 link: item.link,
                 pubDate: item.pubDate || new Date().toISOString(),
-                thumbnail: item.thumbnail || item.enclosure?.link || NEPAL_FALLBACK_IMAGE,
+                thumbnail: thumbnail || NEPAL_FALLBACK_IMAGE,
                 source: `Verified Source: ${sourceName}`,
                 isEmergency,
                 lastUpdated: new Date().toLocaleTimeString(),

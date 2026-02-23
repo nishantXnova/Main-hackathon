@@ -78,13 +78,7 @@ const FlightBooking = () => {
             className="bg-card rounded-3xl p-8 shadow-card border border-border"
           >
             <div className="flex items-center gap-4 mb-6">
-              <motion.div
-                whileHover={{ rotate: 15, scale: 1.1 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center"
-              >
-                <Plane className="h-8 w-8 text-accent" />
-              </motion.div>
+              <Plane className="w-8 h-8 text-orange-400" />
               <div>
                 <h3 className="font-display text-2xl font-semibold text-foreground">Nepal Airlines</h3>
                 <p className="text-muted-foreground">Official National Flag Carrier</p>

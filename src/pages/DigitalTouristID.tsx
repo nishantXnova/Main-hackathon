@@ -4,7 +4,7 @@ import {
     QrCode, Shield, CheckCircle2, Download, Share2,
     Globe, Calendar, CreditCard, User, Flag, Fingerprint,
     Phone, AlertTriangle, Wifi, WifiOff, Copy, ChevronLeft,
-    Loader2, Scan, IdCard, Sparkles, Verified, X, Briefcase, Map, Languages, Plus
+    Loader2, Scan, IdCard, Sparkles, Verified, X, Briefcase, Map, Languages, Plus, Sun
 } from "lucide-react";
 import { cacheTrip, getCachedTrip, isOffline, CachedTripData } from "@/lib/offlineService";
 import { Button } from "@/components/ui/button";

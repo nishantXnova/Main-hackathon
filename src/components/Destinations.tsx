@@ -41,7 +41,7 @@ const Destinations = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col md:flex-row md:items-end md:justify-between mb-20"
+          className="flex flex-col md:flex-row md:items-end md:justify-between mb-12"
         >
           <div className="max-w-2xl">
             <p className="text-accent uppercase tracking-[0.4em] text-xs font-bold mb-6 flex items-center gap-4">

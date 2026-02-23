@@ -64,7 +64,7 @@ const Partners = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-10"
         >
           <p className="text-accent uppercase tracking-widest text-sm font-medium mb-4">
             Trusted Partners
@@ -146,13 +146,7 @@ const Partners = () => {
             >
               <div className="flex flex-col">
                 {/* Icon */}
-                <motion.div
-                  whileHover={{ rotate: 5, scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className="w-16 h-16 rounded-xl bg-secondary flex items-center justify-center mb-6"
-                >
-                  <category.icon className="h-8 w-8 text-accent" />
-                </motion.div>
+                <category.icon className="w-8 h-8 text-orange-400 mb-4" />
 
                 {/* Content */}
                 <h3 className="font-display text-2xl font-semibold text-foreground mb-2">
