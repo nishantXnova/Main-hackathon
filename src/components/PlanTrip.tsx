@@ -4,6 +4,7 @@ import { Search, Calendar, Users, DollarSign, Filter, Loader2, Sparkles, X } fro
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { parseMarkdown, cleanLatexText } from "@/lib/markdownParser";
 
 const interests = ["Adventure", "Culture", "Nature", "Spirituality", "Family"];
 const durations = ["3 days", "5 days", "7 days", "10+ days"];
@@ -42,7 +43,9 @@ const PlanTrip = () => {
       if (error) throw error;
 
       if (data.success) {
-        setItinerary(data.itinerary);
+        // Clean the LaTeX characters before setting
+        const cleanedItinerary = cleanLatexText(data.itinerary);
+        setItinerary(cleanedItinerary);
       } else {
         throw new Error(data.error || 'Failed to generate itinerary');
       }
@@ -112,8 +115,8 @@ const PlanTrip = () => {
                 </Button>
               </div>
               <div className="prose prose-sm max-w-none text-muted-foreground">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {itinerary}
+                <div className="text-sm leading-relaxed">
+                  {itinerary ? parseMarkdown(itinerary) : null}
                 </div>
               </div>
               <div className="mt-8 pt-6 border-t border-border">

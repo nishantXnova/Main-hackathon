@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
-import { Mountain, Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
+import gonepallogo from "@/assets/gonepallogo.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -74,7 +76,7 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-6">
-              <Mountain className="h-8 w-8 text-nepal-gold" />
+              <img src={gonepallogo} alt="GoNepal" className="h-10 w-auto" />
               <span className="font-display text-2xl font-bold">GoNepal</span>
             </Link>
             <p className="text-primary-foreground/70 mb-6 max-w-sm">

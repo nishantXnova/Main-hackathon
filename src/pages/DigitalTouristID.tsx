@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import html2canvas from "html2canvas";
 import {
     QrCode, Shield, CheckCircle2, Download, Share2,
     Globe, Calendar, CreditCard, User, Flag, Fingerprint,
@@ -437,27 +438,96 @@ const DigitalTouristID = () => {
 
     const maskedPassport = touristData.passportNumber.slice(0, -4).replace(/./g, "*") + touristData.passportNumber.slice(-4);
 
-    const handleDownload = () => {
-        toast({
-            title: "📥 ID Card Downloaded",
-            description: "Your Tourist ID has been saved to your device.",
-        });
+    const cardRef = useRef<HTMLDivElement>(null);
+
+    const handleDownload = async () => {
+        if (!cardRef.current) return;
+        
+        try {
+            const canvas = await html2canvas(cardRef.current, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+            });
+            
+            const link = document.createElement('a');
+            link.download = `Nepal-Tourist-ID-${touristData.touristId}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            toast({
+                title: "📥 ID Card Downloaded",
+                description: "Your Tourist ID has been saved to your device.",
+            });
+        } catch (error) {
+            console.error('Download error:', error);
+            toast({
+                variant: "destructive",
+                title: "Download Failed",
+                description: "Could not download the ID card. Please try again.",
+            });
+        }
     };
 
     const handleShare = async () => {
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: "My Nepal Tourist ID",
-                    text: `Tourist ID: ${touristData.touristId} | ${touristData.name} | Visa: ${touristData.visaType}`,
-                    url: window.location.href,
-                });
-            } catch {
-                // Cancelled
+        if (!cardRef.current) return;
+        
+        try {
+            const canvas = await html2canvas(cardRef.current, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+            });
+            
+            const imageUrl = canvas.toDataURL('image/png');
+            
+            if (navigator.share) {
+                // Convert data URL to blob for sharing
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+                const file = new File([blob], `Nepal-Tourist-ID-${touristData.touristId}.png`, { type: 'image/png' });
+                
+                try {
+                    await navigator.share({
+                        title: "My Nepal Tourist ID",
+                        text: `Tourist ID: ${touristData.touristId} | ${touristData.name} | Visa: ${touristData.visaType}`,
+                        files: [file],
+                    });
+                } catch {
+                    // Fallback if files are not supported
+                    await navigator.share({
+                        title: "My Nepal Tourist ID",
+                        text: `Tourist ID: ${touristData.touristId} | ${touristData.name} | Visa: ${touristData.visaType}\n\nCheck out my Nepal Digital Tourist ID!`,
+                        url: window.location.href,
+                    });
+                }
+            } else {
+                // Fallback: download the image
+                const link = document.createElement('a');
+                link.download = `Nepal-Tourist-ID-${touristData.touristId}.png`;
+                link.href = imageUrl;
+                link.click();
+                toast({ title: "📋 Image Downloaded!", description: "Share the downloaded image to share your ID." });
             }
-        } else {
-            await navigator.clipboard.writeText(`Tourist ID: ${touristData.touristId}`);
-            toast({ title: "📋 Copied to clipboard!", description: "Tourist ID copied successfully." });
+        } catch (error) {
+            console.error('Share error:', error);
+            // Fallback to text sharing
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: "My Nepal Tourist ID",
+                        text: `Tourist ID: ${touristData.touristId} | ${touristData.name} | Visa: ${touristData.visaType}`,
+                        url: window.location.href,
+                    });
+                } catch {
+                    // Cancelled
+                }
+            } else {
+                await navigator.clipboard.writeText(`Tourist ID: ${touristData.touristId}`);
+                toast({ title: "📋 Copied to clipboard!", description: "Tourist ID copied successfully." });
+            }
         }
     };
 
@@ -563,6 +633,7 @@ const DigitalTouristID = () => {
 
                     {/* ── Official ID Card ── */}
                     <motion.div
+                        ref={cardRef}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="relative bg-white rounded-[2.5rem] shadow-2xl overflow-hidden group perspective-1000"

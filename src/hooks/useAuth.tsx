@@ -72,13 +72,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
+          // Use explicit redirect URL for both local and production
+          emailRedirectTo: window.location.origin === 'http://localhost:8080' 
+            ? 'http://localhost:8080/auth'
+            : 'https://go-nepal.vercel.app/auth',
           data: {
             full_name: fullName || '',
             role: 'Tourist',
           },
         },
       });
+
+      console.log('Signup response:', { data, error });
+
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        console.log('Email confirmation required - confirmation email should be sent');
+      }
 
       if (!error && data.user) {
         // Manually insert profile to ensure role is saved
@@ -96,6 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       return { error };
     } catch (error) {
+      console.error('Signup error:', error);
       return { error: error as Error };
     }
   };

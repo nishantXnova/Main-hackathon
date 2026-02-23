@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Mountain, User, LogIn, Shield, Bookmark, Newspaper, BadgeCheck, ChevronDown, Package } from "lucide-react";
+import { Menu, X, User, LogIn, Shield, Bookmark, Newspaper, BadgeCheck, ChevronDown, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import LanguageToggle from "./LanguageToggle";
 import OfflineToolkit from "./OfflineToolkit";
+import gonepallogo from "@/assets/gonepallogo.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,11 +65,31 @@ const Navbar = () => {
       <div className="container-wide flex items-center justify-between">
         {/* Logo */}
         <Link to="/" id="navbar-logo" className="flex items-center gap-2 group">
-          <Mountain className={`h-8 w-8 transition-all duration-300 ${isScrolled ? "text-accent" : "text-nepal-gold"
-            }`} />
-          <span className={`font-display text-2xl font-bold transition-colors duration-300 ${isScrolled ? "text-foreground" : "text-white"
+          <div className="relative">
+            {/* Logo Image with color toggle animation */}
+            <img 
+              src={gonepallogo} 
+              alt="GoNepal Premium" 
+              className={`h-10 w-auto transition-all duration-700 ease-out transform ${isScrolled 
+                ? "grayscale-0 drop-shadow-lg scale-105" 
+                : "grayscale-0 brightness-110 scale-100 hover:scale-105"
+              }`}
+              style={{
+                filter: isScrolled 
+                  ? "sepia(100%) saturate(300%) brightness(110%) hue-rotate(-10deg)" 
+                  : "brightness(0) invert(1)" // Makes it pure white
+              }}
+            />
+            {/* Subtle shimmer effect when scrolled */}
+            {isScrolled && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer rounded-full" />
+            )}
+          </div>
+          <span className={`font-display text-2xl font-bold transition-all duration-500 ${isScrolled 
+              ? "text-orange-600 drop-shadow-sm" 
+              : "text-white/90 drop-shadow-md"
             }`}>
-            GoNepal <span className="text-[10px] opacity-40 ml-1 font-sans tracking-widest">PREMIUM</span>
+            GoNepal <span className="text-[10px] opacity-50 ml-1 font-sans tracking-widest">PREMIUM</span>
           </span>
         </Link>
 

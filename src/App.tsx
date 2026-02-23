@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -92,12 +92,31 @@ const AnimatedRoutes = () => {
 
 import PerformanceMonitor from "./components/PerformanceMonitor";
 
+// Lazy load PerformanceMonitor - only load after initial page render
+const LazyPerformanceMonitor = () => {
+  const [Monitor, setMonitor] = useState<typeof PerformanceMonitor | null>(null);
+  
+  useEffect(() => {
+    // Delay loading PerformanceMonitor by 2 seconds to prioritize initial render
+    const timer = setTimeout(() => {
+      import('./components/PerformanceMonitor').then((mod) => {
+        setMonitor(() => mod.default);
+      });
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (!Monitor) return null;
+  return <Monitor />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <LanguageProvider>
         <AutoTranslator />
-        <PerformanceMonitor />
+        <LazyPerformanceMonitor />
         <WeatherProvider>
           <WeatherForecast />
           <TooltipProvider>

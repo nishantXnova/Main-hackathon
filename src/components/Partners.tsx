@@ -1,34 +1,48 @@
 import { motion } from "framer-motion";
-import { ExternalLink, Hotel, Mountain, Package } from "lucide-react";
+import { ExternalLink, Hotel, Mountain, Package, Plane, FileText, Compass, MapPin, Users, Zap, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const airlinePartners = [
-  { name: "Buddha Air", logo: "/logos/buddha-air.svg", url: "https://www.buddhaair.com/" },
-  { name: "Yeti Airlines", logo: "/logos/yeti-airlines.svg", url: "https://yetiairlines.com/" },
-  { name: "Tara Air", logo: "/logos/tara-air.png", url: "https://taraair.com/" },
-];
 
 const partnerCategories = [
   {
-    icon: Hotel,
-    title: "Hotels & Lodges",
-    description: "From luxury resorts to authentic teahouses along the trekking trails.",
-    partners: ["Dwarika's Hotel", "Tiger Mountain Lodge", "Yeti Mountain Home"],
-    cta: "Find Accommodation",
+    icon: Plane,
+    title: "Flights",
+    emoji: "✈️",
+    description: "Search and compare flights to Kathmandu and within Nepal.",
+    cta: "Google Flights KTM",
+    url: "https://www.google.com/flights?q=flights+to+Kathmandu+Nepal",
   },
   {
-    icon: Mountain,
-    title: "Trekking Guides",
-    description: "Licensed guides and porters for safe and memorable mountain adventures.",
-    partners: ["Nepal Mountaineering", "Himalayan Guides", "Adventure Consultants"],
-    cta: "Find a Guide",
+    icon: Hotel,
+    title: "Hotels",
+    emoji: "🏨",
+    description: "Find the best accommodation deals across Nepal.",
+    cta: "Booking.com Nepal",
+    url: "https://www.booking.com/country/nepal.html",
+  },
+  {
+    icon: Compass,
+    title: "Guides",
+    emoji: "🧭",
+    description: "Discover local guides and experiences across Nepal.",
+    cta: "TripAdvisor Nepal Experiences",
+    url: "https://www.tripadvisor.com/Attractions-g293889-Activities-c42-Nepal.html",
   },
   {
     icon: Package,
     title: "Tour Packages",
-    description: "Curated experiences combining multiple destinations and activities.",
-    partners: ["Nepal Tourism Board", "Intrepid Travel", "G Adventures"],
-    cta: "Browse Packages",
+    emoji: "📦",
+    description: "Book tours, activities, and curated experiences.",
+    cta: "GetYourGuide Nepal",
+    url: "https://www.getyourguide.com/nepal-l41/",
+  },
+  {
+    icon: Mountain,
+    title: "Trekking Permits",
+    emoji: "🏔️",
+    badge: "Nepal Exclusive",
+    description: "TIMS, Annapurna & Everest permits available here.",
+    cta: "Tourism Board",
+    url: "https://tourism.gov.np/",
   },
 ];
 
@@ -56,7 +70,7 @@ const itemVariants = {
 
 const Partners = () => {
   return (
-    <section className="section-padding bg-background">
+    <section className="section-padding" style={{ background: 'linear-gradient(180deg, #FFFDF9 0%, #F5EDD8 100%)' }}>
       <div className="container-wide">
         {/* Section Header */}
         <motion.div
@@ -64,133 +78,111 @@ const Partners = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          className="text-center mb-6"
         >
-          <p className="text-accent uppercase tracking-widest text-sm font-medium mb-4">
-            Trusted Partners
-          </p>
           <h2 className="heading-section text-foreground mb-4">
             Book With <span className="italic text-accent">Confidence</span>
           </h2>
           <p className="text-body-large text-muted-foreground max-w-2xl mx-auto">
-            We've partnered with Nepal's best service providers to help you plan your perfect trip.
+            Best ways to plan and book your Nepal adventure — handpicked by our team.
           </p>
         </motion.div>
 
-        {/* Domestic Flights - Special Section with Logos */}
+        {/* Trust Badges - Centered below subtitle */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="bg-card rounded-2xl p-8 border border-border mb-8"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="flex flex-wrap justify-center gap-3 mb-10"
         >
-          <div className="flex flex-col md:flex-row md:items-center gap-6">
-            <div className="flex-1">
-              <h3 className="font-display text-2xl font-semibold text-foreground mb-2">
-                Domestic Flights
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Mountain flights and connections to remote destinations.
-              </p>
-              <Button 
-                variant="outline" 
-                className="border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300"
-                onClick={() => window.open("https://www.nepalairlines.com.np/", "_blank", "noopener,noreferrer")}
-              >
-                Book Flights
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-            
-            {/* Airline Logos */}
-            <div className="flex flex-wrap items-center gap-6">
-              {airlinePartners.map((airline, index) => (
-                <motion.a
-                  key={airline.name}
-                  href={airline.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.1, y: -5 }}
-                  className="bg-white rounded-xl p-4 shadow-soft hover:shadow-card transition-shadow duration-300 flex items-center justify-center min-w-[120px] h-[60px]"
-                >
-                  <img 
-                    src={airline.logo} 
-                    alt={airline.name}
-                    className="max-h-10 max-w-[100px] object-contain"
-                  />
-                </motion.a>
-              ))}
-            </div>
-          </div>
+          {[
+            { icon: MapPin, text: "Local Knowledge" },
+            { icon: Users, text: "Nepal-Based Team" },
+            { icon: CheckCircle, text: "Traveler Verified" },
+            { icon: Zap, text: "Free to Use" },
+          ].map((item) => (
+            <span
+              key={item.text}
+              className="bg-[#FFF4E8] text-orange-700 border border-orange-200 px-4 py-2 rounded-full text-[13px] font-medium flex items-center gap-2"
+            >
+              <item.icon className="w-4 h-4" />
+              {item.text}
+            </span>
+          ))}
         </motion.div>
 
-        {/* Other Partner Categories */}
+        {/* Partner Categories - Uniform Cards */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
         >
           {partnerCategories.map((category) => (
             <motion.div
               key={category.title}
               variants={itemVariants}
-              whileHover={{ y: -8 }}
-              className="bg-card rounded-2xl p-8 border border-border hover:border-accent/30 hover:shadow-card transition-all duration-500"
+              className="relative bg-card rounded-2xl p-6 border border-border transition-all duration-300 flex flex-col h-full min-h-[300px] group hover:shadow-lg hover:-translate-y-6"
             >
-              <div className="flex flex-col">
-                {/* Icon */}
-                <category.icon className="w-8 h-8 text-orange-400 mb-4" />
-
-                {/* Content */}
-                <h3 className="font-display text-2xl font-semibold text-foreground mb-2">
-                  {category.title}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {category.description}
-                </p>
-
-                {/* Partner Names */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {category.partners.map((partner) => (
-                    <span
-                      key={partner}
-                      className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm"
-                    >
-                      {partner}
-                    </span>
-                  ))}
-                </div>
-
-                {/* CTA */}
-                <Button 
-                  variant="outline" 
-                  className="border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300 mt-auto"
+              {/* Top border that appears on hover */}
+              <div 
+                className="absolute top-0 left-0 right-0 h-[3px] bg-[#FB923C] rounded-t-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"
+              />
+              
+              {/* Badge if present - Top Right Corner */}
+              {category.badge && (
+                <span 
+                  className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 text-xs font-semibold z-10"
+                  style={{ borderRadius: '100px' }}
                 >
-                  {category.cta}
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </Button>
+                  {category.badge}
+                </span>
+              )}
+
+              {/* Icon on Top - Lucide Icon */}
+              <div className="text-[#FB923C] mb-4">
+                <category.icon className="w-8 h-8" />
               </div>
+
+              {/* Bold Title */}
+              <h3 className="font-display text-xl font-bold text-foreground mb-2">
+                {category.title}
+              </h3>
+
+              {/* One-line Description */}
+              <p className="text-muted-foreground text-sm mb-4 flex-grow">
+                {category.description}
+              </p>
+
+              {/* CTA Button at Bottom */}
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-[#FB923C] text-white border-[#FB923C] hover:bg-[#E86C35] hover:text-white transition-all duration-300 mt-auto w-full rounded-[8px]"
+                style={{ borderRadius: '8px' }}
+                onClick={() => window.open(category.url, "_blank", "noopener,noreferrer")}
+              >
+                {category.cta}
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </Button>
             </motion.div>
           ))}
         </motion.div>
 
         {/* Disclaimer */}
-        <motion.p
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center text-muted-foreground text-sm mt-12"
+          transition={{ duration: 0.6, delay: 0.4 }}
         >
-          * Partner links will redirect you to external booking platforms. GoNepal is not responsible for third-party services.
-        </motion.p>
+          <div className="border-t border-gray-200 mt-8" style={{ marginTop: '32px' }} />
+          <p className="text-center text-gray-600 text-xs mt-8">
+            GoNepal curates these links for convenience. We are not affiliated with or responsible for third-party platforms.
+          </p>
+        </motion.div>
       </div>
     </section>
   );

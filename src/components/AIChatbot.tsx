@@ -4,6 +4,7 @@ import { MessageCircle, X, Send, Loader2, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
+import { parseMarkdown, cleanLatexText } from '@/lib/markdownParser';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -48,7 +49,9 @@ const AIChatbot = () => {
 
       if (error) throw error;
 
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+      // Clean the response and parse markdown
+      const cleanedReply = cleanLatexText(data.reply);
+      setMessages(prev => [...prev, { role: 'assistant', content: cleanedReply }]);
     } catch (error) {
       console.error('Chatbot error:', error);
       setMessages(prev => [...prev, {
@@ -98,7 +101,7 @@ const AIChatbot = () => {
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Go Guidet</h3>
+                  <h3 className="font-semibold">GoGuide</h3>
                   <p className="text-xs text-primary-foreground/70">Powered by AI</p>
                 </div>
               </div>
@@ -129,7 +132,13 @@ const AIChatbot = () => {
                       ? 'bg-primary text-primary-foreground rounded-tr-none'
                       : 'bg-secondary text-foreground rounded-tl-none'
                   }`}>
-                    {msg.content}
+                    {msg.role === 'user' ? (
+                      msg.content
+                    ) : (
+                      <div className="whitespace-pre-wrap">
+                        {parseMarkdown(msg.content)}
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}

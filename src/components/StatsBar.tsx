@@ -7,7 +7,7 @@ interface Stat {
 }
 
 const stats: Stat[] = [
-  { value: 8848, suffix: 'm', label: "World's Highest Peak" },
+  { value: 8849, suffix: 'm', label: "World's Highest Peak" },
   { value: 3500, suffix: '+', label: 'Trekking Trails' },
   { value: 10, suffix: '', label: 'UNESCO Heritage Sites' },
   { value: 1400, suffix: '+', label: 'Bird Species' },

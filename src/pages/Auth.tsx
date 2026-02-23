@@ -1,15 +1,17 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Mail, Lock, User, Mountain, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import gonepallogo from '@/assets/gonepallogo.png';
 
 // Validation schemas
 const loginSchema = z.object({
@@ -39,9 +41,103 @@ const Auth = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [confirmationStatus, setConfirmationStatus] = useState<'success' | 'error' | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { signIn, signUp } = useAuth();
+
+  // Handle email confirmation on page load
+  useEffect(() => {
+    const handleEmailConfirmation = async () => {
+      // Check for token in query params (Supabase older flow)
+      const token = searchParams.get('token');
+      const type = searchParams.get('type');
+      const email = searchParams.get('email');
+
+      // Check for token in hash fragment (Supabase newer flow)
+      const hashParams = new URLSearchParams(location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+
+      if (accessToken && refreshToken) {
+        // Handle hash-based confirmation (newer Supabase flow)
+        setIsConfirming(true);
+        try {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) {
+            setConfirmationStatus('error');
+            toast({
+              variant: 'destructive',
+              title: 'Confirmation failed',
+              description: error.message,
+            });
+          } else {
+            setConfirmationStatus('success');
+            toast({
+              title: 'Email confirmed!',
+              description: 'Your account has been successfully verified.',
+            });
+            // Redirect to home after a short delay
+            setTimeout(() => navigate('/'), 2000);
+          }
+        } catch (err) {
+          setConfirmationStatus('error');
+          toast({
+            variant: 'destructive',
+            title: 'Confirmation failed',
+            description: 'An unexpected error occurred.',
+          });
+        } finally {
+          setIsConfirming(false);
+        }
+      } else if (token && type) {
+        // Handle query parameter confirmation (older Supabase flow)
+        setIsConfirming(true);
+        try {
+          const { error } = await supabase.auth.verifyOtp({
+            token,
+            type: type as 'signup' | 'email_change' | 'recovery' | 'magiclink',
+            email: email || undefined,
+          });
+
+          if (error) {
+            setConfirmationStatus('error');
+            toast({
+              variant: 'destructive',
+              title: 'Confirmation failed',
+              description: error.message,
+            });
+          } else {
+            setConfirmationStatus('success');
+            toast({
+              title: 'Email confirmed!',
+              description: 'Your account has been successfully verified.',
+            });
+            // Redirect to home after a short delay
+            setTimeout(() => navigate('/'), 2000);
+          }
+        } catch (err) {
+          setConfirmationStatus('error');
+          toast({
+            variant: 'destructive',
+            title: 'Confirmation failed',
+            description: 'An unexpected error occurred.',
+          });
+        } finally {
+          setIsConfirming(false);
+        }
+      }
+    };
+
+    handleEmailConfirmation();
+  }, [searchParams, location, navigate, toast]);
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -131,6 +227,100 @@ const Auth = () => {
     );
   }
 
+  // Show loading state while confirming email
+  if (isConfirming) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-background p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md"
+        >
+          <div className="glass-effect rounded-2xl p-8 text-center shadow-elevated">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 0.2 }}
+              className="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-6"
+            >
+              <Loader2 className="w-10 h-10 text-accent animate-spin" />
+            </motion.div>
+            <h2 className="heading-section text-2xl mb-4">Confirming Email</h2>
+            <p className="text-muted-foreground">
+              Please wait while we verify your email address...
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Show success state after confirmation
+  if (confirmationStatus === 'success') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-background p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md"
+        >
+          <div className="glass-effect rounded-2xl p-8 text-center shadow-elevated">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 0.2 }}
+              className="w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6"
+            >
+              <CheckCircle className="w-10 h-10 text-green-600 dark:text-green-400" />
+            </motion.div>
+            <h2 className="heading-section text-2xl mb-4">Email Confirmed!</h2>
+            <p className="text-muted-foreground mb-6">
+              Your account has been successfully verified. Redirecting you to home...
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Show error state after failed confirmation
+  if (confirmationStatus === 'error') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-background p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md"
+        >
+          <div className="glass-effect rounded-2xl p-8 text-center shadow-elevated">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 0.2 }}
+              className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-6"
+            >
+              <CheckCircle className="w-10 h-10 text-red-600 dark:text-red-400" />
+            </motion.div>
+            <h2 className="heading-section text-2xl mb-4">Confirmation Failed</h2>
+            <p className="text-muted-foreground mb-6">
+              There was a problem confirming your email. The link may be expired or invalid.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setConfirmationStatus(null);
+              }}
+              className="w-full"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Login
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Decorative */}
@@ -147,7 +337,7 @@ const Auth = () => {
         </div>
         <div className="relative z-10 flex flex-col justify-center p-12 text-primary-foreground">
           <Link to="/" className="flex items-center gap-3 mb-12">
-            <Mountain className="w-10 h-10" />
+            <img src={gonepallogo} alt="GoNepal" className="h-12 w-auto" />
             <span className="text-2xl font-bold">GoNepal</span>
           </Link>
           <h1 className="heading-section text-4xl mb-6">

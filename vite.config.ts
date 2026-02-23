@@ -20,6 +20,10 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: 'esnext',
     minify: 'esbuild',
+    // Enable CSS code splitting
+    cssCodeSplit: true,
+    // Generate sourcemaps for production debugging (disabled for speed)
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -43,4 +47,6 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
   },
+  // Prefetch strategy for faster subsequent loads
+  prefetchStrategy: 'viewport',
 }));
