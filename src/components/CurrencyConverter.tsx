@@ -36,16 +36,6 @@ async function fetchRates(baseCurrency: string): Promise<Record<string, number>>
   return getDefaultRates();
 }
 
-  const rates: Record<string, number> | undefined = data?.[key];
-  if (!rates || typeof rates !== "object") {
-    throw new Error("Unexpected API response format.");
-  }
-
-  // Cache the result
-  rateCache[key] = { rates, ts: Date.now() };
-  return rates;
-}
-
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState("1");
   const [from, setFrom] = useState("USD");
