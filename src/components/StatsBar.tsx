@@ -18,8 +18,9 @@ const stats: Stat[] = [
 const StatsBar: React.FC = () => {
   const { currentLanguage } = useLanguage();
   const [isVisible, setIsVisible] = useState(false);
-  const [counts, setCounts] = useState<number[]>(stats.map(() => 0));
+  const [counts, setCounts] = useState<number[]>(stats.map(s => s.value));
   const [translatedLabels, setTranslatedLabels] = useState<string[]>(stats.map(s => s.label));
+  const [animationStarted, setAnimationStarted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,7 +47,9 @@ const StatsBar: React.FC = () => {
   }, [isVisible]);
 
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible || animationStarted) return;
+
+    setAnimationStarted(true);
 
     const duration = 2000;
     const frameRate = 60;
@@ -87,7 +90,7 @@ const StatsBar: React.FC = () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [isVisible]);
+  }, [isVisible, animationStarted]);
 
   // Translate labels when language changes
   useEffect(() => {
