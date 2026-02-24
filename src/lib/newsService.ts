@@ -1,3 +1,5 @@
+import { cacheNews, getCachedNews, CachedNewsItem } from './newsCache';
+
 export interface NewsItem {
     title: string;
     link: string;
@@ -54,11 +56,6 @@ const mapItems = (items: any[], sourceName: string): NewsItem[] => {
         });
 };
 
-export const fetchAlerts = async (): Promise<NewsItem[]> => {
-    const news = await fetchNepalNews();
-    return news.filter(item => item.isEmergency);
-};
-
 const SOURCES = [
     {
         name: 'OnlineKhabar English',
@@ -70,7 +67,38 @@ const SOURCES = [
     },
 ];
 
+// Check if online
+const isOnline = (): boolean => {
+    return typeof navigator !== 'undefined' ? navigator.onLine : true;
+};
+
+export const fetchAlerts = async (): Promise<NewsItem[]> => {
+    const news = await fetchNepalNews();
+    return news.filter(item => item.isEmergency);
+};
+
 export const fetchNepalNews = async (): Promise<NewsItem[]> => {
+    // If offline, try to get from cache
+    if (!isOnline()) {
+        console.log('[News] Offline - fetching from cache');
+        const cached = await getCachedNews();
+        if (cached.length > 0) {
+            console.log(`[News] Found ${cached.length} cached items`);
+            return cached.map(item => ({
+                title: item.title,
+                link: item.link,
+                pubDate: item.pubDate,
+                thumbnail: item.thumbnail,
+                source: item.source,
+                isEmergency: item.isEmergency,
+                lastUpdated: item.lastUpdated + ' (offline)'
+            }));
+        }
+        console.log('[News] No cached news available');
+        return [];
+    }
+
+    // Try to fetch from network
     for (const source of SOURCES) {
         try {
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.rss)}&count=10`;
@@ -80,10 +108,30 @@ export const fetchNepalNews = async (): Promise<NewsItem[]> => {
             if (data.status !== 'ok' || !data.items?.length) continue;
 
             console.info(`[News] Loaded from: ${source.name}`);
-            return mapItems(data.items, source.name);
+            const newsItems = mapItems(data.items, source.name);
+            
+            // Cache the news for offline use
+            await cacheNews(newsItems as CachedNewsItem[]);
+            
+            return newsItems;
         } catch (err) {
             console.warn(`[News] Failed source ${source.name}:`, err);
         }
+    }
+
+    // If all sources fail, try cache as fallback
+    console.log('[News] All sources failed - trying cache');
+    const cached = await getCachedNews();
+    if (cached.length > 0) {
+        return cached.map(item => ({
+            title: item.title,
+            link: item.link,
+            pubDate: item.pubDate,
+            thumbnail: item.thumbnail,
+            source: item.source,
+            isEmergency: item.isEmergency,
+            lastUpdated: item.lastUpdated + ' (cached)'
+        }));
     }
 
     console.error('[News] All sources failed.');

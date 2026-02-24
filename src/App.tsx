@@ -12,6 +12,7 @@ import WeatherForecast from "./components/WeatherForecast";
 import TestAuth from "./components/TestAuth";
 import { WeatherProvider } from "./contexts/WeatherContext";
 import PageTransition from "./components/PageTransition";
+import OfflineIndicator from "./components/OfflineIndicator";
 import { Loader2 } from "lucide-react";
 
 // Lazy load all pages for code splitting
@@ -112,24 +113,26 @@ const LazyPerformanceMonitor = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <LanguageProvider>
-        <AutoTranslator />
-        <LazyPerformanceMonitor />
-        <WeatherProvider>
-          <WeatherForecast />
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AnimatedRoutes />
-            </BrowserRouter>
-          </TooltipProvider>
-        </WeatherProvider>
-      </LanguageProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+  <OfflineIndicator>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <LanguageProvider>
+          <AutoTranslator />
+          <LazyPerformanceMonitor />
+          <WeatherProvider>
+            <WeatherForecast />
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <AnimatedRoutes />
+              </BrowserRouter>
+            </TooltipProvider>
+          </WeatherProvider>
+        </LanguageProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  </OfflineIndicator>
 );
 
 export default App;

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { getCachedRates, getDefaultRates } from "@/lib/currencyCache";
 
 const currencies = [
   { code: "NPR", name: "Nepalese Rupee", flag: "🇳🇵" },
@@ -25,27 +26,15 @@ const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 async function fetchRates(baseCurrency: string): Promise<Record<string, number>> {
   const key = baseCurrency.toLowerCase();
 
-  // Return cached data if fresh
-  const cached = rateCache[key];
-  if (cached && Date.now() - cached.ts < CACHE_TTL) {
-    return cached.rates;
+  // Try to get from offline cache first
+  const cachedRates = await getCachedRates(key);
+  if (cachedRates && Object.keys(cachedRates).length > 0) {
+    return cachedRates;
   }
-
-  const primaryUrl = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${key}.min.json`;
-  const fallbackUrl = `https://latest.currency-api.pages.dev/v1/currencies/${key}.min.json`;
-
-  let data: any;
-
-  try {
-    const res = await fetch(primaryUrl);
-    if (!res.ok) throw new Error(`Primary CDN returned ${res.status}`);
-    data = await res.json();
-  } catch {
-    // Fallback to Cloudflare Pages mirror
-    const res = await fetch(fallbackUrl);
-    if (!res.ok) throw new Error("Unable to fetch exchange rates. Please try again later.");
-    data = await res.json();
-  }
+  
+  // Fallback to default rates if completely offline
+  return getDefaultRates();
+}
 
   const rates: Record<string, number> | undefined = data?.[key];
   if (!rates || typeof rates !== "object") {

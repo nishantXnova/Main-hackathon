@@ -242,6 +242,11 @@
     will-change: transform, opacity;
   }
 
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out forwards;
+    will-change: transform, opacity;
+  }
+
   .delay-100 {
     animation-delay: 100ms;
   }
@@ -317,6 +322,18 @@
   from {
     opacity: 0;
     transform: translate3d(20px, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
   }
 
   to {

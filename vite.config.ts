@@ -4,6 +4,9 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // GitHub Pages deployment base
+  base: '/',
+  
   server: {
     host: true,
     port: 8080,
@@ -11,12 +14,15 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  
   plugins: [react()].filter(Boolean),
+  
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  
   build: {
     target: 'esnext',
     minify: 'esbuild',
@@ -24,6 +30,8 @@ export default defineConfig(({ mode }) => ({
     cssCodeSplit: true,
     // Generate sourcemaps for production debugging (disabled for speed)
     sourcemap: false,
+    // Optimize for mobile - smaller chunks
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -42,11 +50,12 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
   },
+  
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
   },
+  
   // Prefetch strategy for faster subsequent loads
   prefetchStrategy: 'viewport',
 }));

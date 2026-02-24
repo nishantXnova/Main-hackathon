@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { translateText } from '@/lib/translationService';
 
 interface Stat {
   value: number;
@@ -14,8 +16,10 @@ const stats: Stat[] = [
 ];
 
 const StatsBar: React.FC = () => {
+  const { currentLanguage } = useLanguage();
   const [isVisible, setIsVisible] = useState(false);
   const [counts, setCounts] = useState<number[]>(stats.map(() => 0));
+  const [translatedLabels, setTranslatedLabels] = useState<string[]>(stats.map(s => s.label));
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,7 +53,6 @@ const StatsBar: React.FC = () => {
     const totalFrames = (duration / 1000) * frameRate;
 
     const counters = stats.map((stat) => {
-      let frame = 0;
       return {
         target: stat.value,
         increment: stat.value / totalFrames,
@@ -60,8 +63,6 @@ const StatsBar: React.FC = () => {
     const animate = () => {
       setCounts((prevCounts) => {
         const newCounts = [...prevCounts];
-        let allComplete = true;
-
         counters.forEach((counter, index) => {
           if (counter.current < counter.target) {
             counter.current += counter.increment;
@@ -69,10 +70,8 @@ const StatsBar: React.FC = () => {
               Math.round(counter.current),
               counters[index].target
             );
-            allComplete = false;
           }
         });
-
         return newCounts;
       });
     };
@@ -89,6 +88,32 @@ const StatsBar: React.FC = () => {
       clearTimeout(timeout);
     };
   }, [isVisible]);
+
+  // Translate labels when language changes
+  useEffect(() => {
+    const updateTranslations = async () => {
+      if (currentLanguage.code === 'en') {
+        setTranslatedLabels(stats.map(s => s.label));
+        return;
+      }
+
+      // Translate each label
+      const translated = await Promise.all(
+        stats.map(async (stat) => {
+          try {
+            const result = await translateText(stat.label, 'en', currentLanguage.code);
+            return result || stat.label;
+          } catch (e) {
+            console.error('Translation error:', e);
+            return stat.label;
+          }
+        })
+      );
+      setTranslatedLabels(translated);
+    };
+
+    updateTranslations();
+  }, [currentLanguage]);
 
   const formatNumber = (num: number, suffix: string): string => {
     const formatted = num.toLocaleString();
@@ -130,7 +155,7 @@ const StatsBar: React.FC = () => {
                   className="mt-2 text-xs sm:text-sm md:text-base font-medium tracking-wide uppercase whitespace-nowrap block text-center"
                   style={{ color: '#1C2B3A' }}
                 >
-                  {stat.label}
+                  {translatedLabels[index]}
                 </span>
               </div>
 

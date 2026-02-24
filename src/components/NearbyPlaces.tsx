@@ -97,6 +97,14 @@ const NearbyPlaces = () => {
         }
     }, [location, homeLocation]);
 
+    // Fetch places when category changes
+    useEffect(() => {
+        if (location && showNearby) {
+            // Only fetch if we have a valid category or if it's "All" (null/undefined)
+            fetchNearbyPlaces(location[0], location[1], activeCategory || undefined);
+        }
+    }, [activeCategory, location, showNearby]);
+
     const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setRadiusInput(val);
@@ -150,14 +158,24 @@ const NearbyPlaces = () => {
         );
     };
 
-    const fetchNearbyPlaces = async (lat: number, lon: number) => {
+    const fetchNearbyPlaces = async (lat: number, lon: number, category?: string) => {
         if (!showNearby) return;
         setLoading(true);
+        setError(null);
         try {
             const radius = 3000;
-            const queries = Object.entries(CATEGORIES)
-                .map(([key, cat]) => `${cat.query}(around:${radius},${lat},${lon});`)
-                .join("");
+            
+            // If a specific category is selected, only fetch that category
+            // Otherwise, fetch all categories
+            let queries: string;
+            if (category && CATEGORIES[category as keyof typeof CATEGORIES]) {
+                queries = `${CATEGORIES[category as keyof typeof CATEGORIES].query}(around:${radius},${lat},${lon});`;
+            } else {
+                // Fetch all categories
+                queries = Object.entries(CATEGORIES)
+                    .map(([key, cat]) => `${cat.query}(around:${radius},${lat},${lon});`)
+                    .join("");
+            }
 
             const overpassQuery = `
         [out:json];
@@ -491,6 +509,13 @@ const NearbyPlaces = () => {
                                         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                                             <Loader2 className="w-8 h-8 animate-spin mb-3 text-nepal-terracotta" />
                                             <p className="text-sm font-medium">Locating you...</p>
+                                        </div>
+                                    )}
+
+                                    {loading && location && (
+                                        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                                            <Loader2 className="w-8 h-8 animate-spin mb-3 text-nepal-terracotta" />
+                                            <p className="text-sm font-medium">Finding places...</p>
                                         </div>
                                     )}
 

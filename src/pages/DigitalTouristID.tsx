@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import html2canvas from "html2canvas";
+import QRCode from "qrcode";
 import {
     QrCode, Shield, CheckCircle2, Download, Share2,
     Globe, Calendar, CreditCard, User, Flag, Fingerprint,
@@ -46,6 +47,33 @@ const DEFAULT_TOURIST_DATA: TouristData = {
     photo: null,
 };
 
+// Generate QR code locally (works offline!)
+async function generateQRDataUrl(data: TouristData): Promise<string> {
+    const payload = JSON.stringify({
+        touristId: data.touristId,
+        name: data.name,
+        visaType: data.visaType,
+        expiry: data.exitDate,
+        status: data.status,
+    });
+    
+    try {
+        // Generate QR code locally using canvas - works offline!
+        return await QRCode.toDataURL(payload, {
+            width: 200,
+            margin: 1,
+            color: {
+                dark: '#1a1a1a',
+                light: '#ffffff'
+            }
+        });
+    } catch (error) {
+        console.error('QR generation error:', error);
+        return '';
+    }
+}
+
+// Legacy function - falls back to online API
 function getQRUrl(data: TouristData) {
     const payload = JSON.stringify({
         touristId: data.touristId,
@@ -145,7 +173,7 @@ function HotelCheckin({ onClose, touristData }: { onClose: () => void; touristDa
                             {/* Fake QR Scanner UI */}
                             <div className="relative mx-auto w-60 h-60 bg-gray-900 rounded-[2.5rem] overflow-hidden flex items-center justify-center border-[6px] border-[#E41B17]/10 shadow-inner">
                                 <div className="absolute inset-0 bg-gradient-to-br from-[#E41B17]/5 to-transparent" />
-                                <img src={getQRUrl(touristData)} alt="Tourist QR" className="w-48 h-48 opacity-40 brightness-150" />
+                                <img src={localQRCode || getQRUrl(touristData)} alt="Tourist QR" className="w-48 h-48 opacity-40 brightness-150" />
 
                                 {/* Animated scanning beam */}
                                 <motion.div
@@ -407,7 +435,22 @@ const DigitalTouristID = () => {
     const [touristData, setTouristData] = useState<TouristData>(DEFAULT_TOURIST_DATA);
     const [cachedTrip, setCachedTrip] = useState<CachedTripData | null>(null);
     const [isCaching, setIsCaching] = useState(false);
+    const [localQRCode, setLocalQRCode] = useState<string>('');
     const { toast } = useToast();
+
+    // Generate QR code locally (works offline!)
+    useEffect(() => {
+        const generateQR = async () => {
+            try {
+                const qrDataUrl = await generateQRDataUrl(touristData);
+                setLocalQRCode(qrDataUrl);
+                setQrLoaded(true);
+            } catch (error) {
+                console.error('Failed to generate QR:', error);
+            }
+        };
+        generateQR();
+    }, [touristData]);
 
     useEffect(() => {
         setCachedTrip(getCachedTrip());
@@ -738,7 +781,7 @@ const DigitalTouristID = () => {
                                         className="p-3 bg-white border-2 border-gray-100 rounded-2xl shadow-sm"
                                     >
                                         <img
-                                            src={getQRUrl(touristData)}
+                                            src={localQRCode || getQRUrl(touristData)}
                                             alt="Tourist ID QR Code"
                                             className="w-44 h-44"
                                             onLoad={() => setQrLoaded(true)}

@@ -1,10 +1,33 @@
 import { useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { translateText } from "@/lib/translationService";
+import { translateText, preloadCommonTranslations, getTranslationVaultSize } from "@/lib/translationService";
+import { isOnline } from "@/lib/translationVault";
+
+const COMMON_UI_STRINGS = [
+    // Navigation
+    'Home', 'Destinations', 'Hotels', 'Flights', 'Plan Trip', 'Nearby', 'Profile', 'Login', 'Sign Up', 'Logout',
+    // Common actions
+    'Search', 'Book Now', 'View Details', 'Read More', 'Submit', 'Cancel', 'Save', 'Delete', 'Edit', 'Close',
+    // Weather & Status
+    'Weather', 'Temperature', 'Humidity', 'Wind', 'Forecast', 'Today', 'Tomorrow', 'Loading',
+    // Travel info
+    'Distance', 'Duration', 'Rating', 'Reviews', 'Price', 'Currency', 'Per person', 'Available', 'Sold out',
+    // Messages
+    'Error', 'Success', 'No results found', 'Please wait', 'Welcome', 'Next', 'Previous',
+    // Emergency
+    'Emergency', 'Help', 'Hospital', 'Police', 'Ambulance', 'Contact us',
+    // Categories
+    'Trekking', 'Hiking', 'Tour', 'Adventure', 'Cultural', 'Wildlife', 'Nature', 'Mountain',
+    // UI Elements
+    'Learn more', 'See all', 'View all', 'Popular', 'Featured', 'Recommended', 'Best value',
+    // Auth
+    'Email', 'Password', 'Sign in', 'Create account', 'Forgot password', 'Remember me',
+];
 
 const AutoTranslator = () => {
     const { currentLanguage } = useLanguage();
     const observerRef = useRef<MutationObserver | null>(null);
+    const hasPreloadedRef = useRef<boolean>(false);
 
     // Track original text for each node to allow switching back to English
     const originalTextMap = useRef<Map<Node, string>>(new Map());
@@ -17,8 +40,10 @@ const AutoTranslator = () => {
             /Rs\.?\s?\d+/i,        // Rs. 500
             /NPR\.?\s?\d+/i,       // NPR 1000
             /\$\d+/g,              // $50
+            /€\d+/g,               // €50
             /\d{1,2}\s(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s\d{4}/gi, // 20 Feb 2026
             /\d{4}-\d{2}-\d{2}/g,  // 2026-02-20
+            /^\d+(\.\d+)?$/,       // Just numbers
         ];
         return protectedPatterns.some(pattern => pattern.test(text.trim()));
     };
@@ -61,6 +86,7 @@ const AutoTranslator = () => {
         }
 
         try {
+            // This now uses the offline-first translation service with Dexie
             const translated = await translateText(originalText, "en", currentLanguage.code);
             if (translated && translated !== originalText) {
                 node.textContent = translated;
@@ -78,6 +104,34 @@ const AutoTranslator = () => {
             translateNode(node);
         }
     };
+
+    // Preload common UI strings when language changes (only when online)
+    const preloadOnLanguageChange = async () => {
+        if (currentLanguage.code === 'en') return;
+        if (hasPreloadedRef.current) return;
+        
+        // Only preload if online - this primes the Dexie vault
+        if (!isOnline()) {
+            console.log('[AutoTranslator] Offline - skipping preload, will use cached translations');
+            hasPreloadedRef.current = true;
+            return;
+        }
+
+        hasPreloadedRef.current = true;
+        
+        console.log(`[AutoTranslator] Preloading common strings to ${currentLanguage.name}...`);
+        
+        // Preload translations to Dexie vault for offline use
+        await preloadCommonTranslations(COMMON_UI_STRINGS, currentLanguage.code);
+        
+        const size = await getTranslationVaultSize();
+        console.log(`[AutoTranslator] Translation vault now contains ${size} cached translations`);
+    };
+
+    useEffect(() => {
+        // Preload translations when language changes to non-English
+        preloadOnLanguageChange();
+    }, [currentLanguage.code]);
 
     useEffect(() => {
         // Initial translation of the whole page
