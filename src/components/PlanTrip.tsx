@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Calendar, Users, DollarSign, Filter, Loader2, Sparkles, X } from "lucide-react";
+import { Search, Calendar, Users, DollarSign, Filter, Loader2, Sparkles, X, Hotel, Save, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,51 @@ const interests = ["Adventure", "Culture", "Nature", "Spirituality", "Family"];
 const durations = ["3 days", "5 days", "7 days", "10+ days"];
 const difficulties = ["Easy", "Moderate", "Challenging"];
 const budgets = ["Budget", "Mid-range", "Luxury"];
+
+const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+  "Kathmandu": { lat: 27.7172, lng: 85.3240 },
+  "Pokhara": { lat: 28.2096, lng: 83.9856 },
+  "Lumbini": { lat: 27.4784, lng: 83.2750 },
+  "Chitwan": { lat: 27.5333, lng: 84.4500 },
+  "Lukla": { lat: 27.6833, lng: 86.7333 },
+  "Namche": { lat: 27.8000, lng: 86.7167 },
+};
+
+const renderItineraryWithLinks = (text: string) => {
+  return (
+    <div className="space-y-4">
+      {text.split('\n').map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) return <br key={idx} />;
+
+        const isAccommodation = trimmed.toLowerCase().includes('accommodation') ||
+          trimmed.toLowerCase().includes('stay at') ||
+          trimmed.toLowerCase().includes('hotels');
+
+        if (isAccommodation) {
+          const city = Object.keys(CITY_COORDS).find(c => trimmed.includes(c));
+          const coords = city ? CITY_COORDS[city] : CITY_COORDS["Kathmandu"];
+
+          return (
+            <div key={idx} className="mb-4">
+              {parseMarkdown(line)}
+              <div className="mt-2">
+                <a
+                  href="/#nearby-places"
+                  className="inline-flex items-center text-[13px] font-bold text-orange-600 hover:text-orange-700 transition-colors bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100"
+                >
+                  <Hotel className="w-3.5 h-3.5 mr-1.5" />
+                  Find real hotels here →
+                </a>
+              </div>
+            </div>
+          );
+        }
+        return <div key={idx}>{parseMarkdown(line)}</div>;
+      })}
+    </div>
+  );
+};
 
 const PlanTrip = () => {
   const { toast } = useToast();
@@ -116,9 +161,41 @@ const PlanTrip = () => {
               </div>
               <div className="prose prose-sm max-w-none text-muted-foreground">
                 <div className="text-sm leading-relaxed">
-                  {itinerary ? parseMarkdown(itinerary) : null}
+                  {itinerary ? renderItineraryWithLinks(itinerary) : null}
                 </div>
               </div>
+
+              {itinerary && (
+                <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                  <Button
+                    variant="default"
+                    className="flex-1 bg-orange-600 hover:bg-orange-700 text-white rounded-xl py-6"
+                    onClick={() => {
+                      toast({
+                        title: "Coming Soon",
+                        description: "Save to My Account feature is being finalized!",
+                      });
+                    }}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save to My Account
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-orange-200 text-orange-700 hover:bg-orange-50 rounded-xl py-6"
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast({
+                        title: "Link Copied!",
+                        description: "Shareable link has been copied to your clipboard.",
+                      });
+                    }}
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share Link
+                  </Button>
+                </div>
+              )}
               <div className="mt-8 pt-6 border-t border-border">
                 <Button onClick={resetItinerary} variant="outline" className="w-full">
                   Plan Another Trip
@@ -158,11 +235,10 @@ const PlanTrip = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedInterest(interest === selectedInterest ? null : interest)}
-                      className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${
-                        selectedInterest === interest
-                          ? "bg-accent text-accent-foreground border-accent"
-                          : "border-border text-foreground hover:border-accent hover:text-accent"
-                      }`}
+                      className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${selectedInterest === interest
+                        ? "bg-accent text-accent-foreground border-accent"
+                        : "border-border text-foreground hover:border-accent hover:text-accent"
+                        }`}
                     >
                       {interest}
                     </motion.button>
@@ -193,11 +269,10 @@ const PlanTrip = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSelectedDuration(duration === selectedDuration ? null : duration)}
-                      className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${
-                        selectedDuration === duration
-                          ? "bg-accent text-accent-foreground border-accent"
-                          : "border-border text-foreground hover:border-accent hover:text-accent"
-                      }`}
+                      className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${selectedDuration === duration
+                        ? "bg-accent text-accent-foreground border-accent"
+                        : "border-border text-foreground hover:border-accent hover:text-accent"
+                        }`}
                     >
                       {duration}
                     </motion.button>
@@ -229,11 +304,10 @@ const PlanTrip = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setSelectedDifficulty(difficulty === selectedDifficulty ? null : difficulty)}
-                        className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${
-                          selectedDifficulty === difficulty
-                            ? "bg-accent text-accent-foreground border-accent"
-                            : "border-border text-foreground hover:border-accent hover:text-accent"
-                        }`}
+                        className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${selectedDifficulty === difficulty
+                          ? "bg-accent text-accent-foreground border-accent"
+                          : "border-border text-foreground hover:border-accent hover:text-accent"
+                          }`}
                       >
                         {difficulty}
                       </motion.button>
@@ -263,11 +337,10 @@ const PlanTrip = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setSelectedBudget(budget === selectedBudget ? null : budget)}
-                        className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${
-                          selectedBudget === budget
-                            ? "bg-accent text-accent-foreground border-accent"
-                            : "border-border text-foreground hover:border-accent hover:text-accent"
-                        }`}
+                        className={`px-5 py-2.5 rounded-full border-2 transition-all duration-300 ${selectedBudget === budget
+                          ? "bg-accent text-accent-foreground border-accent"
+                          : "border-border text-foreground hover:border-accent hover:text-accent"
+                          }`}
                       >
                         {budget}
                       </motion.button>
@@ -285,8 +358,8 @@ const PlanTrip = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="w-full btn-accent text-lg py-6"
                   disabled={!selectedInterest || !selectedDuration || isLoading}
                   onClick={handleGenerateItinerary}

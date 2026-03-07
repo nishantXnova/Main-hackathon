@@ -13,6 +13,8 @@ import TestAuth from "./components/TestAuth";
 import { WeatherProvider } from "./contexts/WeatherContext";
 import PageTransition from "./components/PageTransition";
 import OfflineIndicator from "./components/OfflineIndicator";
+import FloatingSOS from "./components/FloatingSOS";
+import OnboardingModal from "./components/OnboardingModal";
 import { Loader2 } from "lucide-react";
 
 // Lazy load all pages for code splitting
@@ -27,6 +29,7 @@ const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const NewsPage = lazy(() => import("./pages/NewsPage"));
 const DigitalTouristID = lazy(() => import("./pages/DigitalTouristID"));
+const Trails = lazy(() => import("./pages/Trails"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -86,6 +89,7 @@ const AnimatedRoutes = () => {
           <Route path="/test-auth" element={<TestAuth />} />
           <Route path="/news" element={<NewsPage />} />
           <Route path="/tourist-id" element={<DigitalTouristID />} />
+          <Route path="/trails" element={<Trails />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
@@ -98,7 +102,7 @@ import PerformanceMonitor from "./components/PerformanceMonitor";
 // Lazy load PerformanceMonitor - only load after initial page render
 const LazyPerformanceMonitor = () => {
   const [Monitor, setMonitor] = useState<typeof PerformanceMonitor | null>(null);
-  
+
   useEffect(() => {
     // Delay loading PerformanceMonitor by 2 seconds to prioritize initial render
     const timer = setTimeout(() => {
@@ -106,10 +110,10 @@ const LazyPerformanceMonitor = () => {
         setMonitor(() => mod.default);
       });
     }, 2000);
-    
+
     return () => clearTimeout(timer);
   }, []);
-  
+
   if (!Monitor) return null;
   return <Monitor />;
 };
@@ -128,6 +132,8 @@ const App = () => (
               <Sonner />
               <BrowserRouter>
                 <AnimatedRoutes />
+                <FloatingSOS />
+                <OnboardingModal />
               </BrowserRouter>
             </TooltipProvider>
           </WeatherProvider>

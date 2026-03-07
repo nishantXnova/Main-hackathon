@@ -56,7 +56,7 @@ async function generateQRDataUrl(data: TouristData): Promise<string> {
         expiry: data.exitDate,
         status: data.status,
     });
-    
+
     try {
         // Generate QR code locally using canvas - works offline!
         return await QRCode.toDataURL(payload, {
@@ -485,7 +485,7 @@ const DigitalTouristID = () => {
 
     const handleDownload = async () => {
         if (!cardRef.current) return;
-        
+
         try {
             const canvas = await html2canvas(cardRef.current, {
                 scale: 2,
@@ -493,12 +493,12 @@ const DigitalTouristID = () => {
                 backgroundColor: '#ffffff',
                 logging: false,
             });
-            
+
             const link = document.createElement('a');
             link.download = `Nepal-Tourist-ID-${touristData.touristId}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-            
+
             toast({
                 title: "📥 ID Card Downloaded",
                 description: "Your Tourist ID has been saved to your device.",
@@ -515,7 +515,7 @@ const DigitalTouristID = () => {
 
     const handleShare = async () => {
         if (!cardRef.current) return;
-        
+
         try {
             const canvas = await html2canvas(cardRef.current, {
                 scale: 2,
@@ -523,15 +523,15 @@ const DigitalTouristID = () => {
                 backgroundColor: '#ffffff',
                 logging: false,
             });
-            
+
             const imageUrl = canvas.toDataURL('image/png');
-            
+
             if (navigator.share) {
                 // Convert data URL to blob for sharing
                 const response = await fetch(imageUrl);
                 const blob = await response.blob();
                 const file = new File([blob], `Nepal-Tourist-ID-${touristData.touristId}.png`, { type: 'image/png' });
-                
+
                 try {
                     await navigator.share({
                         title: "My Nepal Tourist ID",
@@ -879,7 +879,8 @@ const DigitalTouristID = () => {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.5 }}
-                        className="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-gray-100"
+                        className="bg-white rounded-[2.5rem] shadow-xl overflow-hidden border border-gray-100 scroll-mt-24"
+                        id="toolkit"
                     >
                         <div className="bg-gradient-to-r from-emerald-600 to-teal-700 p-6 text-white">
                             <div className="flex items-center gap-3">

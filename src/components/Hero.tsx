@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import heroImage from "@/assets/hero-everest.jpg";
 const PlanMyDay = lazy(() => import("./PlanMyDay"));
 
 const Hero = () => {
+  const navigate = useNavigate();
   const [showPlanMyDay, setShowPlanMyDay] = useState(false);
 
   const scrollToSection = (sectionId: string) => {
@@ -74,13 +76,20 @@ const Hero = () => {
               Your journey begins at the roof of the world.
             </motion.p>
 
-            {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
               className="flex flex-col sm:flex-row items-center gap-6"
             >
+              <Button
+                size="lg"
+                className="bg-[#FB923C] text-white hover:bg-[#E86C35] rounded-full px-10 py-7 text-lg font-medium transition-transform duration-200 hover:scale-105 active:scale-95 shadow-2xl"
+                onClick={() => navigate('/experiences')}
+              >
+                Plan My Trek →
+              </Button>
+
               <Button
                 size="lg"
                 className="bg-white text-black hover:bg-white/90 rounded-full px-10 py-7 text-lg font-medium transition-transform duration-200 hover:scale-105 active:scale-95 shadow-2xl"

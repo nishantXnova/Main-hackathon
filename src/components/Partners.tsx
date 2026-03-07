@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { ExternalLink, Hotel, Mountain, Package, Plane, FileText, Compass, MapPin, Users, Zap, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ExternalLink, Hotel, Mountain, Package, Plane, FileText, Compass, MapPin, Users, Zap, CheckCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const partnerCategories = [
@@ -7,33 +8,37 @@ const partnerCategories = [
     icon: Plane,
     title: "Flights",
     emoji: "✈️",
-    description: "Search and compare flights to Kathmandu and within Nepal.",
-    cta: "Google Flights KTM",
-    url: "https://www.google.com/flights?q=flights+to+Kathmandu+Nepal",
+    description: "Search and compare travel options to Kathmandu and within Nepal.",
+    cta: "Find Flights",
+    url: "/#flights",
+    internal: true,
   },
   {
     icon: Hotel,
     title: "Hotels",
     emoji: "🏨",
     description: "Find the best accommodation deals across Nepal.",
-    cta: "Booking.com Nepal",
-    url: "https://www.booking.com/country/nepal.html",
+    cta: "Find Hotels",
+    url: "/#nearby-places",
+    internal: true,
   },
   {
     icon: Compass,
-    title: "Guides",
+    title: "Hotels Near You",
     emoji: "🧭",
-    description: "Discover local guides and experiences across Nepal.",
-    cta: "TripAdvisor Nepal Experiences",
-    url: "https://www.tripadvisor.com/Attractions-g293889-Activities-c42-Nepal.html",
+    description: "Discover the best places to stay right where you are.",
+    cta: "Find Hotels Near You",
+    url: "/#nearby-places",
+    internal: true,
   },
   {
     icon: Package,
-    title: "Tour Packages",
+    title: "Experiences",
     emoji: "📦",
     description: "Book tours, activities, and curated experiences.",
-    cta: "GetYourGuide Nepal",
-    url: "https://www.getyourguide.com/nepal-l41/",
+    cta: "Explore Experiences",
+    url: "/#experiences",
+    internal: true,
   },
   {
     icon: Mountain,
@@ -43,6 +48,7 @@ const partnerCategories = [
     description: "TIMS, Annapurna & Everest permits available here.",
     cta: "Tourism Board",
     url: "https://tourism.gov.np/",
+    internal: false,
   },
 ];
 
@@ -69,8 +75,31 @@ const itemVariants = {
 };
 
 const Partners = () => {
+  const navigate = useNavigate();
+
+  const handleLinkClick = (url: string, internal: boolean) => {
+    if (!internal) {
+      window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    if (url.startsWith("/#")) {
+      const sectionId = url.substring(2);
+      if (window.location.pathname === "/") {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        navigate(url);
+      }
+    } else {
+      navigate(url);
+    }
+  };
+
   return (
-    <section className="section-padding" style={{ background: 'linear-gradient(180deg, #FFFDF9 0%, #F5EDD8 100%)' }}>
+    <section id="experiences" className="section-padding" style={{ background: 'linear-gradient(180deg, #FFFDF9 0%, #F5EDD8 100%)' }}>
       <div className="container-wide">
         {/* Section Header */}
         <motion.div
@@ -127,13 +156,13 @@ const Partners = () => {
               className="relative bg-card rounded-2xl p-6 border border-border transition-all duration-300 flex flex-col h-full min-h-[300px] group hover:shadow-lg hover:-translate-y-6"
             >
               {/* Top border that appears on hover */}
-              <div 
+              <div
                 className="absolute top-0 left-0 right-0 h-[3px] bg-[#FB923C] rounded-t-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"
               />
-              
+
               {/* Badge if present - Top Right Corner */}
               {category.badge && (
-                <span 
+                <span
                   className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 text-xs font-semibold z-10"
                   style={{ borderRadius: '100px' }}
                 >
@@ -157,15 +186,15 @@ const Partners = () => {
               </p>
 
               {/* CTA Button at Bottom */}
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 className="bg-[#FB923C] text-white border-[#FB923C] hover:bg-[#E86C35] hover:text-white transition-all duration-300 mt-auto w-full rounded-[8px]"
                 style={{ borderRadius: '8px' }}
-                onClick={() => window.open(category.url, "_blank", "noopener,noreferrer")}
+                onClick={() => handleLinkClick(category.url, category.internal)}
               >
                 {category.cta}
-                <ExternalLink className="ml-2 h-4 w-4" />
+                {category.internal ? <ArrowRight className="ml-2 h-4 w-4" /> : <ExternalLink className="ml-2 h-4 w-4" />}
               </Button>
             </motion.div>
           ))}

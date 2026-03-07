@@ -308,19 +308,6 @@ const Auth = () => {
           <p className="text-lg opacity-90 leading-relaxed max-w-md">
             From the majestic Himalayas to ancient temples, explore breathtaking destinations and create unforgettable memories.
           </p>
-          <div className="mt-12 flex items-center gap-4">
-            <div className="flex -space-x-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="w-10 h-10 rounded-full bg-primary-foreground/20 border-2 border-primary flex items-center justify-center text-sm font-medium"
-                >
-                  {i}K+
-                </div>
-              ))}
-            </div>
-            <span className="text-sm opacity-80">Happy travelers</span>
-          </div>
         </div>
       </motion.div>
 

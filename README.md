@@ -1,4 +1,6 @@
-# GoNepal - Discover the Land of the Himalayas 🇳🇵
+# GoNepal - Your AI-Powered Himalayan Travel Companion
+
+Discover Nepal like never before with real-time translation, weather-smart itinerary planning, and offline-ready features designed for the modern explorer.
 
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -245,6 +247,29 @@ Get the project running on your machine in under 2 minutes:
 The platform is continuously integrated and deployed via **Vercel**. 
 - **CI/CD**: Every push to `main` undergoes a production build verification.
 - **Performance**: Edge-cached assets and optimized tree-shaking for minimal JS bundle sizes.
+
+---
+---
+
+## 🛠️ Manual Setup & Recent Updates (March 2026)
+
+To fully enable the latest platform enhancements, please perform the following manual steps in your Supabase dashboard:
+
+### 1. Database Schema Updates
+Add the following columns to your `profiles` table to persist onboarding and travel preferences:
+- **`onboarding_completed`**: `boolean` (Default: `false`)
+- **`preferences`**: `jsonb` (To store interests and trekker level)
+
+### 2. AI Prompt Logic & Navigation
+The AI Trip Planner and Chatbot have been updated with the following behavioral rules:
+- **No Competitors**: Mentions of "Maps.me" are replaced with "GoNepal Offline Toolkit".
+- **No Specific Hotels**: Recommendations now focus on "budget guesthouses in [area]" to maintain neutrality and safety.
+- **Fixed Navigation**: All "Book with Confidence" and "Real Hotels" links now use internal hash-based routing (`/#flights`, `/#nearby-places`, `/#experiences`) to prevent 404 errors.
+
+### 3. New Features
+- **SOS Button**: A persistent floating 🛡️ button is now available site-wide. It now redirects directly to the **Offline Toolkit** within the Digital Tourist ID for instant emergency access.
+- **Trail Board**: A live community-driven conditions board is available at `/trails`.
+- **Onboarding**: New users are now greeted with a 3-step personalization flow.
 
 ---
 *Developed with Passion & Pride by Team Valley for the Nepal Tourism Hackathon.*

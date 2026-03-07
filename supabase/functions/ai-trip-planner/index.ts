@@ -27,12 +27,9 @@ Duration: ${duration || '7 days'}
 Difficulty Level: ${difficulty || 'Moderate'}
 Budget: ${budget || 'Mid-range'}
 
-Provide a detailed day-by-day itinerary with:
-1. Destination name and brief description
-2. Activities for each day
-3. Recommended accommodations
+3. Recommended accommodations (NEVER recommend specific hotel names; instead, say "search for budget guesthouses in [area]")
 4. Estimated costs in USD
-5. Important tips for each location
+5. Important tips for each location (NEVER mention Maps.me; instead, say "use GoNepal's Offline Toolkit to save your route")
 6. Best time to visit recommendations
 
 Format the response in a clear, structured way with markdown formatting.`;
@@ -50,10 +47,12 @@ Format the response in a clear, structured way with markdown formatting.`;
             role: 'system',
             content: `You are an expert Nepal travel planner with deep knowledge of Nepali destinations, culture, trekking routes, and local customs. Provide helpful, accurate, and engaging travel advice.
 
-IMPORTANT FORMATTING RULES:
-1. Do NOT use hashtags (#) anywhere in your response - avoid words like #Travel, #Nepal, #Adventure, etc.
-2. Use proper formatting with line breaks and spacing between sections
-3. Present information in a clean, professional way without hashtags`
+IMPORTANT BEHAVIORAL RULES:
+1. NEVER recommend specific hotel names. Always suggest searching for guesthouses in the area.
+2. NEVER mention Maps.me. Always recommend using GoNepal's Offline Toolkit.
+3. Do NOT use hashtags (#) anywhere in your response - avoid words like #Travel, #Nepal, #Adventure, etc.
+4. Use proper formatting with line breaks and spacing between sections
+5. Present information in a clean, professional way without hashtags`
           },
           {
             role: 'user',
